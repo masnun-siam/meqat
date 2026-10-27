@@ -114,8 +114,8 @@ public final class LocationProvider: NSObject, CLLocationManagerDelegate {
 
     func handleFailure() {
         guard mode == .automatic, state == .awaitingFix else { return }
-        stopAutomatic()
-        state = .unavailable
+        fixTimer?.cancel()
+        state = .unavailable  // monitoring stays on, so a late fix still recovers
     }
 
     private func beginFix() {
@@ -126,7 +126,6 @@ public final class LocationProvider: NSObject, CLLocationManagerDelegate {
         fixTimer = Task { [sleep] in
             do { try await sleep(Self.fixTimeout) } catch { return }
             if state == .awaitingFix {
-                stopAutomatic()
                 state = .unavailable
             }
         }
