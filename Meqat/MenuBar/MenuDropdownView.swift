@@ -88,6 +88,7 @@ private struct MenuRowView: View {
             if let detail = row.detailText { Text(detail).foregroundStyle(.secondary) }
         }
         .font(.system(size: 12))
+        .lineLimit(1)
         .opacity(row.isDimmed ? 0.5 : 1)
         .accessibilityElement(children: .ignore)
         .accessibilityLabel(row.accessibilityLabel)
