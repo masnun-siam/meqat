@@ -73,11 +73,14 @@ struct LocationPane: View {
 
     private var statusText: String? {
         switch context.lookupStatus {
-        case .idle: nil
-        case .lookingUp: "Looking up…"
-        case .found: [city, state, country].map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }.filter { !$0.isEmpty }.joined(separator: ", ")
-        case .cityNotFound: "City not found"
-        case .unreachable: "Couldn't reach the server — try again"
+        case .idle: return nil
+        case .lookingUp: return "Looking up…"
+        case .found:
+            // Shows the committed place, not unsaved edits in the fields.
+            let l = store.settings.location
+            return [l.manualCity, l.manualState, l.manualCountry].compactMap { $0 }.joined(separator: ", ")
+        case .cityNotFound: return "City not found"
+        case .unreachable: return "Couldn't reach the server — try again"
         }
     }
 
