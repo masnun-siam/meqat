@@ -20,7 +20,6 @@ final class AppEnvironment {
     private let activity = NSBackgroundActivityScheduler(identifier: "com.masnunsiam.Meqat.periodic")
     private var statusItem: StatusItemController!
     private var systemEvents: SystemEvents?
-    private let logger = Logger(subsystem: MeqatCore.bundleIdentifier, category: "app")
 
     private var bannerNow: EventID?
     private var bannerNowTask: Task<Void, Never>?
