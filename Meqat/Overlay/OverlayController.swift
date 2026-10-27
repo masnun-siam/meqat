@@ -45,6 +45,7 @@ final class OverlayController {
         model?.remaining = content.holdSeconds
         startTimer()
         apply()
+        if !isHidden { announce() }
     }
 
     func dismiss() {
@@ -90,7 +91,7 @@ final class OverlayController {
         }
         if panels.isEmpty { buildPanels() }
         if asleep { hold.pause(at: now) } else { hold.resume(at: now) }
-        tick()
+        refresh()
     }
 
     // MARK: Panels
@@ -106,7 +107,6 @@ final class OverlayController {
         NSApp.activate()
         panels.forEach { $0.orderFrontRegardless() }
         panels.first?.makeKeyAndOrderFront(nil)
-        announce()
     }
 
     private func closePanels() {
@@ -127,11 +127,16 @@ final class OverlayController {
         }
     }
 
-    private func tick() {
-        guard let model, let content else { return }
+    @discardableResult
+    private func refresh() -> Int? {
+        guard let model else { return nil }
         let remaining = Int(hold.remaining(at: Date()).rounded(.up))
         model.remaining = remaining
-        guard !isHidden, !asleep else { return }
+        return remaining
+    }
+
+    private func tick() {
+        guard let content, let remaining = refresh(), !isHidden, !asleep else { return }
         if remaining == 0, !wasSatisfied {
             wasSatisfied = true
             post("\(content.eventName) alert. Dismiss is available")
