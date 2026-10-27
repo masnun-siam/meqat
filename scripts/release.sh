@@ -65,8 +65,10 @@ if [[ $DRY_RUN -eq 0 ]]; then
   codesign --sign "Developer ID Application" --timestamp "$DMG"
 
   echo "==> Notarizing (waits for Apple)"
-  xcrun notarytool submit "$DMG" --keychain-profile "$NOTARY_PROFILE" --wait \
-    || die "notarization failed; inspect with: xcrun notarytool log <submission id> --keychain-profile \"\$NOTARY_PROFILE\""
+  NOTARY_LOG="$STAGE/notary.txt"
+  xcrun notarytool submit "$DMG" --keychain-profile "$NOTARY_PROFILE" --wait | tee "$NOTARY_LOG"
+  grep -q '^ *status: Accepted' "$NOTARY_LOG" \
+    || die "notarization was not accepted; inspect with: xcrun notarytool log <submission id> --keychain-profile \"\$NOTARY_PROFILE\""
 
   echo "==> Stapling"
   xcrun stapler staple "$DMG"
