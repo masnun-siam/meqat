@@ -1,0 +1,16 @@
+repos:
+  - repo: local
+    hooks:
+      - id: claude-md-nested
+        name: Only the root CLAUDE.md
+        entry: scripts/claude-md-guard.sh nested
+        language: script
+        pass_filenames: false
+        always_run: true
+      - id: claude-md-warn
+        name: Warn on CLAUDE.md change
+        entry: scripts/claude-md-guard.sh warn
+        language: script
+        pass_filenames: false
+        always_run: true
+        verbose: true
