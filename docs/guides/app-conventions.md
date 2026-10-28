@@ -19,6 +19,7 @@ Read before changing `Meqat/` (AppKit + SwiftUI, macOS 14+). The app target wire
 - No `@main`, no SwiftUI `App`. `main.swift` creates `AppDelegate` and calls `NSApplication.shared.run()`.
 - `AppDelegate.applicationDidFinishLaunching` sets `.accessory` policy, creates one `AppEnvironment`, calls `start()`, and keeps it in a property.
 - No Dock icon and no main menu: `INFOPLIST_KEY_LSUIElement = YES` in `Meqat.xcodeproj/project.pbxproj` (both configs). Info.plist is generated (`GENERATE_INFOPLIST_FILE = YES`); add keys as `INFOPLIST_KEY_*` build settings, not a plist file.
+- App icon: `Meqat/Assets.xcassets/AppIcon.appiconset`, wired by `ASSETCATALOG_COMPILER_APPICON_NAME` (both configs).
 - There is no Dock or main-menu way to open Settings. The status item popover is the only entry (`MenuActions.openSettings`).
 
 ## Composition: `AppEnvironment`
