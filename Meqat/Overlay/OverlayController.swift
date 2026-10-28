@@ -1,6 +1,6 @@
 import AppKit
-import SwiftUI
 import MeqatCore
+import SwiftUI
 
 @MainActor
 final class OverlayController {
@@ -110,7 +110,10 @@ final class OverlayController {
     }
 
     private func closePanels() {
-        panels.forEach { $0.orderOut(nil); $0.contentView = nil }
+        panels.forEach {
+            $0.orderOut(nil)
+            $0.contentView = nil
+        }
         panels = []
     }
 

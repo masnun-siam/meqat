@@ -1,4 +1,5 @@
 import XCTest
+
 @testable import MeqatCore
 
 private final class FakeLoginItem: LoginItemService {

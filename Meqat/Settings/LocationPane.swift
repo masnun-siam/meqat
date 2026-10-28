@@ -45,7 +45,9 @@ struct LocationPane: View {
                 manualSelected = manual
                 if !manual {
                     store.setLocationMode(.automatic)
-                    city = ""; country = ""; state = ""
+                    city = ""
+                    country = ""
+                    state = ""
                 } else if store.settings.location.manualCity != nil {
                     store.settings.location.mode = .manual
                 }

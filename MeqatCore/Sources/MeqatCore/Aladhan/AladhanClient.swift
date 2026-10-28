@@ -69,7 +69,10 @@ public struct AladhanClient: AladhanFetching {
 
     private struct Response: Decodable {
         struct Day: Decodable {
-            struct DateInfo: Decodable { struct Gregorian: Decodable { let date: String }; let gregorian: Gregorian }
+            struct DateInfo: Decodable {
+                struct Gregorian: Decodable { let date: String }
+                let gregorian: Gregorian
+            }
             struct Meta: Decodable { let timezone: String }
             let date: DateInfo
             let timings: [String: String]
@@ -113,7 +116,8 @@ public struct AladhanClient: AladhanFetching {
     private static func localDate(_ text: String) throws -> LocalDate {
         let p = text.split(separator: "-")
         guard p.count == 3, let d = Int(p[0]), let m = Int(p[1]), let y = Int(p[2]),
-              (1...12).contains(m), (1...31).contains(d) else {
+            (1...12).contains(m), (1...31).contains(d)
+        else {
             throw AladhanError.invalidResponse("bad date")
         }
         return LocalDate(year: y, month: m, day: d)

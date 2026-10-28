@@ -36,8 +36,10 @@ public struct DayTimings: Equatable, Sendable, Codable {
     public var date: LocalDate
     public var fajr, sunrise, dhuhr, asr, sunset, maghrib, isha, midnight, lastthird: Date
 
-    public init(date: LocalDate, fajr: Date, sunrise: Date, dhuhr: Date, asr: Date, sunset: Date,
-                maghrib: Date, isha: Date, midnight: Date, lastthird: Date) {
+    public init(
+        date: LocalDate, fajr: Date, sunrise: Date, dhuhr: Date, asr: Date, sunset: Date,
+        maghrib: Date, isha: Date, midnight: Date, lastthird: Date
+    ) {
         self.date = date
         self.fajr = fajr
         self.sunrise = sunrise
@@ -59,8 +61,10 @@ public struct TimingsCache: Equatable, Sendable, Codable {
     public var fetchedAt: Date
     public var days: [LocalDate: DayTimings]
 
-    public init(formatVersion: Int = TimingsCache.currentFormatVersion, parameters: FetchParameters,
-                fetchedAt: Date, days: [LocalDate: DayTimings]) {
+    public init(
+        formatVersion: Int = TimingsCache.currentFormatVersion, parameters: FetchParameters,
+        fetchedAt: Date, days: [LocalDate: DayTimings]
+    ) {
         self.formatVersion = formatVersion
         self.parameters = parameters
         self.fetchedAt = fetchedAt
@@ -123,7 +127,11 @@ public struct TimingsCache: Equatable, Sendable, Codable {
         try c.encode(formatVersion, forKey: .formatVersion)
         try c.encode(parameters.timeZoneId, forKey: .timeZoneId)
 
-        var latitude: Double?, longitude: Double?, city: String?, country: String?, state: String?
+        var latitude: Double?
+        var longitude: Double?
+        var city: String?
+        var country: String?
+        var state: String?
         switch parameters.location {
         case .coordinates(let coordinates):
             latitude = coordinates.latitude

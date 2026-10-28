@@ -11,9 +11,9 @@ public struct ClockTime: Codable, Sendable, Equatable {
         let text = try decoder.singleValueContainer().decode(String.self)
         let parts = text.split(separator: ":", omittingEmptySubsequences: false)
         guard text.count == 5, parts.count == 2,
-              let hour = Int(parts[0]), let minute = Int(parts[1]),
-              (0...23).contains(hour), (0...59).contains(minute),
-              parts.allSatisfy({ $0.count == 2 && $0.allSatisfy(\.isASCII) && $0.allSatisfy(\.isNumber) })
+            let hour = Int(parts[0]), let minute = Int(parts[1]),
+            (0...23).contains(hour), (0...59).contains(minute),
+            parts.allSatisfy({ $0.count == 2 && $0.allSatisfy(\.isASCII) && $0.allSatisfy(\.isNumber) })
         else {
             throw DecodingError.dataCorrupted(.init(codingPath: decoder.codingPath, debugDescription: "Expected HH:mm, got \(text)"))
         }

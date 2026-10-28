@@ -1,4 +1,5 @@
 import XCTest
+
 @testable import MeqatCore
 
 final class TimingsCacheTests: XCTestCase {
@@ -18,20 +19,27 @@ final class TimingsCacheTests: XCTestCase {
     private func day(_ date: LocalDate) -> DayTimings {
         let base = date.startOfDay(in: TimeZone(identifier: "UTC")!)
         func t(_ h: Double) -> Date { base.addingTimeInterval(h * 3600) }
-        return DayTimings(date: date, fajr: t(5), sunrise: t(6), dhuhr: t(12), asr: t(15), sunset: t(18),
-                          maghrib: t(18.05), isha: t(19.5), midnight: t(23.5), lastthird: t(26))
+        return DayTimings(
+            date: date, fajr: t(5), sunrise: t(6), dhuhr: t(12), asr: t(15), sunset: t(18),
+            maghrib: t(18.05), isha: t(19.5), midnight: t(23.5), lastthird: t(26))
     }
 
-    private func cache(_ location: FetchLocation?, days: [LocalDate] = [LocalDate(year: 2026, month: 10, day: 30), LocalDate(year: 2026, month: 10, day: 31)]) -> TimingsCache {
-        TimingsCache(parameters: FetchParameters(location: location, method: nil, school: 1, timeZoneId: "Asia/Dhaka"),
-                     fetchedAt: Date(timeIntervalSince1970: 1_800_000_000),
-                     days: Dictionary(uniqueKeysWithValues: days.map { ($0, day($0)) }))
+    private func cache(
+        _ location: FetchLocation?,
+        days: [LocalDate] = [LocalDate(year: 2026, month: 10, day: 30), LocalDate(year: 2026, month: 10, day: 31)]
+    ) -> TimingsCache {
+        TimingsCache(
+            parameters: FetchParameters(location: location, method: nil, school: 1, timeZoneId: "Asia/Dhaka"),
+            fetchedAt: Date(timeIntervalSince1970: 1_800_000_000),
+            days: Dictionary(uniqueKeysWithValues: days.map { ($0, day($0)) }))
     }
 
     func testRoundTrip() throws {
-        for location in [FetchLocation.coordinates(.init(latitude: 23.81, longitude: 90.41)),
-                         .city(city: "Dhaka", country: "BD", state: nil),
-                         .city(city: "Austin", country: "US", state: "TX")] {
+        for location in [
+            FetchLocation.coordinates(.init(latitude: 23.81, longitude: 90.41)),
+            .city(city: "Dhaka", country: "BD", state: nil),
+            .city(city: "Austin", country: "US", state: "TX"),
+        ] {
             let original = cache(location)
             try store.save(original)
             XCTAssertEqual(store.load(), original)

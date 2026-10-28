@@ -1,4 +1,5 @@
 import XCTest
+
 @testable import MeqatCore
 
 final class StubTransport: HTTPTransport, @unchecked Sendable {
@@ -18,8 +19,10 @@ final class StubTransport: HTTPTransport, @unchecked Sendable {
 final class AladhanClientTests: XCTestCase {
     let october = YearMonth(year: 2026, month: 10)
 
-    func params(_ location: FetchLocation? = .coordinates(Coordinates(latitude: 23.81034, longitude: 90.41252)),
-                method: Int? = nil, school: Int = 0) -> FetchParameters {
+    func params(
+        _ location: FetchLocation? = .coordinates(Coordinates(latitude: 23.81034, longitude: 90.41252)),
+        method: Int? = nil, school: Int = 0
+    ) -> FetchParameters {
         FetchParameters(location: location, method: method, school: school, timeZoneId: "Asia/Dhaka")
     }
 
@@ -31,7 +34,8 @@ final class AladhanClientTests: XCTestCase {
 
     func fetch(_ body: String, status: Int = 200, location: FetchLocation? = nil) async throws -> [DayTimings] {
         let client = AladhanClient(transport: StubTransport(status: status, body: Data(body.utf8)))
-        return try await client.fetchMonth(october, parameters: params(location ?? .coordinates(Coordinates(latitude: 23.81, longitude: 90.41))))
+        return try await client.fetchMonth(
+            october, parameters: params(location ?? .coordinates(Coordinates(latitude: 23.81, longitude: 90.41))))
     }
 
     func assertInvalid(_ body: String, file: StaticString = #filePath, line: UInt = #line) async {
@@ -48,8 +52,9 @@ final class AladhanClientTests: XCTestCase {
 
     func testCoordinatesRoundedAndParams() {
         let r = AladhanClient.request(for: october, parameters: params(school: 1))
-        XCTAssertEqual(r.url!.absoluteString,
-                       "https://api.aladhan.com/v1/calendar/2026/10?latitude=23.81&longitude=90.41&school=1&iso8601=true")
+        XCTAssertEqual(
+            r.url!.absoluteString,
+            "https://api.aladhan.com/v1/calendar/2026/10?latitude=23.81&longitude=90.41&school=1&iso8601=true")
         XCTAssertEqual(r.timeoutInterval, 5)
     }
 
@@ -65,8 +70,9 @@ final class AladhanClientTests: XCTestCase {
     }
 
     func testStateEncodedOrAbsent() {
-        XCTAssertTrue(url(params(.city(city: "São Paulo", country: "Brazil", state: "SP+1 x"))).contains(
-            "city=S%C3%A3o%20Paulo&country=Brazil&state=SP%2B1%20x&school"))
+        XCTAssertTrue(
+            url(params(.city(city: "São Paulo", country: "Brazil", state: "SP+1 x"))).contains(
+                "city=S%C3%A3o%20Paulo&country=Brazil&state=SP%2B1%20x&school"))
         XCTAssertFalse(url(params(.city(city: "Dhaka", country: "Bangladesh", state: nil))).contains("state"))
     }
 
@@ -87,40 +93,52 @@ final class AladhanClientTests: XCTestCase {
             _ = try await fetch(body, status: 400, location: .city(city: "Nowhere", country: "X", state: nil))
             XCTFail()
         } catch { XCTAssertEqual(error as? AladhanError, .cityNotFound) }
-        do { _ = try await fetch(body, status: 400); XCTFail() } catch { XCTAssertEqual(error as? AladhanError, .http(400)) }
+        do {
+            _ = try await fetch(body, status: 400)
+            XCTFail()
+        } catch { XCTAssertEqual(error as? AladhanError, .http(400)) }
     }
 
     func testHTTPFailures() async {
         for status in [503, 429] {
-            do { _ = try await fetch("{}", status: status, location: .city(city: "A", country: "B", state: nil)); XCTFail() }
-            catch { XCTAssertEqual(error as? AladhanError, .http(status)) }
+            do {
+                _ = try await fetch("{}", status: status, location: .city(city: "A", country: "B", state: nil))
+                XCTFail()
+            } catch { XCTAssertEqual(error as? AladhanError, .http(status)) }
         }
     }
 
     func testTimeoutPassesThrough() async {
         let client = AladhanClient(transport: StubTransport(.failure(URLError(.timedOut))))
-        do { _ = try await client.fetchMonth(october, parameters: params()); XCTFail() }
-        catch { XCTAssertEqual((error as? URLError)?.code, .timedOut) }
+        do {
+            _ = try await client.fetchMonth(october, parameters: params())
+            XCTFail()
+        } catch { XCTAssertEqual((error as? URLError)?.code, .timedOut) }
     }
 
     func testApiCodeNot200() async throws {
         let body = try fixture().replacingOccurrences(of: "\"code\": 200", with: "\"code\": 500")
-        do { _ = try await fetch(body); XCTFail() } catch { XCTAssertEqual(error as? AladhanError, .apiCode(500)) }
+        do {
+            _ = try await fetch(body)
+            XCTFail()
+        } catch { XCTAssertEqual(error as? AladhanError, .apiCode(500)) }
     }
 
     func testBodyTooLarge() async {
-        do { _ = try await fetch(String(repeating: " ", count: 1_048_577)); XCTFail() }
-        catch { XCTAssertEqual(error as? AladhanError, .bodyTooLarge) }
+        do {
+            _ = try await fetch(String(repeating: " ", count: 1_048_577))
+            XCTFail()
+        } catch { XCTAssertEqual(error as? AladhanError, .bodyTooLarge) }
     }
 
     func testInvalidBodies() async throws {
         let f = try fixture()
         await assertInvalid("not json")
-        await assertInvalid(f.replacingOccurrences(of: "\"02-10-2026\"", with: "\"01-10-2026\""))          // duplicate
-        await assertInvalid(f.replacingOccurrences(of: "\"02-10-2026\"", with: "\"02-11-2026\""))          // outside month
-        await assertInvalid(f.replacingOccurrences(of: "\"Lastthird\"", with: "\"Other\""))                // missing field
-        await assertInvalid(f.replacingOccurrences(of: "2026-10-01T04:35:00+06:00", with: "2026-10-01T04:35:00")) // no offset
-        await assertInvalid(f.replacingOccurrences(of: "\"timezone\"", with: "\"tz\""))                   // no timezone
+        await assertInvalid(f.replacingOccurrences(of: "\"02-10-2026\"", with: "\"01-10-2026\""))  // duplicate
+        await assertInvalid(f.replacingOccurrences(of: "\"02-10-2026\"", with: "\"02-11-2026\""))  // outside month
+        await assertInvalid(f.replacingOccurrences(of: "\"Lastthird\"", with: "\"Other\""))  // missing field
+        await assertInvalid(f.replacingOccurrences(of: "2026-10-01T04:35:00+06:00", with: "2026-10-01T04:35:00"))  // no offset
+        await assertInvalid(f.replacingOccurrences(of: "\"timezone\"", with: "\"tz\""))  // no timezone
     }
 
     // MARK: Parsing

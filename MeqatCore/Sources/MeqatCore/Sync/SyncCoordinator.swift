@@ -30,12 +30,14 @@ public final class SyncCoordinator {
     @ObservationIgnored private var debounceTask: Task<Void, Never>?
     @ObservationIgnored private var retryIndex = 0
 
-    public init(client: AladhanFetching,
-                store: CacheStore,
-                parameters: @escaping @MainActor () -> FetchParameters?,
-                now: @escaping @Sendable () -> Date = { Date() },
-                timeZone: @escaping @Sendable () -> TimeZone = { .current },
-                sleep: @escaping @Sendable (Duration) async throws -> Void = { try await Task.sleep(for: $0) }) {
+    public init(
+        client: AladhanFetching,
+        store: CacheStore,
+        parameters: @escaping @MainActor () -> FetchParameters?,
+        now: @escaping @Sendable () -> Date = { Date() },
+        timeZone: @escaping @Sendable () -> TimeZone = { .current },
+        sleep: @escaping @Sendable (Duration) async throws -> Void = { try await Task.sleep(for: $0) }
+    ) {
         self.client = client
         self.store = store
         self.parameters = parameters

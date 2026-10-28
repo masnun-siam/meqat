@@ -1,5 +1,6 @@
 import CoreLocation
 import XCTest
+
 @testable import MeqatCore
 
 final class SyncPolicyTests: XCTestCase {
@@ -18,7 +19,8 @@ final class SyncPolicyTests: XCTestCase {
 
     private func cache(_ p: FetchParameters, through: Int = 30) -> TimingsCache {
         let dates = (-1...through).map { today.adding(days: $0) }
-        return TimingsCache(parameters: p, fetchedAt: Date(timeIntervalSince1970: 0), days: Dictionary(uniqueKeysWithValues: dates.map { ($0, day($0)) }))
+        return TimingsCache(
+            parameters: p, fetchedAt: Date(timeIntervalSince1970: 0), days: Dictionary(uniqueKeysWithValues: dates.map { ($0, day($0)) }))
     }
 
     private func needs(_ cache: TimingsCache?, _ current: FetchParameters) -> Bool {

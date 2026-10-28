@@ -42,8 +42,9 @@ struct EventPane: View {
             }
             Section("Start alert") {
                 Toggle("Enabled", isOn: event.startAlert.enabled)
-                NumberRow(title: "Offset", unit: "min", value: event.startAlert.offsetMinutes,
-                          range: Bounds.offsetMinutes, signed: true)
+                NumberRow(
+                    title: "Offset", unit: "min", value: event.startAlert.offsetMinutes,
+                    range: Bounds.offsetMinutes, signed: true)
             }
             Section("End alert") {
                 Toggle("Enabled", isOn: event.endAlert.enabled)
@@ -54,9 +55,11 @@ struct EventPane: View {
                 NumberRow(title: "Lead", unit: "min", value: event.preWarning.leadMinutes, range: Bounds.leadMinutes)
             }
             Section("Overlay") {
-                NumberRow(title: "Minimum hold", unit: "s", value: event.overlayHoldSeconds,
-                          range: Bounds.overlayHoldSeconds)
-                    .disabled(settings.style != .fullScreen)
+                NumberRow(
+                    title: "Minimum hold", unit: "s", value: event.overlayHoldSeconds,
+                    range: Bounds.overlayHoldSeconds
+                )
+                .disabled(settings.style != .fullScreen)
             }
             Section {
                 Button("Reset to defaults") { store.resetEvent(eventID) }

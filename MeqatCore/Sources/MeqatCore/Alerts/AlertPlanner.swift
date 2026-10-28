@@ -42,18 +42,22 @@ public enum AlertPlanner {
         guard s.style != .disabled, let interval = event.interval else { return [] }
         let name = event.id.displayName
         let prohibited = event.id.kind == .prohibited
-        let start = formatter.string(from: interval.start), end = formatter.string(from: interval.end)
+        let start = formatter.string(from: interval.start)
+        let end = formatter.string(from: interval.end)
         let day = String(format: "%04d-%02d-%02d", event.date.year, event.date.month, event.date.day)
 
         func make(_ kind: AlertKind, _ fire: Date, _ style: AlertStyle, _ title: String) -> PlannedAlert {
-            PlannedAlert(id: "\(day).\(event.id.rawValue).\(kind.rawValue)", eventID: event.id, kind: kind,
-                         fireDate: fire, style: style, title: title, eventInterval: interval)
+            PlannedAlert(
+                id: "\(day).\(event.id.rawValue).\(kind.rawValue)", eventID: event.id, kind: kind,
+                fireDate: fire, style: style, title: title, eventInterval: interval)
         }
 
         var out: [PlannedAlert] = []
         if s.startAlert.enabled {
-            out.append(make(.start, interval.start + TimeInterval(s.startAlert.offsetMinutes * 60), s.style,
-                            prohibited ? "⛔ \(name) · avoid praying until \(end)" : "\(name) · \(start)"))
+            out.append(
+                make(
+                    .start, interval.start + TimeInterval(s.startAlert.offsetMinutes * 60), s.style,
+                    prohibited ? "⛔ \(name) · avoid praying until \(end)" : "\(name) · \(start)"))
         }
         if s.endAlert.enabled {
             let lead = s.endAlert.leadMinutes
@@ -61,8 +65,10 @@ public enum AlertPlanner {
         }
         if s.preWarning.enabled {
             let lead = s.preWarning.leadMinutes
-            out.append(make(.preWarning, interval.start - TimeInterval(lead * 60), .banner,
-                            "\(prohibited ? "⛔ " : "")\(name) in \(lead) min"))
+            out.append(
+                make(
+                    .preWarning, interval.start - TimeInterval(lead * 60), .banner,
+                    "\(prohibited ? "⛔ " : "")\(name) in \(lead) min"))
         }
         return out
     }

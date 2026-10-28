@@ -56,7 +56,8 @@ public struct LocalDate: Comparable, Hashable, Sendable, Codable {
         let string = try decoder.singleValueContainer().decode(String.self)
         let parts = string.split(separator: "-", omittingEmptySubsequences: false)
         guard parts.count == 3, let y = Int(parts[0]), let m = Int(parts[1]), let d = Int(parts[2]),
-              (1...12).contains(m), (1...31).contains(d) else {
+            (1...12).contains(m), (1...31).contains(d)
+        else {
             throw DecodingError.dataCorrupted(.init(codingPath: decoder.codingPath, debugDescription: "Invalid date \(string)"))
         }
         self.init(year: y, month: m, day: d)
