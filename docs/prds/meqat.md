@@ -163,7 +163,7 @@ Menu bar:  ☾ Asr in 1h 11m
 - **FR-16 Empty and error states.** When the cache has an entry for today, the dropdown shows the event list, never an empty state (a revoked permission only adds a warning row). Otherwise it shows exactly one of these, in this order of precedence: "Waiting for location permission…" (automatic mode only, prompt unanswered; entering a manual city switches to manual mode and ends it; with a button to the Location pane so the user can enter a city instead); "Fetching times…" (a request is in flight, or location is granted with no fix yet; a backoff wait does not count, so the dropdown doesn't flip on each retry); "Set your location" (no location and no manual city, with a button to the Location pane); "City not found — check Location settings" (the last sync got Aladhan's 400, with a button to the Location pane); "No schedule — connect to the internet" (any other failed sync, with a "Try again" button). The status item then shows the crescent alone.
   - Acceptance: on a clean install with a manual city set and the network off, the dropdown shows "No schedule — connect to the internet" and no alerts are scheduled. With permission denied and no manual city it shows "Set your location". With a valid cache from yesterday that no longer covers today and a request in flight, it shows "Fetching times…"; during a backoff wait it shows "No schedule — connect to the internet". With the prompt unanswered it shows "Waiting for location permission…", and entering a city then leads to "Fetching times…" and then the list.
 
-- **FR-17 Settings window.** A sidebar and detail window, like System Settings. The sidebar has **General** (launch at login, method, school, the three prohibited-window durations), **Location** (automatic or manual city, country and optional state, current place, last sync), then the 11 events in day order. Selecting an event shows all of its FR-9 and FR-10 controls and a "Reset to defaults" button for that event. General has "Reset all settings" (after a confirmation), which restores every default but keeps the location. Changes apply immediately; there is no Save button (except the city lookup in FR-4). "Settings…" and the "Set your location" button activate the app and bring the single Settings window to the front, on the chosen pane.
+- **FR-17 Settings window.** A sidebar and detail window, like System Settings. The sidebar has **General** (launch at login, method, school, time format, the three prohibited-window durations), **Location** (automatic or manual city, country and optional state, current place, last sync), then the 11 events in day order. Selecting an event shows all of its FR-9 and FR-10 controls and a "Reset to defaults" button for that event. General has "Reset all settings" (after a confirmation), which restores every default but keeps the location. Changes apply immediately; there is no Save button (except the city lookup in FR-4). "Settings…" and the "Set your location" button activate the app and bring the single Settings window to the front, on the chosen pane.
   - Acceptance: every control in FR-9 and FR-10 can be reached for each of the 11 events, and quitting and relaunching keeps every value. "Reset to defaults" on Dhuhr restores its FR-9 and FR-10 defaults and leaves other events alone; "Reset all settings" restores all of them and keeps the location.
 
 ```
@@ -185,6 +185,8 @@ Menu bar:  ☾ Asr in 1h 11m
 
 - **FR-18 Launch at login.** A General setting, on by default after the first launch, registers the app as a login item. The app has no Dock icon.
   - Acceptance: with the setting on, Meqat is running after a reboot. With it off, it isn't. The app never appears in the Dock or the Cmd-Tab switcher.
+- **FR-19 Time format.** A General setting picks how times are shown: 24-hour (`15:04`, the default) or 12-hour (`3:04 PM`). It applies to the dropdown's times, ranges, VoiceOver labels and footer sync time, banner titles (FR-13), the overlay's time range (FR-14) and the Location pane's last sync. The examples elsewhere in this PRD show the 24-hour default. Static times are still stored as `HH:mm`.
+  - Acceptance: with 12-hour selected, a row reads `3:04 PM`, Istiwa reads `11:36 AM–11:46 AM`, the footer reads `Synced 3:04 PM`, and the Istiwa start banner reads "⛔ Istiwa · avoid praying until 11:46 AM". With the default, every string matches FR-13 and FR-15. Settings saved before this change load as 24-hour.
 
 ## Edge cases
 
@@ -207,7 +209,7 @@ Menu bar:  ☾ Asr in 1h 11m
 Two local stores, both inside the app's sandbox container:
 
 - **Settings (UserDefaults)** (FR-4, FR-5, FR-9, FR-10, FR-17, FR-18):
-  - General: `launchAtLogin` (bool), `method` (int, or absent = Aladhan's choice), `school` (0 Shafi'i, 1 Hanafi), `shuruqMinutes`/`istiwaMinutes`/`ghurubMinutes` (5–30).
+  - General: `launchAtLogin` (bool), `method` (int, or absent = Aladhan's choice), `school` (0 Shafi'i, 1 Hanafi), `timeFormat` (`twentyFour`/`twelve`, absent = `twentyFour`), `shuruqMinutes`/`istiwaMinutes`/`ghurubMinutes` (5–30).
   - Location: `locationMode` (`automatic`/`manual`), `manualCity`, `manualCountry`, `manualState` (optional).
   - Per event, keyed by event id (`tahajjud`, `fajr`, `shuruq`, `duha`, `istiwa`, `dhuhr`, `jumah`, `asr`, `ghurub`, `maghrib`, `isha`): `style` (`fullScreen`/`banner`/`disabled`), `timeSource` (`calculated`/`static`), `staticTime` (`HH:mm`), `startAlert` {enabled, offsetMinutes}, `endAlert` {enabled, leadMinutes}, `preWarning` {enabled, leadMinutes}, `overlayHoldSeconds`.
   - Stored as one versioned Codable value per group. A missing key falls back to the FR-9 and FR-10 defaults.
@@ -344,6 +346,7 @@ None. Meqat is a personal tool and telemetry is a non-goal, so no metric is meas
 ## Epics
 
 - **E1 Meqat MVP** — covers FR-1 to FR-18. Issue: #1
+- FR-19 — Issue: #52 (no epic)
 
 ## Decisions
 
@@ -370,6 +373,7 @@ None. Meqat is a personal tool and telemetry is a non-goal, so no metric is meas
 - The overlay uses shielding window level on every screen and joins all Spaces. — This was the draft's mitigation for full-screen apps.
 - Priority is medium, with one epic. — Personal project with no external deadline.
 - No third-party Swift packages. — The platform frameworks cover everything here.
+- Time format defaults to 24-hour, with no "follow system" option. — Existing users see no change, and two fixed choices keep output testable.
 
 ## Open questions
 
@@ -377,7 +381,7 @@ None.
 
 ## Change log
 
-- —
+- 2026-10-29 — Added FR-19 (12/24-hour time format); FR-17 and Data updated. Issue: #52.
 
 ## Related
 
