@@ -33,5 +33,6 @@ struct SettingsView: View {
             case .event(let id): EventPane(eventID: id, store: store, context: context)
             }
         }
+        .frame(minWidth: 680, minHeight: 480)
     }
 }
