@@ -17,6 +17,10 @@ public enum MenuPresenter {
 
         let valid = input.events.filter { $0.interval != nil }
         let prohibited = valid.first { $0.id.kind == .prohibited && $0.interval!.contains(now) && now < $0.interval!.end }
+        let current =
+            valid
+            .filter { $0.interval!.start <= now && now < $0.interval!.end && input.styles[$0.id] != .disabled }
+            .max { $0.interval!.start < $1.interval!.start }
         let next =
             valid
             .filter { $0.interval!.start > now && input.styles[$0.id] != .disabled }
@@ -31,6 +35,12 @@ public enum MenuPresenter {
             )
         } else if let banner = input.bannerNow {
             (title, label) = ("● \(banner.displayName) now", "\(banner.displayName), now")
+        } else if let current {
+            let cd = countdown(current.interval!.end.timeIntervalSince(now))
+            (title, label) = (
+                "\(crescent) \(current.id.displayName) ends in \(cd.short)",
+                "\(current.id.displayName), current, ends in \(cd.spoken)"
+            )
         } else if let next {
             let cd = countdown(next.interval!.start.timeIntervalSince(now))
             (title, label) = ("\(crescent) \(next.id.displayName) in \(cd.short)", "\(next.id.displayName), next, in \(cd.spoken)")

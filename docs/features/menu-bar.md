@@ -26,10 +26,12 @@ flowchart LR
 |---|---|
 | inside a prohibited window (even if its alerts are disabled) | `⛔ Shuruq ends in 12m` |
 | `bannerNow` set | `● Asr now` |
+| a current non-disabled event exists | `☾ Dhuhr ends in 1h 11m` |
 | a next non-disabled event exists | `☾ Asr in 1h 11m` |
 | otherwise, or no schedule today | `☾` (label "Meqat") |
 
 - Countdowns round down to whole minutes: `<1m`, `12m`, `1h 0m`. Spoken form goes to `statusAccessibilityLabel`.
+- "Current" = valid event with `start <= now < end` whose style is not `.disabled`; if several overlap, the latest start wins. May be yesterday's Isha past midnight.
 - "Next" = earliest valid event starting after `now` whose style is not `.disabled`; may be tomorrow's.
 - `bannerNow` is set by `AppEnvironment.showBannerNow` when a banner fires but notifications are not authorized; it clears after 5 min (`bannerNowDuration`) or when the dropdown opens (`MenuActions.dropdownOpened`).
 

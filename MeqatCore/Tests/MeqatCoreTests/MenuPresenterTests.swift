@@ -37,7 +37,7 @@ final class MenuPresenterTests: XCTestCase {
 
     func testNextCountdownAndRows() {
         let s = present(at(28, 13, 52, 30))
-        XCTAssertEqual(s.statusTitle, "☾ Asr in 1h 11m")
+        XCTAssertEqual(s.statusTitle, "☾ Dhuhr ends in 1h 11m")
         XCTAssertEqual(s.rows.count, 10)
         XCTAssertEqual(s.rows.map(\.marker), [.done, .done, .prohibited, .done, .prohibited, .current, .next, .prohibited, .none, .none])
         XCTAssertEqual(s.rows[5].detailText, "ends in 1h 11m")
@@ -61,7 +61,7 @@ final class MenuPresenterTests: XCTestCase {
         }
         XCTAssertEqual(s.statusTitle, "⛔ Istiwa ends in 6m")
         XCTAssertEqual(s.statusAccessibilityLabel, "Istiwa, prohibited window, ends in 6 minutes")
-        XCTAssertEqual(present(at(28, 11, 47)).statusTitle, "☾ Asr in 3h 17m")
+        XCTAssertEqual(present(at(28, 11, 47)).statusTitle, "☾ Dhuhr ends in 3h 17m")
     }
 
     func testAllDisabledShowsCrescent() {
@@ -83,6 +83,20 @@ final class MenuPresenterTests: XCTestCase {
         XCTAssertEqual(s.statusTitle, "☾ Fajr in 4h 52m")
     }
 
+    func testDisabledCurrentFallsBackToNext() {
+        let s = present(at(28, 16, 0)) { $0.styles[.asr] = .disabled }
+        XCTAssertEqual(s.statusTitle, "☾ Ghurub in 1h 12m")
+    }
+
+    func testLatestStartWinsAmongOverlappingCurrent() {
+        let events = [ev(.isha, 28, (18, 42), (23, 59)), ev(.tahajjud, 28, (22, 0), (23, 30))]
+        XCTAssertEqual(present(at(28, 22, 30), events: events).statusTitle, "☾ Tahajjud ends in 1h 0m")
+    }
+
+    func testEventAtExactEndIsNotCurrent() {
+        XCTAssertEqual(present(at(28, 15, 4)).statusTitle, "☾ Asr ends in 2h 8m")
+    }
+
     func testBannerNow() {
         XCTAssertEqual(present(at(28, 15, 5)) { $0.bannerNow = .asr }.statusTitle, "● Asr now")
         XCTAssertEqual(present(at(28, 15, 5)) { $0.bannerNow = .asr }.statusAccessibilityLabel, "Asr, now")
@@ -94,7 +108,7 @@ final class MenuPresenterTests: XCTestCase {
         XCTAssertEqual(s.rows[4].accessibilityLabel, "Istiwa, prohibited window, 11:36 to 11:46")
         XCTAssertEqual(s.rows[5].accessibilityLabel, "Dhuhr, current, 11:46, ends in 1 hour 11 minutes")
         XCTAssertEqual(s.rows[6].accessibilityLabel, "Asr, next, 15:04, in 1 hour 11 minutes")
-        XCTAssertEqual(s.statusAccessibilityLabel, "Asr, next, in 1 hour 11 minutes")
+        XCTAssertEqual(s.statusAccessibilityLabel, "Dhuhr, current, ends in 1 hour 11 minutes")
     }
 
     func testInvalidEventRow() {
