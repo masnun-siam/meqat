@@ -3,7 +3,7 @@ import Foundation
 public enum Bounds {
     public static let offsetMinutes = -60...60
     public static let leadMinutes = 1...120
-    public static let overlayHoldSeconds = 0...300
+    public static let overlayTimeoutSeconds = 10...600
     public static let windowMinutes = 5...30
 
     public static func clamped(_ value: Int, to range: ClosedRange<Int>) -> Int {
@@ -67,14 +67,12 @@ public struct EventSettings: Codable, Sendable, Equatable {
     public var startAlert: StartAlert
     public var endAlert: LeadAlert
     public var preWarning: LeadAlert
-    public var overlayHoldSeconds: Int { didSet { overlayHoldSeconds = Bounds.clamped(overlayHoldSeconds, to: Bounds.overlayHoldSeconds) } }
 
     public init(
         style: AlertStyle, timeSource: TimeSource = .calculated, staticTime: ClockTime? = nil,
         startAlert: StartAlert = StartAlert(),
         endAlert: LeadAlert = LeadAlert(enabled: false, leadMinutes: 15),
-        preWarning: LeadAlert = LeadAlert(enabled: false, leadMinutes: 20),
-        overlayHoldSeconds: Int = 60
+        preWarning: LeadAlert = LeadAlert(enabled: false, leadMinutes: 20)
     ) {
         self.style = style
         self.timeSource = timeSource
@@ -82,7 +80,6 @@ public struct EventSettings: Codable, Sendable, Equatable {
         self.startAlert = startAlert
         self.endAlert = endAlert
         self.preWarning = preWarning
-        self.overlayHoldSeconds = Bounds.clamped(overlayHoldSeconds, to: Bounds.overlayHoldSeconds)
     }
 
     public static func defaults(for id: EventID) -> EventSettings {
@@ -99,8 +96,7 @@ public struct EventSettings: Codable, Sendable, Equatable {
             staticTime: try c.decodeIfPresent(ClockTime.self, forKey: .staticTime) ?? d.staticTime,
             startAlert: try c.decodeIfPresent(StartAlert.self, forKey: .startAlert) ?? d.startAlert,
             endAlert: try c.decodeLead(forKey: .endAlert, default: d.endAlert),
-            preWarning: try c.decodeLead(forKey: .preWarning, default: d.preWarning),
-            overlayHoldSeconds: try c.decodeIfPresent(Int.self, forKey: .overlayHoldSeconds) ?? d.overlayHoldSeconds)
+            preWarning: try c.decodeLead(forKey: .preWarning, default: d.preWarning))
     }
 
     public init(from decoder: Decoder) throws {
@@ -134,11 +130,15 @@ public struct GeneralSettings: Codable, Sendable, Equatable {
     public var shuruqMinutes: Int { didSet { shuruqMinutes = Bounds.clamped(shuruqMinutes, to: Bounds.windowMinutes) } }
     public var istiwaMinutes: Int { didSet { istiwaMinutes = Bounds.clamped(istiwaMinutes, to: Bounds.windowMinutes) } }
     public var ghurubMinutes: Int { didSet { ghurubMinutes = Bounds.clamped(ghurubMinutes, to: Bounds.windowMinutes) } }
+    public var overlayTimeoutSeconds: Int {
+        didSet { overlayTimeoutSeconds = Bounds.clamped(overlayTimeoutSeconds, to: Bounds.overlayTimeoutSeconds) }
+    }
 
     public init(
         launchAtLogin: Bool = true, method: Int? = nil, school: School = .shafii,
         timeFormat: TimeFormat = .twentyFour,
-        shuruqMinutes: Int = 15, istiwaMinutes: Int = 10, ghurubMinutes: Int = 15
+        shuruqMinutes: Int = 15, istiwaMinutes: Int = 10, ghurubMinutes: Int = 15,
+        overlayTimeoutSeconds: Int = 60
     ) {
         self.launchAtLogin = launchAtLogin
         self.method = method
@@ -147,6 +147,7 @@ public struct GeneralSettings: Codable, Sendable, Equatable {
         self.shuruqMinutes = Bounds.clamped(shuruqMinutes, to: Bounds.windowMinutes)
         self.istiwaMinutes = Bounds.clamped(istiwaMinutes, to: Bounds.windowMinutes)
         self.ghurubMinutes = Bounds.clamped(ghurubMinutes, to: Bounds.windowMinutes)
+        self.overlayTimeoutSeconds = Bounds.clamped(overlayTimeoutSeconds, to: Bounds.overlayTimeoutSeconds)
     }
 
     public init(from decoder: Decoder) throws {
@@ -159,7 +160,8 @@ public struct GeneralSettings: Codable, Sendable, Equatable {
             timeFormat: try c.decodeIfPresent(TimeFormat.self, forKey: .timeFormat) ?? d.timeFormat,
             shuruqMinutes: try c.decodeIfPresent(Int.self, forKey: .shuruqMinutes) ?? d.shuruqMinutes,
             istiwaMinutes: try c.decodeIfPresent(Int.self, forKey: .istiwaMinutes) ?? d.istiwaMinutes,
-            ghurubMinutes: try c.decodeIfPresent(Int.self, forKey: .ghurubMinutes) ?? d.ghurubMinutes)
+            ghurubMinutes: try c.decodeIfPresent(Int.self, forKey: .ghurubMinutes) ?? d.ghurubMinutes,
+            overlayTimeoutSeconds: try c.decodeIfPresent(Int.self, forKey: .overlayTimeoutSeconds) ?? d.overlayTimeoutSeconds)
     }
 }
 

@@ -8,7 +8,7 @@ final class OverlayModel: ObservableObject {
 
     init(content: OverlayContent) {
         self.content = content
-        remaining = content.holdSeconds
+        remaining = content.timeoutSeconds
     }
 }
 
@@ -28,8 +28,6 @@ struct OverlayView: View {
         endPoint: .bottomTrailing
     )
 
-    private var canDismiss: Bool { model.remaining <= 0 }
-
     private var timeRange: String {
         let f = DateFormatter()
         f.locale = Locale(identifier: "en_US_POSIX")
@@ -37,8 +35,8 @@ struct OverlayView: View {
         return "\(f.string(from: model.content.start))–\(f.string(from: model.content.end))"
     }
 
-    private var buttonTitle: String {
-        canDismiss ? "Dismiss" : String(format: "Dismiss (%d:%02d)", model.remaining / 60, model.remaining % 60)
+    private var closesIn: String {
+        String(format: "Closes in %d:%02d", model.remaining / 60, model.remaining % 60)
     }
 
     var body: some View {
@@ -52,15 +50,16 @@ struct OverlayView: View {
                 Text(timeRange)
                     .font(.system(size: 40, weight: .medium))
                 Button(action: dismiss) {
-                    Text(buttonTitle)
+                    Text("Dismiss")
                         .font(.system(size: 22, weight: .semibold))
-                        .contentTransition(reduceMotion ? .identity : .numericText())
                         .padding(.horizontal, 24)
                         .padding(.vertical, 8)
                 }
                 .keyboardShortcut(.defaultAction)
-                .disabled(!canDismiss)
                 .controlSize(.large)
+                Text(closesIn)
+                    .font(.system(size: 18, weight: .medium))
+                    .contentTransition(reduceMotion ? .identity : .numericText())
             }
             .foregroundStyle(.white)
             .padding(48)

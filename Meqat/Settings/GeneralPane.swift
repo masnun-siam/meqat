@@ -25,6 +25,11 @@ struct GeneralPane: View {
                 DurationRow(title: "Istiwa", minutes: $store.settings.general.istiwaMinutes)
                 DurationRow(title: "Ghurub", minutes: $store.settings.general.ghurubMinutes)
             }
+            Section("Full-Screen overlay") {
+                DurationRow(
+                    title: "Auto-dismiss after", minutes: $store.settings.general.overlayTimeoutSeconds,
+                    range: Bounds.overlayTimeoutSeconds, unit: "s")
+            }
             Section {
                 Button("Reset all settings…") { confirmingReset = true }
             }
@@ -41,17 +46,19 @@ struct GeneralPane: View {
 private struct DurationRow: View {
     let title: String
     @Binding var minutes: Int
+    var range = Bounds.windowMinutes
+    var unit = "min"
 
     var body: some View {
         let clamped = Binding(
             get: { minutes },
-            set: { minutes = Bounds.clamped($0, to: Bounds.windowMinutes) })
+            set: { minutes = Bounds.clamped($0, to: range) })
         LabeledContent(title) {
             HStack {
                 TextField(title, value: clamped, format: .number)
                     .labelsHidden().multilineTextAlignment(.trailing).frame(width: 50)
-                Stepper(title, value: clamped, in: Bounds.windowMinutes).labelsHidden()
-                Text("min")
+                Stepper(title, value: clamped, in: range).labelsHidden()
+                Text(unit)
             }
         }
     }

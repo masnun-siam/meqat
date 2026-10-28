@@ -42,9 +42,9 @@ final class SettingsTests: XCTestCase {
             XCTAssertEqual(e.startAlert, StartAlert(enabled: true, offsetMinutes: 0))
             XCTAssertEqual(e.endAlert, LeadAlert(enabled: false, leadMinutes: 15))
             XCTAssertEqual(e.preWarning, LeadAlert(enabled: false, leadMinutes: 20))
-            XCTAssertEqual(e.overlayHoldSeconds, 60)
         }
         XCTAssertEqual(s.events.count, 11)
+        XCTAssertEqual(s.general.overlayTimeoutSeconds, 60)
         XCTAssertEqual(
             s.general,
             GeneralSettings(launchAtLogin: true, method: nil, school: .shafii, shuruqMinutes: 15, istiwaMinutes: 10, ghurubMinutes: 15))
@@ -86,11 +86,10 @@ final class SettingsTests: XCTestCase {
         XCTAssertEqual(l.leadMinutes, 1)
         l.leadMinutes = 500
         XCTAssertEqual(l.leadMinutes, 120)
-        var e = EventSettings(style: .banner, overlayHoldSeconds: -1)
-        XCTAssertEqual(e.overlayHoldSeconds, 0)
-        e.overlayHoldSeconds = 301
-        XCTAssertEqual(e.overlayHoldSeconds, 300)
-        var g = GeneralSettings(shuruqMinutes: 3)
+        var g = GeneralSettings(shuruqMinutes: 3, overlayTimeoutSeconds: 9)
+        XCTAssertEqual(g.overlayTimeoutSeconds, 10)
+        g.overlayTimeoutSeconds = 601
+        XCTAssertEqual(g.overlayTimeoutSeconds, 600)
         XCTAssertEqual(g.shuruqMinutes, 5)
         g.istiwaMinutes = 45
         XCTAssertEqual(g.istiwaMinutes, 30)
@@ -101,8 +100,10 @@ final class SettingsTests: XCTestCase {
         XCTAssertEqual(try decode(StartAlert.self, #"{"enabled":true,"offsetMinutes":-999}"#).offsetMinutes, -60)
         XCTAssertEqual(try decode(LeadAlert.self, #"{"enabled":true,"leadMinutes":0}"#).leadMinutes, 1)
         XCTAssertEqual(try decode(LeadAlert.self, #"{"enabled":true,"leadMinutes":500}"#).leadMinutes, 120)
-        XCTAssertEqual(try decode(EventSettings.self, #"{"overlayHoldSeconds":-1}"#).overlayHoldSeconds, 0)
-        XCTAssertEqual(try decode(EventSettings.self, #"{"overlayHoldSeconds":301}"#).overlayHoldSeconds, 300)
+        XCTAssertEqual(try decode(GeneralSettings.self, #"{"overlayTimeoutSeconds":9}"#).overlayTimeoutSeconds, 10)
+        XCTAssertEqual(try decode(GeneralSettings.self, #"{"overlayTimeoutSeconds":601}"#).overlayTimeoutSeconds, 600)
+        let old = try decode(EventSettings.self, #"{"style":"fullScreen","overlayHoldSeconds":120}"#)
+        XCTAssertEqual(old.style, .fullScreen)
         let g = try decode(GeneralSettings.self, #"{"shuruqMinutes":3,"ghurubMinutes":45}"#)
         XCTAssertEqual(g.shuruqMinutes, 5)
         XCTAssertEqual(g.ghurubMinutes, 30)
