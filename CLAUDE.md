@@ -37,9 +37,12 @@ Meqat is a macOS 14+ menu bar app that tracks Islamic prayer times, Jumah, Duha,
 
 | Task | Command |
 |---|---|
-| Core tests | `swift test --package-path MeqatCore` |
-| Live Aladhan tests (network) | `MEQAT_LIVE_TESTS=1 swift test --package-path MeqatCore` |
-| Build app (unsigned) | `xcodebuild -project Meqat.xcodeproj -scheme Meqat -configuration Debug -destination 'platform=macOS' CODE_SIGNING_ALLOWED=NO build` |
+| List targets | `make help` |
+| Lint, test and build (what CI runs) | `make check` |
+| Core tests | `make test` |
+| Live Aladhan tests (network) | `make test-live` |
+| Build app (unsigned) | `make build` |
+| Run app or a debug harness | `make run` / `make run HARNESS=Overlay` |
 | Unsigned release DMG | `scripts/release.sh --dry-run` |
 
 ## References
@@ -48,8 +51,11 @@ Open these on demand; only list files that exist.
 
 | Need | Where |
 |---|---|
+| Docs index: architecture, features, development | `docs/README.md` |
+| Conventions per component | `docs/guides/meqatcore-conventions.md`, `docs/guides/app-conventions.md` |
+| Workflow, board, branches, PRs | `docs/guides/engineering-workflow.md` |
 | Product requirements | `docs/prds/meqat.md` |
 | Release steps and manual checks | `docs/release-checklist.md` |
-| Workflow, gates, code review | the ai-workflow plugin's `guides/` |
-| CI | `.github/workflows/ci.yml` |
+| Lint, test and build targets | `Makefile` |
+| CI | `.github/workflows/ci.yml`, `.github/workflows/pr-meta.yml` |
 | Commit gates | `.pre-commit-config.yaml` |
