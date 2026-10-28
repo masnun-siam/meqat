@@ -12,7 +12,6 @@ final class OverlayController {
     private var locked = false
     private var screensaver = false
     private var asleep = false
-    private var wasSatisfied = false
     private var observers: [(NotificationCenter, NSObjectProtocol)] = []
 
     init() {
@@ -35,14 +34,13 @@ final class OverlayController {
 
     func show(_ content: OverlayContent) {
         self.content = content
-        hold = OverlayHold(seconds: content.holdSeconds)
-        wasSatisfied = false
+        hold = OverlayHold(seconds: content.timeoutSeconds)
         if let model {
             model.content = content
         } else {
             model = OverlayModel(content: content)
         }
-        model?.remaining = content.holdSeconds
+        model?.remaining = content.timeoutSeconds
         startTimer()
         apply()
         if !isHidden { announce() }
@@ -100,8 +98,8 @@ final class OverlayController {
         guard let model else { return }
         panels = NSScreen.screens.map { screen in
             let panel = OverlayPanel(screen: screen)
-            panel.contentView = NSHostingView(rootView: OverlayView(model: model) { [weak self] in self?.dismissIfSatisfied() })
-            panel.onCancel = { [weak self] in self?.dismissIfSatisfied() }
+            panel.contentView = NSHostingView(rootView: OverlayView(model: model) { [weak self] in self?.dismiss() })
+            panel.onCancel = { [weak self] in self?.dismiss() }
             return panel
         }
         NSApp.activate()
@@ -115,10 +113,6 @@ final class OverlayController {
             $0.contentView = nil
         }
         panels = []
-    }
-
-    private func dismissIfSatisfied() {
-        if hold.isSatisfied(at: Date()) { dismiss() }
     }
 
     // MARK: Countdown
@@ -139,18 +133,17 @@ final class OverlayController {
     }
 
     private func tick() {
-        guard let content, let remaining = refresh(), !isHidden, !asleep else { return }
-        if remaining == 0, !wasSatisfied {
-            wasSatisfied = true
-            post("\(content.eventName) alert. Dismiss is available")
-        } else if remaining > 0, remaining % 10 == 0 {
+        guard content != nil, let remaining = refresh(), !isHidden, !asleep else { return }
+        if remaining == 0 {
+            dismiss()
+        } else if remaining % 10 == 0 {
             announce()
         }
     }
 
     private func announce() {
         guard let content, let model else { return }
-        post("\(content.eventName) alert. Dismiss available in \(model.remaining) seconds")
+        post("\(content.eventName) alert. Closes in \(model.remaining) seconds")
     }
 
     private func post(_ text: String) {

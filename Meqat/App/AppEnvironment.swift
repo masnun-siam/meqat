@@ -84,7 +84,7 @@ final class AppEnvironment {
             overlay.show(
                 OverlayContent(
                     eventName: alert.eventID.displayName, start: alert.eventInterval.start,
-                    end: alert.eventInterval.end, holdSeconds: store.settings[event: alert.eventID].overlayHoldSeconds,
+                    end: alert.eventInterval.end, timeoutSeconds: store.settings.general.overlayTimeoutSeconds,
                     timeFormat: store.settings.general.timeFormat))
         }
         scheduler.onBannerFired = { [unowned self] alert in

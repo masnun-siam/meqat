@@ -54,13 +54,6 @@ struct EventPane: View {
                 Toggle("Enabled", isOn: event.preWarning.enabled)
                 NumberRow(title: "Lead", unit: "min", value: event.preWarning.leadMinutes, range: Bounds.leadMinutes)
             }
-            Section("Overlay") {
-                NumberRow(
-                    title: "Minimum hold", unit: "s", value: event.overlayHoldSeconds,
-                    range: Bounds.overlayHoldSeconds
-                )
-                .disabled(settings.style != .fullScreen)
-            }
             Section {
                 Button("Reset to defaults") { store.resetEvent(eventID) }
             }

@@ -1,6 +1,6 @@
 import Foundation
 
-/// Counts down an overlay's minimum hold, only while the overlay is visible.
+/// Counts down an overlay's visible time until it closes.
 public struct OverlayHold: Equatable {
     public let seconds: Int
     private var elapsed: TimeInterval = 0
