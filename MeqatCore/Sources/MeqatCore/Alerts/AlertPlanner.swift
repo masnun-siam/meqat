@@ -24,7 +24,7 @@ public enum AlertPlanner {
         let formatter = DateFormatter()
         formatter.locale = Locale(identifier: "en_US_POSIX")
         formatter.timeZone = timeZone
-        formatter.dateFormat = "HH:mm"
+        formatter.dateFormat = settings.general.timeFormat.dateFormat
 
         let all = events.flatMap { alerts(for: $0, settings[event: $0.id], formatter) }
             .filter { now < $0.fireDate && $0.fireDate <= now + horizon }

@@ -16,6 +16,10 @@ struct GeneralPane: View {
                 Text("Shafi'i").tag(School.shafii)
                 Text("Hanafi").tag(School.hanafi)
             }
+            Picker("Time format", selection: $store.settings.general.timeFormat) {
+                Text("24-hour (15:30)").tag(TimeFormat.twentyFour)
+                Text("12-hour (3:30 PM)").tag(TimeFormat.twelve)
+            }
             Section("Prohibited windows") {
                 DurationRow(title: "Shuruq", minutes: $store.settings.general.shuruqMinutes)
                 DurationRow(title: "Istiwa", minutes: $store.settings.general.istiwaMinutes)

@@ -29,7 +29,7 @@ Details in [settings.md](settings.md).
 - Id: `<yyyy-MM-dd list date>.<eventID>.<kind>`, e.g. `2026-10-28.asr.start`. It is also the notification request identifier.
 - Skipped: `style == .disabled` (no alerts of any kind, including pre-warning), events with no `interval` (invalid time), fire dates not in `(now, now + AlertPlanner.horizon]` (48 h).
 - Sorted by `(fireDate, id)`. Banners are capped at `AlertPlanner.maxBanners` (60, soonest kept); full-screen alerts are never capped.
-- Times in titles are formatted `HH:mm` in the given time zone.
+- Times in titles are formatted with `settings.general.timeFormat` (`HH:mm` or `h:mm a`) in the given time zone.
 
 ## AlertScheduler (`@MainActor @Observable`)
 

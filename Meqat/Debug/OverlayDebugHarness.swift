@@ -1,5 +1,6 @@
 #if DEBUG
     import AppKit
+    import MeqatCore
 
     @objc(MeqatDebugOverlayHarness)
     final class OverlayDebugHarness: NSObject, DebugHarness {
@@ -12,7 +13,9 @@
             let hold = UserDefaults.standard.object(forKey: "MeqatDebugHold") == nil ? 10 : override
             @MainActor func fire(_ name: String) {
                 let now = Date()
-                controller.show(OverlayContent(eventName: name, start: now, end: now.addingTimeInterval(7200), holdSeconds: hold))
+                controller.show(
+                    OverlayContent(
+                        eventName: name, start: now, end: now.addingTimeInterval(7200), holdSeconds: hold, timeFormat: .twentyFour))
             }
             DispatchQueue.main.asyncAfter(deadline: .now() + 3) { MainActor.assumeIsolated { fire("Asr") } }
             DispatchQueue.main.asyncAfter(deadline: .now() + 23) { MainActor.assumeIsolated { fire("Maghrib") } }

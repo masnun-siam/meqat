@@ -5,7 +5,7 @@ public enum MenuPresenter {
     private static let crescent = "☾"
 
     public static func present(_ input: MenuInput) -> MenuState {
-        let f = Formatters(timeZone: input.timeZone)
+        let f = Formatters(timeZone: input.timeZone, format: input.timeFormat)
         let now = input.now
         let footer = footerStatus(input, f)
         let notificationsOff = !input.notificationsAuthorized
@@ -140,7 +140,7 @@ public enum MenuPresenter {
     private struct Formatters {
         let time, header, day: DateFormatter
 
-        init(timeZone: TimeZone) {
+        init(timeZone: TimeZone, format: TimeFormat) {
             func make(_ format: String) -> DateFormatter {
                 let f = DateFormatter()
                 f.locale = Locale(identifier: "en_US_POSIX")
@@ -148,7 +148,7 @@ public enum MenuPresenter {
                 f.dateFormat = format
                 return f
             }
-            (time, header, day) = (make("HH:mm"), make("EEE d MMM"), make("d MMM"))
+            (time, header, day) = (make(format.dateFormat), make("EEE d MMM"), make("d MMM"))
         }
     }
 }

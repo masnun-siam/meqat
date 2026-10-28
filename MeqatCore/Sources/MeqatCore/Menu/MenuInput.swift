@@ -36,11 +36,13 @@ public struct MenuInput: Sendable, Equatable {
     public var notificationsAuthorized: Bool
     public var bannerNow: EventID?
     public var showsCouldntRefresh: Bool
+    public var timeFormat: TimeFormat
 
     public init(
         now: Date, timeZone: TimeZone, events: [ScheduledEvent], styles: [EventID: AlertStyle] = [:], place: String? = nil,
         hasScheduleForToday: Bool = true, sync: MenuSyncInfo = MenuSyncInfo(), location: MenuLocationInfo = .available,
-        notificationsAuthorized: Bool = true, bannerNow: EventID? = nil, showsCouldntRefresh: Bool = false
+        notificationsAuthorized: Bool = true, bannerNow: EventID? = nil, showsCouldntRefresh: Bool = false,
+        timeFormat: TimeFormat = .twentyFour
     ) {
         self.now = now
         self.timeZone = timeZone
@@ -53,5 +55,6 @@ public struct MenuInput: Sendable, Equatable {
         self.notificationsAuthorized = notificationsAuthorized
         self.bannerNow = bannerNow
         self.showsCouldntRefresh = showsCouldntRefresh
+        self.timeFormat = timeFormat
     }
 }

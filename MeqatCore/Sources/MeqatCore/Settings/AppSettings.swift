@@ -120,21 +120,30 @@ public enum School: Int, Codable, Sendable, Equatable {
     case hanafi = 1
 }
 
+public enum TimeFormat: String, Codable, Sendable, Equatable {
+    case twentyFour, twelve
+
+    public var dateFormat: String { self == .twelve ? "h:mm a" : "HH:mm" }
+}
+
 public struct GeneralSettings: Codable, Sendable, Equatable {
     public var launchAtLogin: Bool
     public var method: Int?
     public var school: School
+    public var timeFormat: TimeFormat
     public var shuruqMinutes: Int { didSet { shuruqMinutes = Bounds.clamped(shuruqMinutes, to: Bounds.windowMinutes) } }
     public var istiwaMinutes: Int { didSet { istiwaMinutes = Bounds.clamped(istiwaMinutes, to: Bounds.windowMinutes) } }
     public var ghurubMinutes: Int { didSet { ghurubMinutes = Bounds.clamped(ghurubMinutes, to: Bounds.windowMinutes) } }
 
     public init(
         launchAtLogin: Bool = true, method: Int? = nil, school: School = .shafii,
+        timeFormat: TimeFormat = .twentyFour,
         shuruqMinutes: Int = 15, istiwaMinutes: Int = 10, ghurubMinutes: Int = 15
     ) {
         self.launchAtLogin = launchAtLogin
         self.method = method
         self.school = school
+        self.timeFormat = timeFormat
         self.shuruqMinutes = Bounds.clamped(shuruqMinutes, to: Bounds.windowMinutes)
         self.istiwaMinutes = Bounds.clamped(istiwaMinutes, to: Bounds.windowMinutes)
         self.ghurubMinutes = Bounds.clamped(ghurubMinutes, to: Bounds.windowMinutes)
@@ -147,6 +156,7 @@ public struct GeneralSettings: Codable, Sendable, Equatable {
             launchAtLogin: try c.decodeIfPresent(Bool.self, forKey: .launchAtLogin) ?? d.launchAtLogin,
             method: try c.decodeIfPresent(Int.self, forKey: .method),
             school: try c.decodeIfPresent(School.self, forKey: .school) ?? d.school,
+            timeFormat: try c.decodeIfPresent(TimeFormat.self, forKey: .timeFormat) ?? d.timeFormat,
             shuruqMinutes: try c.decodeIfPresent(Int.self, forKey: .shuruqMinutes) ?? d.shuruqMinutes,
             istiwaMinutes: try c.decodeIfPresent(Int.self, forKey: .istiwaMinutes) ?? d.istiwaMinutes,
             ghurubMinutes: try c.decodeIfPresent(Int.self, forKey: .ghurubMinutes) ?? d.ghurubMinutes)

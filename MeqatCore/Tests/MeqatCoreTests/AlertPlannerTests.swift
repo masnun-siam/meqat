@@ -82,6 +82,17 @@ final class AlertPlannerTests: XCTestCase {
             ["⛔ Istiwa in 20 min", "Istiwa ends in 15 min", "⛔ Istiwa · avoid praying until 11:46"])
     }
 
+    func testTwelveHourTitles() {
+        var s = settings(.istiwa, start: StartAlert())
+        s.general.timeFormat = .twelve
+        XCTAssertEqual(
+            plan([event(.istiwa, from: at(28, 11, 36), to: at(28, 11, 46))], s).map(\.title),
+            ["⛔ Istiwa · avoid praying until 11:46 AM"])
+        var d = settings(.dhuhr, start: StartAlert())
+        d.general.timeFormat = .twelve
+        XCTAssertEqual(plan([event(.dhuhr, from: at(28, 11, 46), to: at(28, 15, 4))], d).map(\.title), ["Dhuhr · 11:46 AM"])
+    }
+
     func testPastAndBeyond48hSkipped() {
         let s = settings(.asr, start: StartAlert())
         let events = [

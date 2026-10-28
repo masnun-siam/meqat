@@ -61,6 +61,11 @@ final class SettingsTests: XCTestCase {
         XCTAssertEqual(store().settings[event: .dhuhr], .defaults(for: .dhuhr))
     }
 
+    func testMissingTimeFormatDecodesToTwentyFour() {
+        defaults.set(Data(#"{"version":1,"value":{"launchAtLogin":false}}"#.utf8), forKey: "settings.general")
+        XCTAssertEqual(store().settings.general.timeFormat, .twentyFour)
+    }
+
     func testPartialLeadAlertKeepsDefaultForMissingField() throws {
         let json = #"{"version":1,"value":{"asr":{"preWarning":{"enabled":true}}}}"#
         defaults.set(Data(json.utf8), forKey: "settings.events")
@@ -108,6 +113,7 @@ final class SettingsTests: XCTestCase {
         a.settings.general.launchAtLogin = false
         a.settings.general.method = 3
         a.settings.general.school = .hanafi
+        a.settings.general.timeFormat = .twelve
         a.setManualLocation(city: "Dhaka", country: "Bangladesh", state: nil)
         a.settings.events[.fajr]?.style = .fullScreen
         a.settings.events[.fajr]?.timeSource = .fixed
