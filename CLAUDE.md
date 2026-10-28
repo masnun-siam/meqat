@@ -29,7 +29,7 @@ Meqat is a macOS 14+ menu bar app that tracks Islamic prayer times, Jumah, Duha,
 4. **Dependencies.** No third-party packages. Adding one is a decision for a PRD.
 5. **Secrets.** Never commit or log signing identities, team IDs, notary credentials or user location.
 6. **Scope.** Change only what the task asks. No drive-by refactors, dependency upgrades or new patterns without a human agreeing.
-7. **Releases.** Never sign, notarize, tag or publish a release; that is the owner's job (`docs/release-checklist.md`).
+7. **Releases.** Agents may build, tag and publish a release when the owner asks (`docs/release-checklist.md`). The owner has no Apple Developer account, so releases are unsigned and not notarized; never handle signing identities or notary credentials.
 8. **Docs.** Do not commit plans, specs or generated docs unless a human asks.
 9. **Read first.** Before working in an area, open its reference below. Do not invent conventions that are not written down; follow the surrounding code.
 
