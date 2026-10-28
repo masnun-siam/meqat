@@ -1,0 +1,20 @@
+name: PR meta
+
+# Its own workflow so renaming a PR or editing its body re-runs only this check.
+on:
+  pull_request:
+    types: [opened, edited, synchronize, reopened]
+
+jobs:
+  issue-reference:
+    runs-on: ubuntu-latest
+    steps:
+      - env:
+          BODY: ${{ github.event.pull_request.body }}
+        run: |
+          if printf '%s' "$BODY" | grep -qE '(^|[^&[:alnum:]])#[0-9]+'; then
+            echo "PR body references an issue."
+          else
+            echo "::error::The PR body must reference its issue (for example 'Closes #123')."
+            exit 1
+          fi

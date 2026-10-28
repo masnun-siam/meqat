@@ -1,4 +1,20 @@
+# Install once per clone: pre-commit install --hook-type pre-commit --hook-type pre-push
+# Doc-only commits (*.md, docs/) skip the Swift hooks through their `files` patterns.
+default_install_hook_types: [pre-commit, pre-push]
+default_stages: [pre-commit]
 repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v5.0.0
+    hooks:
+      - id: no-commit-to-branch
+        args: [--branch, main]
+      - id: check-merge-conflict
+      - id: check-yaml
+      - id: check-json
+  - repo: https://github.com/gitleaks/gitleaks
+    rev: v8.24.2
+    hooks:
+      - id: gitleaks
   - repo: local
     hooks:
       - id: claude-md-nested
@@ -14,3 +30,27 @@ repos:
         pass_filenames: false
         always_run: true
         verbose: true
+      - id: no-lint-suppression
+        name: No lint or warning suppressions
+        language: pygrep
+        entry: 'swift-format-ignore|swiftlint:disable|#warning|@_silgen_name|-suppress-warnings|SWIFT_SUPPRESS_WARNINGS'
+        files: '\.(swift|pbxproj)$|^Makefile$|^\.swift-format$|^MeqatCore/Package\.swift$'
+      - id: swift-format-lint
+        name: swift format lint
+        entry: swift format lint --strict --parallel
+        language: system
+        types: [swift]
+      - id: make-test
+        name: make test
+        entry: make test
+        language: system
+        pass_filenames: false
+        files: '^(MeqatCore/|Makefile$|\.swift-format$)'
+        stages: [pre-push]
+      - id: make-build
+        name: make build
+        entry: make build
+        language: system
+        pass_filenames: false
+        files: '^(Meqat/|MeqatCore/Sources/|Meqat\.xcodeproj/|Config/|Makefile$)'
+        stages: [pre-push]

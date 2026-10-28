@@ -1,7 +1,7 @@
 import Foundation
 import Observation
-import os
 import UserNotifications
+import os
 
 @MainActor @Observable
 public final class AlertScheduler {
@@ -23,11 +23,13 @@ public final class AlertScheduler {
     @ObservationIgnored private var rebuildPending = false
     @ObservationIgnored private var suspended = false
 
-    public init(center: NotificationCentering,
-                timer: AlertTimer,
-                now: @escaping @Sendable () -> Date = Date.init,
-                timeZone: @escaping @Sendable () -> TimeZone = { .current },
-                plan: @escaping @MainActor () -> [PlannedAlert]) {
+    public init(
+        center: NotificationCentering,
+        timer: AlertTimer,
+        now: @escaping @Sendable () -> Date = { Date() },
+        timeZone: @escaping @Sendable () -> TimeZone = { .current },
+        plan: @escaping @MainActor () -> [PlannedAlert]
+    ) {
         self.center = center
         self.timer = timer
         self.now = now
@@ -83,8 +85,9 @@ public final class AlertScheduler {
         calendar.timeZone = timeZone()
         let parts = calendar.dateComponents(in: timeZone(), from: alert.fireDate)
         let trigger = UNCalendarNotificationTrigger(
-            dateMatching: DateComponents(timeZone: parts.timeZone, year: parts.year, month: parts.month, day: parts.day,
-                                         hour: parts.hour, minute: parts.minute, second: parts.second),
+            dateMatching: DateComponents(
+                timeZone: parts.timeZone, year: parts.year, month: parts.month, day: parts.day,
+                hour: parts.hour, minute: parts.minute, second: parts.second),
             repeats: false)
         return UNNotificationRequest(identifier: alert.id, content: content, trigger: trigger)
     }

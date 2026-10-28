@@ -13,53 +13,46 @@ No services, ports or third-party packages.
 ## Prerequisites
 
 - macOS 14 or later, Xcode 16 or later (CI uses the `macos-15` runner).
-- For commits: `brew install pre-commit && pre-commit install`.
+- For commits: `brew install pre-commit && pre-commit install` (installs the pre-commit and pre-push hooks).
 
 ## Quickstart
 
 ```sh
-# Core tests (the live Aladhan test is skipped)
-swift test --package-path MeqatCore
-
-# Build the app, unsigned, into build/DerivedData
-xcodebuild -project Meqat.xcodeproj -scheme Meqat -configuration Debug \
-  -destination 'platform=macOS' -derivedDataPath build/DerivedData \
-  CODE_SIGNING_ALLOWED=NO build
-
-# Run it: a text item (next event) appears in the menu bar, no Dock icon
-open build/DerivedData/Build/Products/Debug/Meqat.app
+make help     # list targets
+make test     # MeqatCore tests (the live Aladhan test is skipped)
+make build    # unsigned Debug app
+make run      # build and launch: a text item (next event) appears in the menu bar, no Dock icon
+make check    # lint + test + build, what CI runs
 ```
 
-Quit from the menu bar dropdown.
+Quit from the menu bar dropdown. Build output goes to `$TMPDIR/meqat/<worktree folder>/`, one folder per worktree, so parallel worktrees never share products and a repo on an ExFAT drive still signs. `make clean` removes it. `make format` fixes lint findings.
 
 ### Debug harnesses
 
 Debug builds can open one surface with mock data, without location or network:
 
 ```sh
-open build/DerivedData/Build/Products/Debug/Meqat.app --args -MeqatDebugHarness Overlay
+make run HARNESS=Overlay   # or Menu, Settings, LoginItem
 ```
 
-Names: `Overlay`, `Menu`, `Settings`, `LoginItem`. See `Meqat/Debug/`.
+See `Meqat/Debug/`.
 
 ### Live API tests
 
 ```sh
-MEQAT_LIVE_TESTS=1 swift test --package-path MeqatCore
-```
-
-### Repo on an ExFAT or other non-APFS drive
-
-The volume adds `._*` files to build products and code signing fails (`CodeSign ... ._Resources`). Put build output on the internal disk:
-
-```sh
-swift test --package-path MeqatCore --scratch-path "$TMPDIR/meqat-core"
-# and for xcodebuild: -derivedDataPath "$TMPDIR/meqat-dd"
+make test-live
 ```
 
 ## Checks
 
-CI (`.github/workflows/ci.yml`) runs on every pull request: the core tests and the unsigned Debug build above. Pre-commit (`.pre-commit-config.yaml`) guards `CLAUDE.md`.
+| Where | What |
+|---|---|
+| pre-commit | no commits to `main`, gitleaks secret scan, no lint/warning suppressions, `swift format lint --strict`, `CLAUDE.md` guards, YAML/JSON |
+| pre-push | `make test` and `make build` when Swift or project files changed |
+| CI (`.github/workflows/ci.yml`) | the hooks above on Ubuntu; `make lint test build` on macOS, skipped when only `*.md` or `docs/` changed; `summary` is the required check |
+| PR meta (`.github/workflows/pr-meta.yml`) | the PR body references an issue; re-runs on title/body edits |
+
+Warnings are errors in `make test` and `make build`. Formatting rules: `.swift-format`.
 
 ## Install
 
