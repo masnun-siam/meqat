@@ -12,7 +12,7 @@ No services, ports or third-party packages.
 
 ## Prerequisites
 
-- macOS 14 or later, Xcode 16 or later (CI uses the `macos-15` runner).
+- macOS 14 or later, Xcode 26 or later (CI uses the `macos-26` runner; older SDKs report Sendable warnings, which fail the build).
 - For commits: `brew install pre-commit && pre-commit install` (installs the pre-commit and pre-push hooks).
 
 ## Quickstart
