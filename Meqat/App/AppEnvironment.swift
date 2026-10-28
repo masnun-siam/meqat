@@ -84,7 +84,8 @@ final class AppEnvironment {
             overlay.show(
                 OverlayContent(
                     eventName: alert.eventID.displayName, start: alert.eventInterval.start,
-                    end: alert.eventInterval.end, holdSeconds: store.settings[event: alert.eventID].overlayHoldSeconds))
+                    end: alert.eventInterval.end, holdSeconds: store.settings[event: alert.eventID].overlayHoldSeconds,
+                    timeFormat: store.settings.general.timeFormat))
         }
         scheduler.onBannerFired = { [unowned self] alert in
             if !scheduler.notificationsAuthorized { showBannerNow(alert.eventID) }
@@ -246,7 +247,8 @@ final class AppEnvironment {
                 location: MenuLocationInfo(provider.state),
                 notificationsAuthorized: scheduler.notificationsAuthorized,
                 bannerNow: bannerNow,
-                showsCouldntRefresh: showsCouldntRefresh))
+                showsCouldntRefresh: showsCouldntRefresh,
+                timeFormat: settings.general.timeFormat))
     }
 
     private func refreshAll() {
@@ -265,14 +267,16 @@ final class AppEnvironment {
             todays.compactMap { e in e.calculatedInterval.map { (e.id, $0) } }, uniquingKeysWith: { first, _ in first })
         context.place = store.settings.location.placeName(timeZone: timeZone)
         context.coordinatesText = provider.coordinates.map { String(format: "%.2f, %.2f", $0.latitude, $0.longitude) }
-        context.lastSyncText = coordinator.status.lastSuccess.map { Self.lastSyncFormat(timeZone).string(from: $0) }
+        context.lastSyncText = coordinator.status.lastSuccess.map {
+            Self.lastSyncFormat(timeZone, store.settings.general.timeFormat).string(from: $0)
+        }
     }
 
-    private static func lastSyncFormat(_ timeZone: TimeZone) -> DateFormatter {
+    private static func lastSyncFormat(_ timeZone: TimeZone, _ format: TimeFormat) -> DateFormatter {
         let f = DateFormatter()
         f.locale = Locale(identifier: "en_US_POSIX")
         f.timeZone = timeZone
-        f.dateFormat = "d MMM HH:mm"
+        f.dateFormat = "d MMM " + format.dateFormat
         return f
     }
 

@@ -165,6 +165,22 @@ final class MenuPresenterTests: XCTestCase {
         XCTAssertNil(MenuPresenter.present(MenuInput(now: at(28, 12, 0), timeZone: tz, events: mockup())).emptyState)
     }
 
+    func testTwelveHourFormat() {
+        let s = present(at(28, 13, 52, 30)) {
+            $0.timeFormat = .twelve
+            $0.sync = MenuSyncInfo(lastSuccess: at(28, 15, 4))
+        }
+        XCTAssertEqual(s.rows[2].timeText, "6:05 AM–6:20 AM")
+        XCTAssertEqual(s.rows[4].timeText, "11:36 AM–11:46 AM")
+        XCTAssertTrue(s.rows[0].accessibilityLabel.hasSuffix("1:00 AM"), s.rows[0].accessibilityLabel)
+        XCTAssertEqual(s.footerStatus, "Synced 3:04 PM")
+        let other = present(at(28, 12, 0)) {
+            $0.timeFormat = .twelve
+            $0.sync = MenuSyncInfo(lastSuccess: at(27, 15, 4))
+        }
+        XCTAssertEqual(other.footerStatus, "Synced 27 Oct 3:04 PM")
+    }
+
     func testFooterVariants() {
         func footer(_ sync: MenuSyncInfo, couldnt: Bool = false) -> (String, Bool) {
             let s = present(at(28, 12, 0)) {

@@ -1,3 +1,4 @@
+import MeqatCore
 import SwiftUI
 
 /// State shared by every screen's panel.
@@ -27,16 +28,12 @@ struct OverlayView: View {
         endPoint: .bottomTrailing
     )
 
-    private static let timeFormat: DateFormatter = {
-        let f = DateFormatter()
-        f.dateFormat = "HH:mm"
-        return f
-    }()
-
     private var canDismiss: Bool { model.remaining <= 0 }
 
     private var timeRange: String {
-        let f = Self.timeFormat
+        let f = DateFormatter()
+        f.locale = Locale(identifier: "en_US_POSIX")
+        f.dateFormat = model.content.timeFormat.dateFormat
         return "\(f.string(from: model.content.start))–\(f.string(from: model.content.end))"
     }
 
