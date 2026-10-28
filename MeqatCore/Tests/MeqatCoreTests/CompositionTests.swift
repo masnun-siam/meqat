@@ -1,4 +1,5 @@
 import XCTest
+
 @testable import MeqatCore
 
 final class CompositionTests: XCTestCase {
@@ -19,7 +20,12 @@ final class CompositionTests: XCTestCase {
     func testEventsCoverCachedDaysAroundToday() throws {
         // Fixture holds Oct 28–30; asking on Oct 29 reaches yesterday (28) through 31, and 31 is missing.
         let list = Composition.events(cache: try cache(), settings: AppSettings(), now: at(29, 12, 0), timeZone: dhaka)
-        XCTAssertEqual(Set(list.map(\.date)), [LocalDate(year: 2026, month: 10, day: 28), LocalDate(year: 2026, month: 10, day: 29), LocalDate(year: 2026, month: 10, day: 30)])
+        XCTAssertEqual(
+            Set(list.map(\.date)),
+            [
+                LocalDate(year: 2026, month: 10, day: 28), LocalDate(year: 2026, month: 10, day: 29),
+                LocalDate(year: 2026, month: 10, day: 30),
+            ])
         XCTAssertEqual(list.count, 30)
     }
 
@@ -38,9 +44,12 @@ final class CompositionTests: XCTestCase {
     func testFetchParameters() {
         let s = AppSettings()
         let coords = Coordinates(latitude: 23.81, longitude: 90.41)
-        XCTAssertEqual(Composition.fetchParameters(location: .located(coords), settings: s, timeZone: dhaka)?.location, .coordinates(coords))
-        XCTAssertEqual(Composition.fetchParameters(location: .manual(city: "Dhaka", country: "Bangladesh", state: nil), settings: s, timeZone: dhaka)?.location,
-                       .city(city: "Dhaka", country: "Bangladesh", state: nil))
+        XCTAssertEqual(
+            Composition.fetchParameters(location: .located(coords), settings: s, timeZone: dhaka)?.location, .coordinates(coords))
+        XCTAssertEqual(
+            Composition.fetchParameters(location: .manual(city: "Dhaka", country: "Bangladesh", state: nil), settings: s, timeZone: dhaka)?
+                .location,
+            .city(city: "Dhaka", country: "Bangladesh", state: nil))
         for state in [LocationState.awaitingPermission, .awaitingFix, .unavailable] {
             XCTAssertNil(Composition.fetchParameters(location: state, settings: s, timeZone: dhaka))
         }

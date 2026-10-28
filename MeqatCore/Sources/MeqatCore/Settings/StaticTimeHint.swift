@@ -5,9 +5,10 @@ public enum StaticTimeHint {
     public static func isOutside(_ time: ClockTime, window: DateInterval, timeZone: TimeZone) -> Bool {
         var calendar = Calendar(identifier: .gregorian)
         calendar.timeZone = timeZone
-        guard let resolved = calendar.date(
-            bySettingHour: time.hour, minute: time.minute, second: 0,
-            of: calendar.startOfDay(for: window.start), matchingPolicy: .nextTime)
+        guard
+            let resolved = calendar.date(
+                bySettingHour: time.hour, minute: time.minute, second: 0,
+                of: calendar.startOfDay(for: window.start), matchingPolicy: .nextTime)
         else { return false }
         return !window.contains(resolved)
     }

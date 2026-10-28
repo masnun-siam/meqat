@@ -28,7 +28,9 @@ public enum LoginItemSync {
             if wanted { try service.register() } else { try service.unregister() }
             return nil
         } catch {
-            logger.error("login item \(wanted ? "register" : "unregister", privacy: .public) failed: \(error.localizedDescription, privacy: .public)")
+            logger.error(
+                "login item \(wanted ? "register" : "unregister", privacy: .public) failed: \(error.localizedDescription, privacy: .public)"
+            )
             return error
         }
     }

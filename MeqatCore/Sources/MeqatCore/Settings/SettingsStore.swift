@@ -44,7 +44,12 @@ public final class SettingsStore {
     }
 
     public func setLocationMode(_ mode: LocationMode) {
-        settings.location = mode == .automatic ? LocationSettings() : LocationSettings(mode: .manual, manualCity: settings.location.manualCity, manualCountry: settings.location.manualCountry, manualState: settings.location.manualState)
+        settings.location =
+            mode == .automatic
+            ? LocationSettings()
+            : LocationSettings(
+                mode: .manual, manualCity: settings.location.manualCity, manualCountry: settings.location.manualCountry,
+                manualState: settings.location.manualState)
     }
 
     public func setManualLocation(city: String, country: String, state: String?) {
@@ -57,8 +62,9 @@ public final class SettingsStore {
 
     private static func load<Value: Codable>(_ type: Value.Type, key: String, from defaults: UserDefaults) -> Value? {
         guard let data = defaults.data(forKey: key),
-              let envelope = try? JSONDecoder().decode(Envelope<Value>.self, from: data),
-              envelope.version == version else { return nil }
+            let envelope = try? JSONDecoder().decode(Envelope<Value>.self, from: data),
+            envelope.version == version
+        else { return nil }
         return envelope.value
     }
 }

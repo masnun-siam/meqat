@@ -1,5 +1,6 @@
 import CoreLocation
 import XCTest
+
 @testable import MeqatCore
 
 private final class FakeLocationManager: LocationManaging {
@@ -23,7 +24,11 @@ private final class FakeSleeper: @unchecked Sendable {
         await withCheckedContinuation { c in lock.withLock { waiters.append(c) } }
     }
     func fire() {
-        let w = lock.withLock { let w = waiters; waiters = []; return w }
+        let w = lock.withLock {
+            let w = waiters
+            waiters = []
+            return w
+        }
         w.forEach { $0.resume() }
     }
 }
@@ -122,10 +127,10 @@ final class LocationProviderTests: XCTestCase {
         provider.handleLocations(fix(23.81, 90.41))
         XCTAssertEqual(changes, 1)
         clock.date += 3 * 3600
-        provider.handleLocations(fix(23.819, 90.41))   // ~1 km
+        provider.handleLocations(fix(23.819, 90.41))  // ~1 km
         XCTAssertEqual(changes, 1)
         clock.date += 3 * 3600
-        provider.handleLocations(fix(23.87, 90.41))    // ~6.6 km from the first
+        provider.handleLocations(fix(23.87, 90.41))  // ~6.6 km from the first
         XCTAssertEqual(changes, 2)
     }
 

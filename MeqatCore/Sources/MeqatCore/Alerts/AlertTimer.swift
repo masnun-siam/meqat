@@ -14,8 +14,10 @@ public final class DispatchAlertTimer: AlertTimer {
     public func arm(at date: Date, _ handler: @escaping @MainActor () -> Void) {
         cancel()
         let timer = DispatchSource.makeTimerSource(flags: .strict, queue: .main)
-        let wall = DispatchWallTime(timespec: timespec(tv_sec: Int(date.timeIntervalSince1970),
-                                                       tv_nsec: Int((date.timeIntervalSince1970.truncatingRemainder(dividingBy: 1)) * 1e9)))
+        let wall = DispatchWallTime(
+            timespec: timespec(
+                tv_sec: Int(date.timeIntervalSince1970),
+                tv_nsec: Int((date.timeIntervalSince1970.truncatingRemainder(dividingBy: 1)) * 1e9)))
         timer.schedule(wallDeadline: wall, leeway: .milliseconds(50))
         timer.setEventHandler { MainActor.assumeIsolated { handler() } }
         source = timer

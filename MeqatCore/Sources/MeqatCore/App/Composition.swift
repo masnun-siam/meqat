@@ -6,12 +6,15 @@ public enum Composition {
     public static func events(cache: TimingsCache?, settings: AppSettings, now: Date, timeZone: TimeZone) -> [ScheduledEvent] {
         guard let cache else { return [] }
         let today = LocalDate(now, timeZone: timeZone)
-        return (-1...2).flatMap { EventEngine.events(for: today.adding(days: $0), cache: cache, settings: settings, timeZone: timeZone) ?? [] }
+        return (-1...2).flatMap {
+            EventEngine.events(for: today.adding(days: $0), cache: cache, settings: settings, timeZone: timeZone) ?? []
+        }
     }
 
     public static func plan(cache: TimingsCache?, settings: AppSettings, now: Date, timeZone: TimeZone) -> [PlannedAlert] {
-        AlertPlanner.plan(events: events(cache: cache, settings: settings, now: now, timeZone: timeZone),
-                          settings: settings, now: now, timeZone: timeZone)
+        AlertPlanner.plan(
+            events: events(cache: cache, settings: settings, now: now, timeZone: timeZone),
+            settings: settings, now: now, timeZone: timeZone)
     }
 
     /// nil while there is no location to fetch for.
@@ -22,8 +25,9 @@ public enum Composition {
         case .manual(let city, let country, let state): fetchLocation = .city(city: city, country: country, state: state)
         case .awaitingPermission, .awaitingFix, .unavailable: return nil
         }
-        return FetchParameters(location: fetchLocation, method: settings.general.method,
-                               school: settings.general.school.rawValue, timeZoneId: timeZone.identifier)
+        return FetchParameters(
+            location: fetchLocation, method: settings.general.method,
+            school: settings.general.school.rawValue, timeZoneId: timeZone.identifier)
     }
 }
 

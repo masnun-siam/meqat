@@ -1,4 +1,5 @@
 import XCTest
+
 @testable import MeqatCore
 
 final class EventEngineTests: XCTestCase {
@@ -11,7 +12,9 @@ final class EventEngineTests: XCTestCase {
         return try decoder.decode(TimingsCache.self, from: Fixture.data("engine/\(name).json"))
     }
 
-    private func events(_ cache: TimingsCache, _ date: LocalDate, tz: TimeZone? = nil, _ settings: AppSettings = AppSettings()) throws -> [EventID: ScheduledEvent] {
+    private func events(_ cache: TimingsCache, _ date: LocalDate, tz: TimeZone? = nil, _ settings: AppSettings = AppSettings()) throws
+        -> [EventID: ScheduledEvent]
+    {
         let list = try XCTUnwrap(EventEngine.events(for: date, cache: cache, settings: settings, timeZone: tz ?? dhaka))
         return Dictionary(uniqueKeysWithValues: list.map { ($0.id, $0) })
     }
@@ -37,7 +40,8 @@ final class EventEngineTests: XCTestCase {
         let c = try cache("dhaka-2026-10-28-30")
         let list = try XCTUnwrap(EventEngine.events(for: oct30, cache: c, settings: AppSettings(), timeZone: dhaka))
         XCTAssertEqual(list.map(\.id), [.tahajjud, .fajr, .shuruq, .duha, .istiwa, .jumah, .asr, .ghurub, .maghrib, .isha])
-        let day = c.day(oct30)!, e = Dictionary(uniqueKeysWithValues: list.map { ($0.id, $0) })
+        let day = c.day(oct30)!
+        let e = Dictionary(uniqueKeysWithValues: list.map { ($0.id, $0) })
         XCTAssertEqual(e[.jumah]?.interval, DateInterval(start: day.dhuhr, end: day.asr))
         XCTAssertEqual(e[.istiwa]?.interval, DateInterval(start: day.dhuhr - 600, end: day.dhuhr))
         XCTAssertEqual(e[.duha]?.interval, DateInterval(start: day.sunrise + 900, end: day.dhuhr - 600))
@@ -45,14 +49,18 @@ final class EventEngineTests: XCTestCase {
     }
 
     func testThursdayHasDhuhrNotJumah() throws {
-        let list = try XCTUnwrap(EventEngine.events(for: oct29, cache: cache("dhaka-2026-10-28-30"), settings: AppSettings(), timeZone: dhaka))
+        let list = try XCTUnwrap(
+            EventEngine.events(for: oct29, cache: cache("dhaka-2026-10-28-30"), settings: AppSettings(), timeZone: dhaka))
         XCTAssertEqual(list.count, 10)
         XCTAssertTrue(list.contains { $0.id == .dhuhr })
         XCTAssertFalse(list.contains { $0.id == .jumah })
     }
 
     func testMissingDayReturnsNil() throws {
-        XCTAssertNil(EventEngine.events(for: LocalDate(year: 2026, month: 11, day: 5), cache: try cache("dhaka-2026-10-28-30"), settings: AppSettings(), timeZone: dhaka))
+        XCTAssertNil(
+            EventEngine.events(
+                for: LocalDate(year: 2026, month: 11, day: 5), cache: try cache("dhaka-2026-10-28-30"), settings: AppSettings(),
+                timeZone: dhaka))
     }
 
     func testIshaEndsAfterMidnightOnNextDate() throws {
@@ -125,7 +133,8 @@ final class EventEngineTests: XCTestCase {
         XCTAssertTrue(exact.startsPreviousNight)
         XCTAssertEqual(exact.interval?.start, at(oct28, ishaTime.hour, ishaTime.minute))
 
-        let beforeIsha = try events(c, oct29, settings(.tahajjud, at: ClockTime(hour: ishaTime.hour, minute: ishaTime.minute - 1)))[.tahajjud]!
+        let beforeIsha = try events(c, oct29, settings(.tahajjud, at: ClockTime(hour: ishaTime.hour, minute: ishaTime.minute - 1)))[
+            .tahajjud]!
         XCTAssertFalse(beforeIsha.startsPreviousNight)
 
         let noon = try events(c, oct29, settings(.tahajjud, at: ClockTime(hour: 12, minute: 0)))[.tahajjud]!
@@ -162,7 +171,9 @@ final class EventEngineTests: XCTestCase {
         let c = try cache("new-york-2026-03-08")
         let e = try events(c, mar8, tz: newYork)
         XCTAssertEqual(e[.fajr]?.interval?.start, at(mar8, 6, 4, tz: newYork))
-        XCTAssertEqual(e[.fajr]?.interval?.start.timeIntervalSince1970, ISO8601DateFormatter().date(from: "2026-03-08T06:04:00-04:00")?.timeIntervalSince1970)
+        XCTAssertEqual(
+            e[.fajr]?.interval?.start.timeIntervalSince1970,
+            ISO8601DateFormatter().date(from: "2026-03-08T06:04:00-04:00")?.timeIntervalSince1970)
 
         let skipped = try events(c, mar8, tz: newYork, settings(.fajr, at: ClockTime(hour: 2, minute: 30)))
         XCTAssertEqual(skipped[.fajr]?.interval?.start, at(mar8, 3, 0, tz: newYork))
@@ -171,7 +182,8 @@ final class EventEngineTests: XCTestCase {
     func testHighLatitudeNeverProducesNonPositiveInterval() throws {
         let c = try cache("high-latitude")
         for date in c.days.keys.sorted() {
-            let list = try XCTUnwrap(EventEngine.events(for: date, cache: c, settings: AppSettings(), timeZone: TimeZone(identifier: "Europe/Oslo")!))
+            let list = try XCTUnwrap(
+                EventEngine.events(for: date, cache: c, settings: AppSettings(), timeZone: TimeZone(identifier: "Europe/Oslo")!))
             XCTAssertEqual(list.count, 10)
             for event in list { XCTAssertTrue((event.interval?.duration ?? 1) > 0, "\(event.id) on \(date)") }
         }

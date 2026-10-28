@@ -108,15 +108,16 @@ public struct EventSettings: Codable, Sendable, Equatable {
     }
 }
 
-private extension KeyedDecodingContainer {
-    func decodeLead(forKey key: Key, default d: LeadAlert) throws -> LeadAlert {
+extension KeyedDecodingContainer {
+    fileprivate func decodeLead(forKey key: Key, default d: LeadAlert) throws -> LeadAlert {
         guard contains(key) else { return d }
         return try LeadAlert(from: superDecoder(forKey: key), defaults: d)
     }
 }
 
 public enum School: Int, Codable, Sendable, Equatable {
-    case shafii = 0, hanafi = 1
+    case shafii = 0
+    case hanafi = 1
 }
 
 public struct GeneralSettings: Codable, Sendable, Equatable {
@@ -193,7 +194,10 @@ public struct AppSettings: Sendable, Equatable {
 
     public static let defaultEvents = Dictionary(uniqueKeysWithValues: EventID.allCases.map { ($0, EventSettings.defaults(for: $0)) })
 
-    public init(general: GeneralSettings = .init(), location: LocationSettings = .init(), events: [EventID: EventSettings] = AppSettings.defaultEvents) {
+    public init(
+        general: GeneralSettings = .init(), location: LocationSettings = .init(),
+        events: [EventID: EventSettings] = AppSettings.defaultEvents
+    ) {
         self.general = general
         self.location = location
         self.events = events
@@ -215,7 +219,8 @@ struct EventsGroup: Codable, Equatable {
         events = [:]
         for id in EventID.allCases {
             let key = DynamicKey(id.rawValue)
-            events[id] = c.contains(key)
+            events[id] =
+                c.contains(key)
                 ? try EventSettings(from: c.superDecoder(forKey: key), id: id)
                 : .defaults(for: id)
         }

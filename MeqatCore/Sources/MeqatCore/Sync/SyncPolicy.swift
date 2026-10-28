@@ -3,7 +3,9 @@ import Foundation
 
 extension FetchParameters {
     /// nil when the location settings are incomplete (no coordinates in automatic mode, no city or country in manual mode).
-    public static func current(general: GeneralSettings, location: LocationSettings, coordinates: Coordinates?, timeZone: TimeZone) -> FetchParameters? {
+    public static func current(general: GeneralSettings, location: LocationSettings, coordinates: Coordinates?, timeZone: TimeZone)
+        -> FetchParameters?
+    {
         let fetchLocation: FetchLocation
         switch location.mode {
         case .automatic:
@@ -11,11 +13,13 @@ extension FetchParameters {
             fetchLocation = .coordinates(coordinates)
         case .manual:
             guard let city = location.manualCity, !city.isEmpty,
-                  let country = location.manualCountry, !country.isEmpty else { return nil }
+                let country = location.manualCountry, !country.isEmpty
+            else { return nil }
             let state = location.manualState.flatMap { $0.isEmpty ? nil : $0 }
             fetchLocation = .city(city: city, country: country, state: state)
         }
-        return FetchParameters(location: fetchLocation, method: general.method, school: general.school.rawValue, timeZoneId: timeZone.identifier)
+        return FetchParameters(
+            location: fetchLocation, method: general.method, school: general.school.rawValue, timeZoneId: timeZone.identifier)
     }
 }
 

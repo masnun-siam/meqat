@@ -1,4 +1,5 @@
 import XCTest
+
 @testable import MeqatCore
 
 final class AlertPlannerTests: XCTestCase {
@@ -16,9 +17,11 @@ final class AlertPlannerTests: XCTestCase {
         return ScheduledEvent(id: id, date: date ?? oct28, interval: i, calculatedInterval: i)
     }
 
-    private func settings(_ id: EventID, style: AlertStyle = .banner, start: StartAlert = StartAlert(enabled: false),
-                          end: LeadAlert = LeadAlert(enabled: false, leadMinutes: 15),
-                          pre: LeadAlert = LeadAlert(enabled: false, leadMinutes: 20)) -> AppSettings {
+    private func settings(
+        _ id: EventID, style: AlertStyle = .banner, start: StartAlert = StartAlert(enabled: false),
+        end: LeadAlert = LeadAlert(enabled: false, leadMinutes: 15),
+        pre: LeadAlert = LeadAlert(enabled: false, leadMinutes: 20)
+    ) -> AppSettings {
         var s = AppSettings()
         s.events[id] = EventSettings(style: style, startAlert: start, endAlert: end, preWarning: pre)
         return s
@@ -49,7 +52,8 @@ final class AlertPlannerTests: XCTestCase {
     }
 
     func testDisabledAndInvalidHaveNoAlerts() {
-        let on = StartAlert(), lead = LeadAlert(enabled: true, leadMinutes: 15)
+        let on = StartAlert()
+        let lead = LeadAlert(enabled: true, leadMinutes: 15)
         let disabled = settings(.asr, style: .disabled, start: on, end: lead, pre: lead)
         XCTAssertTrue(plan([event(.asr, from: at(28, 15, 4), to: at(28, 17, 0))], disabled).isEmpty)
         let enabled = settings(.asr, start: on, end: lead, pre: lead)
@@ -65,12 +69,17 @@ final class AlertPlannerTests: XCTestCase {
     }
 
     func testTitlesForPrayerAndProhibitedWindow() {
-        let s1 = settings(.asr, start: StartAlert(), end: LeadAlert(enabled: true, leadMinutes: 15), pre: LeadAlert(enabled: true, leadMinutes: 20))
-        XCTAssertEqual(plan([event(.asr, from: at(28, 15, 4), to: at(28, 17, 0))], s1).map(\.title),
-                       ["Asr in 20 min", "Asr · 15:04", "Asr ends in 15 min"])
-        let s2 = settings(.istiwa, start: StartAlert(), end: LeadAlert(enabled: true, leadMinutes: 15), pre: LeadAlert(enabled: true, leadMinutes: 20))
-        XCTAssertEqual(plan([event(.istiwa, from: at(28, 11, 36), to: at(28, 11, 46))], s2).map(\.title),
-                       ["⛔ Istiwa in 20 min", "Istiwa ends in 15 min", "⛔ Istiwa · avoid praying until 11:46"])  // end alert (11:31) precedes start (11:36)
+        let s1 = settings(
+            .asr, start: StartAlert(), end: LeadAlert(enabled: true, leadMinutes: 15), pre: LeadAlert(enabled: true, leadMinutes: 20))
+        XCTAssertEqual(
+            plan([event(.asr, from: at(28, 15, 4), to: at(28, 17, 0))], s1).map(\.title),
+            ["Asr in 20 min", "Asr · 15:04", "Asr ends in 15 min"])
+        let s2 = settings(
+            .istiwa, start: StartAlert(), end: LeadAlert(enabled: true, leadMinutes: 15), pre: LeadAlert(enabled: true, leadMinutes: 20))
+        // end alert (11:31) precedes start (11:36)
+        XCTAssertEqual(
+            plan([event(.istiwa, from: at(28, 11, 36), to: at(28, 11, 46))], s2).map(\.title),
+            ["⛔ Istiwa in 20 min", "Istiwa ends in 15 min", "⛔ Istiwa · avoid praying until 11:46"])
     }
 
     func testPastAndBeyond48hSkipped() {
@@ -81,8 +90,8 @@ final class AlertPlannerTests: XCTestCase {
         ]
         XCTAssertTrue(plan(events, s, now: at(28, 15, 4)).isEmpty)  // at now: skipped
         XCTAssertEqual(plan(events, s, now: at(28, 15, 3)).count, 1)
-        XCTAssertEqual(plan(events, s, now: at(29, 15, 4)).map(\.id), ["2026-10-31.asr.start"]) // exactly 48h: kept
-        XCTAssertTrue(plan(events, s, now: at(29, 15, 3)).isEmpty) // 48h + 1 min: dropped
+        XCTAssertEqual(plan(events, s, now: at(29, 15, 4)).map(\.id), ["2026-10-31.asr.start"])  // exactly 48h: kept
+        XCTAssertTrue(plan(events, s, now: at(29, 15, 3)).isEmpty)  // 48h + 1 min: dropped
     }
 
     func testBannerCapKeepsSoonest60AndFullScreenUncapped() {
@@ -106,10 +115,15 @@ final class AlertPlannerTests: XCTestCase {
     }
 
     func testBoundsOffsetsAndLeads() {
-        let from = at(28, 12, 0), to = at(28, 14, 0)
-        var s = settings(.asr, start: StartAlert(offsetMinutes: -60), end: LeadAlert(enabled: true, leadMinutes: 120), pre: LeadAlert(enabled: true, leadMinutes: 1))
+        let from = at(28, 12, 0)
+        let to = at(28, 14, 0)
+        var s = settings(
+            .asr, start: StartAlert(offsetMinutes: -60), end: LeadAlert(enabled: true, leadMinutes: 120),
+            pre: LeadAlert(enabled: true, leadMinutes: 1))
         XCTAssertEqual(plan([event(.asr, from: from, to: to)], s).map(\.fireDate), [at(28, 11, 0), at(28, 11, 59), at(28, 12, 0)])
-        s = settings(.asr, start: StartAlert(offsetMinutes: 60), end: LeadAlert(enabled: true, leadMinutes: 1), pre: LeadAlert(enabled: true, leadMinutes: 120))
+        s = settings(
+            .asr, start: StartAlert(offsetMinutes: 60), end: LeadAlert(enabled: true, leadMinutes: 1),
+            pre: LeadAlert(enabled: true, leadMinutes: 120))
         XCTAssertEqual(plan([event(.asr, from: from, to: to)], s).map(\.fireDate), [at(28, 10, 0), at(28, 13, 0), at(28, 13, 59)])
     }
 

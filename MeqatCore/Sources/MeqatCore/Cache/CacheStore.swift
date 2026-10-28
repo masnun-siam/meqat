@@ -19,7 +19,8 @@ public final class CacheStore: Sendable {
         let decoder = JSONDecoder()
         decoder.dateDecodingStrategy = .iso8601
         if let cache = try? decoder.decode(TimingsCache.self, from: data),
-           cache.formatVersion == TimingsCache.currentFormatVersion {
+            cache.formatVersion == TimingsCache.currentFormatVersion
+        {
             return cache
         }
         delete()

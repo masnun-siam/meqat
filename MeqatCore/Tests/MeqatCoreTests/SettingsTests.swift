@@ -1,4 +1,5 @@
 import XCTest
+
 @testable import MeqatCore
 
 @MainActor
@@ -22,8 +23,9 @@ final class SettingsTests: XCTestCase {
     }
 
     func testEventOrder() {
-        XCTAssertEqual(EventID.allCases.map(\.rawValue),
-                       ["tahajjud", "fajr", "shuruq", "duha", "istiwa", "dhuhr", "jumah", "asr", "ghurub", "maghrib", "isha"])
+        XCTAssertEqual(
+            EventID.allCases.map(\.rawValue),
+            ["tahajjud", "fajr", "shuruq", "duha", "istiwa", "dhuhr", "jumah", "asr", "ghurub", "maghrib", "isha"])
         XCTAssertEqual(EventID.shuruq.kind, .prohibited)
         XCTAssertEqual(EventID.duha.kind, .voluntary)
         XCTAssertEqual(EventID.fajr.kind, .obligatory)
@@ -43,7 +45,9 @@ final class SettingsTests: XCTestCase {
             XCTAssertEqual(e.overlayHoldSeconds, 60)
         }
         XCTAssertEqual(s.events.count, 11)
-        XCTAssertEqual(s.general, GeneralSettings(launchAtLogin: true, method: nil, school: .shafii, shuruqMinutes: 15, istiwaMinutes: 10, ghurubMinutes: 15))
+        XCTAssertEqual(
+            s.general,
+            GeneralSettings(launchAtLogin: true, method: nil, school: .shafii, shuruqMinutes: 15, istiwaMinutes: 10, ghurubMinutes: 15))
         XCTAssertEqual(s.location, LocationSettings(mode: .automatic))
     }
 
@@ -69,14 +73,22 @@ final class SettingsTests: XCTestCase {
     }
 
     func testClampingThroughInitAndSetter() {
-        var a = StartAlert(offsetMinutes: 999); XCTAssertEqual(a.offsetMinutes, 60)
-        a.offsetMinutes = -999; XCTAssertEqual(a.offsetMinutes, -60)
-        var l = LeadAlert(enabled: true, leadMinutes: 0); XCTAssertEqual(l.leadMinutes, 1)
-        l.leadMinutes = 500; XCTAssertEqual(l.leadMinutes, 120)
-        var e = EventSettings(style: .banner, overlayHoldSeconds: -1); XCTAssertEqual(e.overlayHoldSeconds, 0)
-        e.overlayHoldSeconds = 301; XCTAssertEqual(e.overlayHoldSeconds, 300)
-        var g = GeneralSettings(shuruqMinutes: 3); XCTAssertEqual(g.shuruqMinutes, 5)
-        g.istiwaMinutes = 45; XCTAssertEqual(g.istiwaMinutes, 30)
+        var a = StartAlert(offsetMinutes: 999)
+        XCTAssertEqual(a.offsetMinutes, 60)
+        a.offsetMinutes = -999
+        XCTAssertEqual(a.offsetMinutes, -60)
+        var l = LeadAlert(enabled: true, leadMinutes: 0)
+        XCTAssertEqual(l.leadMinutes, 1)
+        l.leadMinutes = 500
+        XCTAssertEqual(l.leadMinutes, 120)
+        var e = EventSettings(style: .banner, overlayHoldSeconds: -1)
+        XCTAssertEqual(e.overlayHoldSeconds, 0)
+        e.overlayHoldSeconds = 301
+        XCTAssertEqual(e.overlayHoldSeconds, 300)
+        var g = GeneralSettings(shuruqMinutes: 3)
+        XCTAssertEqual(g.shuruqMinutes, 5)
+        g.istiwaMinutes = 45
+        XCTAssertEqual(g.istiwaMinutes, 30)
     }
 
     func testClampingThroughDecoding() throws {
@@ -144,7 +156,8 @@ final class SettingsTests: XCTestCase {
     }
 
     func testPlaceName() {
-        XCTAssertEqual(LocationSettings(mode: .manual, manualCity: "Dhaka").placeName(timeZone: TimeZone(identifier: "Europe/Paris")!), "Dhaka")
+        XCTAssertEqual(
+            LocationSettings(mode: .manual, manualCity: "Dhaka").placeName(timeZone: TimeZone(identifier: "Europe/Paris")!), "Dhaka")
         XCTAssertEqual(LocationSettings().placeName(timeZone: TimeZone(identifier: "Asia/Dhaka")!), "Dhaka")
         XCTAssertEqual(LocationSettings().placeName(timeZone: TimeZone(identifier: "America/New_York")!), "New York")
     }

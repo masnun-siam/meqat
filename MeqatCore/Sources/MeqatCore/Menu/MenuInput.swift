@@ -37,9 +37,11 @@ public struct MenuInput: Sendable, Equatable {
     public var bannerNow: EventID?
     public var showsCouldntRefresh: Bool
 
-    public init(now: Date, timeZone: TimeZone, events: [ScheduledEvent], styles: [EventID: AlertStyle] = [:], place: String? = nil,
-                hasScheduleForToday: Bool = true, sync: MenuSyncInfo = MenuSyncInfo(), location: MenuLocationInfo = .available,
-                notificationsAuthorized: Bool = true, bannerNow: EventID? = nil, showsCouldntRefresh: Bool = false) {
+    public init(
+        now: Date, timeZone: TimeZone, events: [ScheduledEvent], styles: [EventID: AlertStyle] = [:], place: String? = nil,
+        hasScheduleForToday: Bool = true, sync: MenuSyncInfo = MenuSyncInfo(), location: MenuLocationInfo = .available,
+        notificationsAuthorized: Bool = true, bannerNow: EventID? = nil, showsCouldntRefresh: Bool = false
+    ) {
         self.now = now
         self.timeZone = timeZone
         self.events = events

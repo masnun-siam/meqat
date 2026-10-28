@@ -59,7 +59,8 @@ public final class LocationProvider: NSObject, CLLocationManagerDelegate {
         case .manual:
             stopAutomatic()
             if let city = location.manualCity, !city.isEmpty,
-               let country = location.manualCountry, !country.isEmpty {
+                let country = location.manualCountry, !country.isEmpty
+            {
                 state = .manual(city: city, country: country, state: location.manualState)
             } else {
                 state = .unavailable
@@ -99,8 +100,9 @@ public final class LocationProvider: NSObject, CLLocationManagerDelegate {
         if let last = lastAccepted, date.timeIntervalSince(last) < Self.minUpdateInterval { return }
         lastAccepted = date
         fixTimer?.cancel()
-        let rounded = Coordinates(latitude: Self.round2(fix.coordinate.latitude),
-                                  longitude: Self.round2(fix.coordinate.longitude))
+        let rounded = Coordinates(
+            latitude: Self.round2(fix.coordinate.latitude),
+            longitude: Self.round2(fix.coordinate.longitude))
         coordinates = rounded
         state = .located(rounded)
         if let last = lastReported {

@@ -7,7 +7,9 @@ public enum EventEngine {
         return events(for: date, day: day, previousDay: cache.day(date.adding(days: -1)), settings: settings, timeZone: timeZone)
     }
 
-    public static func events(for date: LocalDate, day: DayTimings, previousDay: DayTimings?, settings: AppSettings, timeZone: TimeZone) -> [ScheduledEvent] {
+    public static func events(for date: LocalDate, day: DayTimings, previousDay: DayTimings?, settings: AppSettings, timeZone: TimeZone)
+        -> [ScheduledEvent]
+    {
         let calendar = gregorian(timeZone)
         let general = settings.general
         func minutes(_ n: Int) -> TimeInterval { TimeInterval(n * 60) }
@@ -37,14 +39,19 @@ public enum EventEngine {
         let isFriday = date.weekday == 6
         let midday: EventID = isFriday ? .jumah : .dhuhr
 
-        func event(_ id: EventID, _ effective: (start: Date, end: Date)?, calculated: (start: Date, end: Date)?, startsPreviousNight: Bool = false) -> ScheduledEvent {
-            ScheduledEvent(id: id, date: date, interval: effective.flatMap(window), calculatedInterval: calculated.flatMap(window), startsPreviousNight: startsPreviousNight)
+        func event(
+            _ id: EventID, _ effective: (start: Date, end: Date)?, calculated: (start: Date, end: Date)?, startsPreviousNight: Bool = false
+        ) -> ScheduledEvent {
+            ScheduledEvent(
+                id: id, date: date, interval: effective.flatMap(window), calculatedInterval: calculated.flatMap(window),
+                startsPreviousNight: startsPreviousNight)
         }
         func simple(_ id: EventID, start: Date, end: Date) -> ScheduledEvent {
             event(id, span(id, calculatedStart: start, end: end), calculated: (start, end))
         }
 
-        let tahajjud = tahajjudEvent(for: date, day: day, previousDay: previousDay, settings: settings[event: .tahajjud], calendar: calendar)
+        let tahajjud = tahajjudEvent(
+            for: date, day: day, previousDay: previousDay, settings: settings[event: .tahajjud], calendar: calendar)
         return [
             tahajjud,
             simple(.fajr, start: day.fajr, end: day.sunrise),
@@ -59,7 +66,9 @@ public enum EventEngine {
         ]
     }
 
-    private static func tahajjudEvent(for date: LocalDate, day: DayTimings, previousDay: DayTimings?, settings: EventSettings, calendar: Calendar) -> ScheduledEvent {
+    private static func tahajjudEvent(
+        for date: LocalDate, day: DayTimings, previousDay: DayTimings?, settings: EventSettings, calendar: Calendar
+    ) -> ScheduledEvent {
         guard let previousDay else { return ScheduledEvent(id: .tahajjud, date: date, interval: nil, calculatedInterval: nil) }
         let calculated = interval(start: previousDay.lastthird, end: day.fajr)
         guard settings.timeSource == .fixed, let time = settings.staticTime else {
@@ -68,7 +77,9 @@ public enum EventEngine {
         let ishaParts = calendar.dateComponents([.hour, .minute], from: previousDay.isha)
         let previousNight = (time.hour, time.minute) >= (ishaParts.hour!, ishaParts.minute!)
         let start = resolve(time, on: previousNight ? date.adding(days: -1) : date, calendar: calendar)
-        return ScheduledEvent(id: .tahajjud, date: date, interval: interval(start: start, end: day.fajr), calculatedInterval: calculated, startsPreviousNight: previousNight)
+        return ScheduledEvent(
+            id: .tahajjud, date: date, interval: interval(start: start, end: day.fajr), calculatedInterval: calculated,
+            startsPreviousNight: previousNight)
     }
 
     /// `DateInterval` traps when end < start, and an empty window is "—" too.
@@ -86,6 +97,7 @@ public enum EventEngine {
 
     /// `.nextTime` moves a minute skipped by a DST change to the next valid one.
     private static func resolve(_ time: ClockTime, on date: LocalDate, calendar: Calendar) -> Date {
-        calendar.date(bySettingHour: time.hour, minute: time.minute, second: 0, of: date.startOfDay(in: calendar.timeZone), matchingPolicy: .nextTime)!
+        calendar.date(
+            bySettingHour: time.hour, minute: time.minute, second: 0, of: date.startOfDay(in: calendar.timeZone), matchingPolicy: .nextTime)!
     }
 }

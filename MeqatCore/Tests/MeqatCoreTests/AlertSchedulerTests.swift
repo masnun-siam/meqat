@@ -1,5 +1,6 @@
 import UserNotifications
 import XCTest
+
 @testable import MeqatCore
 
 final class FakeNotificationCenter: NotificationCentering, @unchecked Sendable {
@@ -24,8 +25,15 @@ final class FakeAlertTimer: AlertTimer {
     private var handler: (@MainActor () -> Void)?
     private(set) var cancelCount = 0
 
-    func arm(at date: Date, _ handler: @escaping @MainActor () -> Void) { armed = date; self.handler = handler }
-    func cancel() { armed = nil; handler = nil; cancelCount += 1 }
+    func arm(at date: Date, _ handler: @escaping @MainActor () -> Void) {
+        armed = date
+        self.handler = handler
+    }
+    func cancel() {
+        armed = nil
+        handler = nil
+        cancelCount += 1
+    }
     @MainActor func fire() { handler?() }
 }
 
@@ -39,14 +47,16 @@ final class AlertSchedulerTests: XCTestCase {
 
     private func alert(_ id: String, _ offset: TimeInterval, _ style: AlertStyle, _ kind: AlertKind = .start) -> PlannedAlert {
         let date = t0 + offset
-        return PlannedAlert(id: id, eventID: .asr, kind: kind, fireDate: date, style: style, title: "Title \(id)",
-                            eventInterval: DateInterval(start: date, duration: 600))
+        return PlannedAlert(
+            id: id, eventID: .asr, kind: kind, fireDate: date, style: style, title: "Title \(id)",
+            eventInterval: DateInterval(start: date, duration: 600))
     }
 
     private func make(_ plan: @escaping @MainActor () -> [PlannedAlert]) -> AlertScheduler {
         let clockBox = self
-        return AlertScheduler(center: center, timer: timer, now: { [unowned clockBox] in MainActor.assumeIsolated { clockBox.clock } },
-                              timeZone: { [tz] in tz }, plan: plan)
+        return AlertScheduler(
+            center: center, timer: timer, now: { [unowned clockBox] in MainActor.assumeIsolated { clockBox.clock } },
+            timeZone: { [tz] in tz }, plan: plan)
     }
 
     private func rebuild(_ s: AlertScheduler) async {
@@ -64,7 +74,8 @@ final class AlertSchedulerTests: XCTestCase {
         let a = center.requests[0]
         XCTAssertEqual(a.content.title, "Title a")
         XCTAssertEqual(a.content.body, "")
-        var cal = Calendar(identifier: .gregorian); cal.timeZone = tz
+        var cal = Calendar(identifier: .gregorian)
+        cal.timeZone = tz
         XCTAssertEqual(cal.date(from: dateParts(a)), plan[0].fireDate)
         XCTAssertEqual(dateParts(a).second, cal.component(.second, from: plan[0].fireDate))
         XCTAssertEqual(timer.armed, plan[0].fireDate)
@@ -82,8 +93,14 @@ final class AlertSchedulerTests: XCTestCase {
     func testTenRequestsMergeIntoOneMoreRebuild() async {
         var calls = 0
         var n = 0
-        let s = make { calls += 1; return [self.alert("p\(n)", 60, .banner)] }
-        for i in 0..<10 { n = i; s.requestRebuild() }
+        let s = make {
+            calls += 1
+            return [self.alert("p\(n)", 60, .banner)]
+        }
+        for i in 0..<10 {
+            n = i
+            s.requestRebuild()
+        }
         for _ in 0..<100 { await Task.yield() }
         XCTAssertEqual(center.requests.map(\.identifier), ["p9"])
         XCTAssertLessThanOrEqual(calls, 2)
@@ -92,8 +109,11 @@ final class AlertSchedulerTests: XCTestCase {
     func testDisabledEventHasNoRequests() async {
         var settings = AppSettings()
         settings.events[.asr]!.style = .disabled
-        let events = [ScheduledEvent(id: .asr, date: LocalDate(year: 2026, month: 10, day: 28),
-                                     interval: DateInterval(start: t0 + 3600, duration: 3600), calculatedInterval: nil)]
+        let events = [
+            ScheduledEvent(
+                id: .asr, date: LocalDate(year: 2026, month: 10, day: 28),
+                interval: DateInterval(start: t0 + 3600, duration: 3600), calculatedInterval: nil)
+        ]
         let s = make { AlertPlanner.plan(events: events, settings: settings, now: self.t0, timeZone: self.tz) }
         await rebuild(s)
         XCTAssertTrue(center.requests.isEmpty)
@@ -164,12 +184,14 @@ final class AlertSchedulerTests: XCTestCase {
         let decoder = JSONDecoder()
         decoder.dateDecodingStrategy = .iso8601
         let cache = try decoder.decode(TimingsCache.self, from: Fixture.data("engine/dhaka-2026-10-28-30.json"))
-        var cal = Calendar(identifier: .gregorian); cal.timeZone = tz
+        var cal = Calendar(identifier: .gregorian)
+        cal.timeZone = tz
         let now = cal.date(from: DateComponents(year: 2026, month: 10, day: 28))!
         var settings = AppSettings()
         let s = make {
             let events = (0...2).flatMap {
-                EventEngine.events(for: LocalDate(year: 2026, month: 10, day: 28 + $0), cache: cache, settings: settings, timeZone: self.tz) ?? []
+                EventEngine.events(for: LocalDate(year: 2026, month: 10, day: 28 + $0), cache: cache, settings: settings, timeZone: self.tz)
+                    ?? []
             }
             return AlertPlanner.plan(events: events, settings: settings, now: now, timeZone: self.tz)
         }

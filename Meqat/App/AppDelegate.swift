@@ -6,7 +6,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     func applicationDidFinishLaunching(_ notification: Notification) {
         NSApp.setActivationPolicy(.accessory)
         #if DEBUG
-        if DebugHarnessLauncher.runIfRequested() { return }
+            if DebugHarnessLauncher.runIfRequested() { return }
         #endif
         let environment = AppEnvironment()
         environment.start()

@@ -1,4 +1,5 @@
 import Foundation
+
 @testable import MeqatCore
 
 actor StubAladhan: AladhanFetching {
@@ -40,7 +41,8 @@ actor StubAladhan: AladhanFetching {
 
     static func day(_ date: LocalDate) -> DayTimings {
         let t = date.startOfDay(in: TimeZone(identifier: "UTC")!)
-        return DayTimings(date: date, fajr: t, sunrise: t, dhuhr: t, asr: t, sunset: t, maghrib: t,
-                          isha: t, midnight: t, lastthird: t)
+        return DayTimings(
+            date: date, fajr: t, sunrise: t, dhuhr: t, asr: t, sunset: t, maghrib: t,
+            isha: t, midnight: t, lastthird: t)
     }
 }

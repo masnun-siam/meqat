@@ -1,8 +1,8 @@
 import AppKit
 import MeqatCore
 import Observation
-import os
 import UserNotifications
+import os
 
 /// The composition root: owns every component and wires them together.
 @MainActor
@@ -30,7 +30,8 @@ final class AppEnvironment {
     private var lookupSawFetch = false
 
     init() {
-        let store = store, provider = provider
+        let store = store
+        let provider = provider
         let directory = (try? CacheStore.defaultDirectory()) ?? FileManager.default.temporaryDirectory
         let coordinator = SyncCoordinator(client: AladhanClient(), store: CacheStore(directory: directory)) {
             Composition.fetchParameters(location: provider.state, settings: store.settings, timeZone: .current)
@@ -39,7 +40,7 @@ final class AppEnvironment {
         scheduler = AlertScheduler(center: UNUserNotificationCenter.current(), timer: DispatchAlertTimer()) {
             let plan = Composition.plan(cache: coordinator.cache, settings: store.settings, now: Date(), timeZone: .current)
             #if DEBUG
-            Self.logPlan(plan)
+                Self.logPlan(plan)
             #endif
             return plan
         }
@@ -80,30 +81,33 @@ final class AppEnvironment {
             refreshAll()
         }
         scheduler.onFullScreen = { [unowned self] alert in
-            overlay.show(OverlayContent(eventName: alert.eventID.displayName, start: alert.eventInterval.start,
-                                        end: alert.eventInterval.end, holdSeconds: store.settings[event: alert.eventID].overlayHoldSeconds))
+            overlay.show(
+                OverlayContent(
+                    eventName: alert.eventID.displayName, start: alert.eventInterval.start,
+                    end: alert.eventInterval.end, holdSeconds: store.settings[event: alert.eventID].overlayHoldSeconds))
         }
         scheduler.onBannerFired = { [unowned self] alert in
             if !scheduler.notificationsAuthorized { showBannerNow(alert.eventID) }
         }
-        systemEvents = SystemEvents(.init(
-            willSleep: { [unowned self] in scheduler.suspend() },
-            didWake: { [unowned self] in
-                syncAndRebuild(.wake)
-                statusItem.refresh()
-                statusItem.rearmTicker()
-            },
-            timeZoneChanged: { [unowned self] in
-                syncAndRebuild(.timeZoneChanged)
-                refreshAll()
-                statusItem.rearmTicker()
-            },
-            clockChanged: { [unowned self] in
-                scheduler.requestRebuild()
-                refreshAll()
-                statusItem.rearmTicker()
-            },
-            willTerminate: { [unowned self] in scheduler.suspend() }))
+        systemEvents = SystemEvents(
+            .init(
+                willSleep: { [unowned self] in scheduler.suspend() },
+                didWake: { [unowned self] in
+                    syncAndRebuild(.wake)
+                    statusItem.refresh()
+                    statusItem.rearmTicker()
+                },
+                timeZoneChanged: { [unowned self] in
+                    syncAndRebuild(.timeZoneChanged)
+                    refreshAll()
+                    statusItem.rearmTicker()
+                },
+                clockChanged: { [unowned self] in
+                    scheduler.requestRebuild()
+                    refreshAll()
+                    statusItem.rearmTicker()
+                },
+                willTerminate: { [unowned self] in scheduler.suspend() }))
     }
 
     private func settingsChanged(_ old: AppSettings, _ new: AppSettings) {
@@ -227,19 +231,22 @@ final class AppEnvironment {
     }
 
     private func menuState() -> MenuState {
-        let now = Date(), timeZone = TimeZone.current, settings = store.settings
+        let now = Date()
+        let timeZone = TimeZone.current
+        let settings = store.settings
         let cache = coordinator.cache
-        return MenuPresenter.present(MenuInput(
-            now: now, timeZone: timeZone,
-            events: Composition.events(cache: cache, settings: settings, now: now, timeZone: timeZone),
-            styles: settings.events.mapValues(\.style),
-            place: settings.location.placeName(timeZone: timeZone),
-            hasScheduleForToday: cache?.day(LocalDate(now, timeZone: timeZone)) != nil,
-            sync: MenuSyncInfo(coordinator.status),
-            location: MenuLocationInfo(provider.state),
-            notificationsAuthorized: scheduler.notificationsAuthorized,
-            bannerNow: bannerNow,
-            showsCouldntRefresh: showsCouldntRefresh))
+        return MenuPresenter.present(
+            MenuInput(
+                now: now, timeZone: timeZone,
+                events: Composition.events(cache: cache, settings: settings, now: now, timeZone: timeZone),
+                styles: settings.events.mapValues(\.style),
+                place: settings.location.placeName(timeZone: timeZone),
+                hasScheduleForToday: cache?.day(LocalDate(now, timeZone: timeZone)) != nil,
+                sync: MenuSyncInfo(coordinator.status),
+                location: MenuLocationInfo(provider.state),
+                notificationsAuthorized: scheduler.notificationsAuthorized,
+                bannerNow: bannerNow,
+                showsCouldntRefresh: showsCouldntRefresh))
     }
 
     private func refreshAll() {
@@ -248,10 +255,14 @@ final class AppEnvironment {
     }
 
     private func refreshContext() {
-        let now = Date(), timeZone = TimeZone.current
+        let now = Date()
+        let timeZone = TimeZone.current
         let today = LocalDate(now, timeZone: timeZone)
-        let todays = Composition.events(cache: coordinator.cache, settings: store.settings, now: now, timeZone: timeZone).filter { $0.date == today }
-        context.calculatedWindows = Dictionary(todays.compactMap { e in e.calculatedInterval.map { (e.id, $0) } }, uniquingKeysWith: { first, _ in first })
+        let todays = Composition.events(cache: coordinator.cache, settings: store.settings, now: now, timeZone: timeZone).filter {
+            $0.date == today
+        }
+        context.calculatedWindows = Dictionary(
+            todays.compactMap { e in e.calculatedInterval.map { (e.id, $0) } }, uniquingKeysWith: { first, _ in first })
         context.place = store.settings.location.placeName(timeZone: timeZone)
         context.coordinatesText = provider.coordinates.map { String(format: "%.2f, %.2f", $0.latitude, $0.longitude) }
         context.lastSyncText = coordinator.status.lastSuccess.map { Self.lastSyncFormat(timeZone).string(from: $0) }
@@ -266,14 +277,14 @@ final class AppEnvironment {
     }
 
     #if DEBUG
-    /// Ids and fire times only: titles and places stay out of the log.
-    private static func logPlan(_ plan: [PlannedAlert]) {
-        let logger = Logger(subsystem: MeqatCore.bundleIdentifier, category: "app")
-        let f = DateFormatter()
-        f.dateFormat = "HH:mm:ss"
-        for alert in plan where alert.style == .banner {
-            logger.debug("pending: \(alert.id, privacy: .public)@\(f.string(from: alert.fireDate), privacy: .public)")
+        /// Ids and fire times only: titles and places stay out of the log.
+        private static func logPlan(_ plan: [PlannedAlert]) {
+            let logger = Logger(subsystem: MeqatCore.bundleIdentifier, category: "app")
+            let f = DateFormatter()
+            f.dateFormat = "HH:mm:ss"
+            for alert in plan where alert.style == .banner {
+                logger.debug("pending: \(alert.id, privacy: .public)@\(f.string(from: alert.fireDate), privacy: .public)")
+            }
         }
-    }
     #endif
 }

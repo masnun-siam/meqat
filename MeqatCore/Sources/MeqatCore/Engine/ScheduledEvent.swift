@@ -11,7 +11,8 @@ public struct ScheduledEvent: Equatable, Sendable {
     /// True only for a Static Tahajjud placed on the previous date.
     public let startsPreviousNight: Bool
 
-    public init(id: EventID, date: LocalDate, interval: DateInterval?, calculatedInterval: DateInterval?, startsPreviousNight: Bool = false) {
+    public init(id: EventID, date: LocalDate, interval: DateInterval?, calculatedInterval: DateInterval?, startsPreviousNight: Bool = false)
+    {
         self.id = id
         self.date = date
         self.interval = interval

@@ -1,12 +1,13 @@
 import XCTest
+
 @testable import MeqatCore
 
 @MainActor
 final class SyncCoordinatorTests: XCTestCase {
     private let utc = TimeZone(identifier: "UTC")!
     private let dhaka = Coordinates(latitude: 23.8103, longitude: 90.4125)
-    private let oct15 = Date(timeIntervalSince1970: 1_792_065_600) // 2026-10-15 12:00 UTC
-    private let jan30 = Date(timeIntervalSince1970: 1_801_396_800) // 2027-01-30 12:00 UTC
+    private let oct15 = Date(timeIntervalSince1970: 1_792_065_600)  // 2026-10-15 12:00 UTC
+    private let jan30 = Date(timeIntervalSince1970: 1_801_396_800)  // 2027-01-30 12:00 UTC
 
     private var directory: URL!
     private var store: CacheStore!
@@ -44,14 +45,17 @@ final class SyncCoordinatorTests: XCTestCase {
 
     private func savedCache(_ p: FetchParameters, today: LocalDate = LocalDate(year: 2026, month: 10, day: 15)) throws -> TimingsCache {
         let dates = (-1...30).map { today.adding(days: $0) }
-        let cache = TimingsCache(parameters: p, fetchedAt: Date(timeIntervalSince1970: 0),
-                                 days: Dictionary(uniqueKeysWithValues: dates.map { ($0, StubAladhan.day($0)) }))
+        let cache = TimingsCache(
+            parameters: p, fetchedAt: Date(timeIntervalSince1970: 0),
+            days: Dictionary(uniqueKeysWithValues: dates.map { ($0, StubAladhan.day($0)) }))
         try store.save(cache)
         return cache
     }
 
-    private func eventually(_ message: String = "", file: StaticString = #filePath, line: UInt = #line,
-                            _ condition: () async -> Bool) async {
+    private func eventually(
+        _ message: String = "", file: StaticString = #filePath, line: UInt = #line,
+        _ condition: () async -> Bool
+    ) async {
         for _ in 0..<1000 {
             if await condition() { return }
             try? await Task.sleep(for: .milliseconds(5))

@@ -1,18 +1,78 @@
 name: CI
 
+# PR title/body edits do not re-run this; pr-meta.yml handles those.
 on:
   pull_request:
+    types: [opened, synchronize, reopened]
+  push:
+    branches: [main]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
-  build-and-test:
-    runs-on: macos-15
+  changes:
+    runs-on: ubuntu-latest
+    outputs:
+      code: ${{ steps.diff.outputs.code }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - id: diff
+        env:
+          BASE: ${{ github.event.pull_request.base.sha || github.event.before }}
+          HEAD: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: |
+          # Doc-only = every changed path is *.md or under docs/.
+          if ! files=$(git diff --name-only "$BASE" "$HEAD" 2>/dev/null); then
+            echo "code=true" >> "$GITHUB_OUTPUT"; exit 0
+          fi
+          printf '%s\n' "$files"
+          if printf '%s\n' "$files" | grep -vqE '(\.md$|^docs/)'; then
+            echo "code=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "code=false" >> "$GITHUB_OUTPUT"
+          fi
+
+  hooks:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install pre-commit
+      - name: pre-commit (secrets, suppressions, CLAUDE.md guard, YAML/JSON)
+        env:
+          # Swift and make hooks run on macOS in the code job; the branch guard only applies locally.
+          SKIP: no-commit-to-branch,claude-md-warn,swift-format-lint,make-test,make-build
+        run: pre-commit run --all-files --show-diff-on-failure
+
+  code:
+    needs: changes
+    if: needs.changes.outputs.code == 'true'
+    runs-on: macos-26
     timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
-      - name: Unit tests
-        run: swift test --package-path MeqatCore
-      - name: Build app (unsigned)
-        run: >
-          xcodebuild -project Meqat.xcodeproj -scheme Meqat
-          -configuration Debug -destination 'platform=macOS'
-          CODE_SIGNING_ALLOWED=NO build
+      - name: Toolchain
+        run: |
+          ls -d /Applications/Xcode*.app
+          xcodebuild -version
+          swift --version
+      - run: make lint
+      - run: make test
+      - run: make build
+
+  summary:
+    if: always()
+    needs: [changes, hooks, code]
+    runs-on: ubuntu-latest
+    steps:
+      - env:
+          RESULTS: ${{ join(needs.*.result, ' ') }}
+        run: |
+          echo "results: $RESULTS"
+          case " $RESULTS " in *" failure "*|*" cancelled "*) exit 1 ;; esac
