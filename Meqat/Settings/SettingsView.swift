@@ -18,6 +18,7 @@ struct SettingsView: View {
                 Section {
                     Text("General").tag(SettingsPane.general)
                     Text("Location").tag(SettingsPane.location)
+                    Text("About").tag(SettingsPane.about)
                 }
                 Section {
                     ForEach(EventID.allCases, id: \.self) { id in
@@ -30,6 +31,7 @@ struct SettingsView: View {
             switch navigation.selection {
             case .general: GeneralPane(store: store)
             case .location: LocationPane(store: store, context: context)
+            case .about: AboutPane(store: store, context: context)
             case .event(let id): EventPane(eventID: id, store: store, context: context)
             }
         }

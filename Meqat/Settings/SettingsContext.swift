@@ -14,4 +14,7 @@ final class SettingsContext {
     var place: String?
     var coordinatesText: String?
     var lastSyncText: String?
+    var updateStatus: UpdateStatus = .idle
+    var lastCheckedText: String?
+    var checkNow: @MainActor () -> Void = {}
 }
