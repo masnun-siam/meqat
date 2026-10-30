@@ -48,6 +48,7 @@ final class SettingsTests: XCTestCase {
             XCTAssertEqual(e.preWarning, LeadAlert(enabled: false, leadMinutes: 20))
         }
         XCTAssertEqual(s.events.count, 11)
+        XCTAssertTrue(s.general.checkForUpdates)
         XCTAssertEqual(s.general.overlayTimeoutSeconds, 60)
         XCTAssertEqual(
             s.general,
@@ -68,6 +69,24 @@ final class SettingsTests: XCTestCase {
     func testMissingTimeFormatDecodesToTwentyFour() {
         defaults.set(Data(#"{"version":1,"value":{"launchAtLogin":false}}"#.utf8), forKey: "settings.general")
         XCTAssertEqual(store().settings.general.timeFormat, .twentyFour)
+    }
+
+    func testMissingCheckForUpdatesDecodesToOn() {
+        defaults.set(Data(#"{"version":1,"value":{"launchAtLogin":false}}"#.utf8), forKey: "settings.general")
+        let g = store().settings.general
+        XCTAssertTrue(g.checkForUpdates)
+        XCTAssertFalse(g.launchAtLogin)
+    }
+
+    func testCheckForUpdatesRoundTripAndReset() {
+        let s = store()
+        var changes = 0
+        s.onChange = { _, _ in changes += 1 }
+        s.settings.general.checkForUpdates = false
+        XCTAssertEqual(changes, 1)
+        XCTAssertFalse(store().settings.general.checkForUpdates)
+        s.resetAll()
+        XCTAssertTrue(s.settings.general.checkForUpdates)
     }
 
     func testPartialLeadAlertKeepsDefaultForMissingField() throws {
