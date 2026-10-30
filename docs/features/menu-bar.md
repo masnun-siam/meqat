@@ -51,7 +51,7 @@ flowchart LR
 
   Precedence: awaiting permission, then fetching (syncing or awaiting fix), then missing location, then last failure; no failure means fetching.
 - "Notifications are off — Open System Settings" row when `!notificationsAuthorized` (opens the Notifications settings pane URL).
-- `MenuState.updateRow` (`MenuUpdateRow`: `Update available — <x.y.z>` and the release URL) is set only when `updateNotice` is present and `checksForUpdates` is on, with or without a schedule; not rendered yet.
+- `MenuState.updateRow` (`MenuUpdateRow`: `Update available — <x.y.z>` and the release URL) is set only when `updateNotice` is present and `checksForUpdates` is on, with or without a schedule. `MenuDropdownView` renders it as a link row above the footer divider (below the notifications-off row); clicking opens the URL and closes the popover via `dismiss`. Harness: `-MeqatDebugUpdate 1.4.0`.
 - Footer text (first match): `Couldn't refresh`, `Syncing…`, `Offline — using cache from d MMM`, `Synced HH:mm` (today) or `Synced d MMM HH:mm`, empty. Times follow `MenuInput.timeFormat` (`h:mm a` when 12-hour). Buttons: Refresh now (disabled while fetching), Settings…, Quit.
 
 ## "Couldn't refresh"

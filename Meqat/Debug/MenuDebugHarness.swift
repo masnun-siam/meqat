@@ -2,7 +2,8 @@
     import AppKit
     import MeqatCore
 
-    /// `-MeqatDebugHarness Menu` shows the FR-15 mockup day; add `-MeqatDebugEmpty offline` for the empty state.
+    /// `-MeqatDebugHarness Menu` shows the FR-15 mockup day; add `-MeqatDebugEmpty offline` for the empty state
+    /// and `-MeqatDebugUpdate 1.4.0` for the update row.
     @objc(MeqatDebugMenuHarness)
     final class MenuDebugHarness: NSObject, DebugHarness {
         private static var controller: StatusItemController?
@@ -26,6 +27,9 @@
                     ev(.asr, (15, 4), (17, 12)), ev(.ghurub, (17, 12), (17, 27)), ev(.maghrib, (17, 27), (18, 42)),
                     ev(.isha, (18, 42), (23, 59)),
                 ]
+                let update = UserDefaults.standard.string(forKey: "MeqatDebugUpdate").map {
+                    UpdateNotice(version: $0, releaseURL: URL(string: "https://github.com/masnun-siam/meqat/releases/tag/v\($0)")!)
+                }
                 let empty = UserDefaults.standard.string(forKey: "MeqatDebugEmpty") == "offline"
                 // Clock runs on from 13:52 so the title ticks.
                 let offset = at(13, 52).timeIntervalSinceNow
@@ -42,7 +46,7 @@
                                 now: Date().addingTimeInterval(offset), timeZone: tz, events: events, styles: [.duha: .disabled],
                                 place: "Dhaka",
                                 hasScheduleForToday: !empty, sync: MenuSyncInfo(lastSuccess: synced, lastFailure: empty ? .other : nil),
-                                notificationsAuthorized: false))
+                                notificationsAuthorized: false, updateNotice: update))
                     }, actions: actions)
             }
         }
