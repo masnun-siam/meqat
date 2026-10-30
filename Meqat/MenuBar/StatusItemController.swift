@@ -30,7 +30,9 @@ final class StatusItemController: NSObject {
         let current = state()
         statusItem.button?.title = current.statusTitle
         statusItem.button?.setAccessibilityLabel(current.statusAccessibilityLabel)
-        host.rootView = AnyView(MenuDropdownView(state: current, actions: actions))
+        host.rootView = AnyView(
+            MenuDropdownView(
+                state: current, actions: actions, dismiss: { [weak self] in self?.popover.performClose(nil) }))
         if popover.isShown { popover.contentSize = host.view.fittingSize }
     }
 

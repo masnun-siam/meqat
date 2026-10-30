@@ -5,6 +5,7 @@ import SwiftUI
 struct MenuDropdownView: View {
     let state: MenuState
     let actions: MenuActions
+    let dismiss: @MainActor () -> Void
 
     private static let notificationsPane = URL(string: "x-apple.systempreferences:com.apple.Notifications-Settings.extension")!
 
@@ -19,6 +20,14 @@ struct MenuDropdownView: View {
                 Divider()
                 Button("Notifications are off — Open System Settings") {
                     NSWorkspace.shared.open(Self.notificationsPane)
+                }
+                .buttonStyle(.link).padding(12)
+            }
+            if let update = state.updateRow {
+                Divider()
+                Button(update.title) {
+                    NSWorkspace.shared.open(update.url)
+                    dismiss()
                 }
                 .buttonStyle(.link).padding(12)
             }
