@@ -5,7 +5,7 @@ description: Cut a Meqat release end to end - version bump PR, unsigned DMG, Git
 
 # Release
 
-Unsigned, not notarized (CLAUDE.md rule 7; there is no Apple Developer account). Never touch signing identities or notary credentials. Never push to `main`; agents never merge PRs, so the owner merges the bump PR. Argument: the version, e.g. `1.2.0`; if absent, propose one from `git log <last tag>..origin/main` (minor for features, patch for fixes) and confirm.
+Ad-hoc signed, not notarized (there is no Apple Developer account; `scripts/release.sh` takes no arguments or credentials). Never touch signing identities or notary credentials. Never push to `main`; agents never merge PRs, so the owner merges the bump PR. Argument: the version, e.g. `1.2.0`; if absent, propose one from `git log <last tag>..origin/main` (minor for features, patch for fixes) and confirm.
 
 Run from the repo root. Work out which phase applies from `git tag`, `gh pr list --search "bump version"` and the tap.
 
@@ -13,16 +13,16 @@ Run from the repo root. Work out which phase applies from `git tag`, `gh pr list
 
 1. `git fetch origin`, `git switch -c release-<v> origin/main`.
 2. In `Meqat.xcodeproj/project.pbxproj` set every `MARKETING_VERSION = <v>;` and add 1 to every `CURRENT_PROJECT_VERSION`.
-3. `make check` must pass, then `scripts/release.sh --dry-run` must end with a DMG and SHA-256.
+3. `make check` must pass, then `scripts/release.sh` must end with a DMG and SHA-256. Mount the DMG and check `codesign -dv --verbose=2 /Volumes/Meqat/Meqat.app` shows `Signature=adhoc`, `Info.plist entries=` (not `not bound`) and `Sealed Resources version=2`; detach it.
 4. Commit `chore: bump version to <v>`, push, open a PR into `main` listing the merged PRs since the last tag. Stop and ask the owner to merge it.
 
 ## Phase 2 - publish (after the bump PR is merged)
 
 1. `git fetch origin && git switch --detach origin/main`; confirm `MARKETING_VERSION` is `<v>` and `git tag -l v<v>` is empty.
-2. `scripts/release.sh --dry-run`; note the SHA-256 of `build/release/Meqat-<v>.dmg`.
+2. `scripts/release.sh`; note the SHA-256 of `build/release/Meqat-<v>.dmg`.
 3. `gh release create v<v> build/release/Meqat-<v>.dmg --target "$(git rev-parse HEAD)" --title "Meqat <v>" --notes "<changes, PR numbers>
 
-Unsigned, not notarized: right-click the app and choose Open the first time.
+Not notarized: right-click the app and choose Open the first time.
 
 SHA-256: <sha>"` (this creates the tag on the remote; do not push to `main`).
 4. Verify: `gh release download v<v> -p '*.dmg' -O - | shasum -a 256` equals the noted SHA-256.
@@ -35,4 +35,4 @@ SHA-256: <sha>"` (this creates the tag on the remote; do not push to `main`).
 
 ## Report
 
-One short message: release URL, SHA-256, tap commit. State what was not checked (manual checklist in `docs/release-checklist.md`, `brew audit`, `brew install`); Gatekeeper checks do not apply to an unsigned build.
+One short message: release URL, SHA-256, tap commit. State what was not checked (manual checklist in `docs/release-checklist.md`, `brew audit`, `brew install`); Gatekeeper notarization checks do not apply.
