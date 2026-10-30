@@ -22,9 +22,12 @@ struct EventPane: View {
         let settings = event.wrappedValue
         Form {
             Section("Time") {
-                Picker("Source", selection: timeSource) {
+                Picker(selection: timeSource) {
                     Text("Calculated").tag(TimeSource.calculated)
                     Text("Static").tag(TimeSource.fixed)
+                } label: {
+                    Text("Source")
+                    Text(sourceHelp)
                 }
                 .pickerStyle(.radioGroup)
                 if settings.timeSource == .fixed {
@@ -35,30 +38,55 @@ struct EventPane: View {
                     }
                 }
             }
-            Picker("Style", selection: event.style) {
+            Picker(selection: event.style) {
                 Text("Full-Screen Focus").tag(AlertStyle.fullScreen)
                 Text("Banner").tag(AlertStyle.banner)
                 Text("Disabled").tag(AlertStyle.disabled)
+            } label: {
+                Text("Style")
+                Text(
+                    "Full-Screen Focus covers the screen, Banner shows a notification, "
+                        + "Disabled turns off every alert for this event.")
             }
             Section("Start alert") {
-                Toggle("Enabled", isOn: event.startAlert.enabled)
+                Toggle(isOn: event.startAlert.enabled) {
+                    Text("Enabled")
+                    Text("Alert when the event starts.")
+                }
                 NumberRow(
-                    title: "Offset", unit: "min", value: event.startAlert.offsetMinutes,
+                    title: "Offset", help: "Minutes to shift the start alert: negative is earlier, positive is later.",
+                    unit: "min", value: event.startAlert.offsetMinutes,
                     range: Bounds.offsetMinutes, signed: true)
             }
             Section("End alert") {
-                Toggle("Enabled", isOn: event.endAlert.enabled)
-                NumberRow(title: "Lead", unit: "min", value: event.endAlert.leadMinutes, range: Bounds.leadMinutes)
+                Toggle(isOn: event.endAlert.enabled) {
+                    Text("Enabled")
+                    Text("Alert before the event ends.")
+                }
+                NumberRow(
+                    title: "Lead", help: "How many minutes before the end.", unit: "min",
+                    value: event.endAlert.leadMinutes, range: Bounds.leadMinutes)
             }
             Section("Pre-warning") {
-                Toggle("Enabled", isOn: event.preWarning.enabled)
-                NumberRow(title: "Lead", unit: "min", value: event.preWarning.leadMinutes, range: Bounds.leadMinutes)
+                Toggle(isOn: event.preWarning.enabled) {
+                    Text("Enabled")
+                    Text("A banner before the event starts, even when the style is Full-Screen Focus.")
+                }
+                NumberRow(
+                    title: "Lead", help: "How many minutes before the start.", unit: "min",
+                    value: event.preWarning.leadMinutes, range: Bounds.leadMinutes)
             }
             Section {
                 Button("Reset to defaults") { store.resetEvent(eventID) }
             }
         }
         .formStyle(.grouped)
+    }
+
+    private var sourceHelp: String {
+        eventID == .duha
+            ? "Duha always runs from the end of Shuruq to the start of Istiwa, so a static time does not move it."
+            : "Calculated follows today's prayer times. Static uses the same clock time every day."
     }
 
     private var timeSource: Binding<TimeSource> {
@@ -99,6 +127,7 @@ struct EventPane: View {
 
 private struct NumberRow: View {
     let title: String
+    let help: String
     let unit: String
     @Binding var value: Int
     let range: ClosedRange<Int>
@@ -108,13 +137,16 @@ private struct NumberRow: View {
         let clamped = Binding(
             get: { value },
             set: { value = Bounds.clamped($0, to: range) })
-        LabeledContent(title) {
+        LabeledContent {
             HStack {
                 TextField(title, value: clamped, format: signed ? .number.sign(strategy: .always(includingZero: false)) : .number)
                     .labelsHidden().multilineTextAlignment(.trailing).frame(width: 50)
                 Stepper(title, value: clamped, in: range).labelsHidden()
                 Text(unit)
             }
+        } label: {
+            Text(title)
+            Text(help)
         }
     }
 }

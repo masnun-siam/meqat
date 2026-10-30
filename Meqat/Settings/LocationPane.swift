@@ -27,9 +27,12 @@ struct LocationPane: View {
 
     var body: some View {
         Form {
-            Picker("Location", selection: modeBinding) {
+            Picker(selection: modeBinding) {
                 Text("Automatic (uses this Mac's location)").tag(false)
                 Text("Manual city").tag(true)
+            } label: {
+                Text("Location")
+                Text("Automatic uses this Mac's location. Manual uses the city you enter.")
             }
             .pickerStyle(.radioGroup)
             if manualSelected { manualSection } else { automaticSection }
@@ -70,6 +73,8 @@ struct LocationPane: View {
                 .keyboardShortcut(.defaultAction)
                 .disabled(!canCommit)
             if let text = statusText { Text(text).foregroundStyle(.secondary) }
+        } footer: {
+            Text("Look up finds the city and fetches its prayer times.")
         }
     }
 
