@@ -3,8 +3,9 @@
     import MeqatCore
 
     /// `--args -MeqatDebugHarness Settings` opens the Settings window. Extra arguments:
-    /// `-MeqatDebugPane <location|eventID>`, `-MeqatDebugWindows 1`,
-    /// `-MeqatDebugLookup <idle|lookingUp|found|cityNotFound|unreachable>`.
+    /// `-MeqatDebugPane <location|about|eventID>`, `-MeqatDebugWindows 1`,
+    /// `-MeqatDebugLookup <idle|lookingUp|found|cityNotFound|unreachable>`,
+    /// `-MeqatDebugUpdate <idle|checking|upToDate|available|failed>`.
     @objc(MeqatDebugSettingsHarness)
     final class SettingsDebugHarness: NSObject, DebugHarness {
         static func run() {
@@ -30,12 +31,24 @@
             case "unreachable": context.lookupStatus = .unreachable
             default: context.lookupStatus = .idle
             }
+            context.lastCheckedText = "30 Oct 09:05"
+            switch args.string(forKey: "MeqatDebugUpdate") {
+            case "checking": context.updateStatus = .checking
+            case "upToDate": context.updateStatus = .upToDate(checkedAt: Date())
+            case "available":
+                context.updateStatus = .available(
+                    version: "1.4.0", releaseURL: URL(string: "https://github.com/masnun-siam/meqat/releases/tag/v1.4.0")!)
+            case "failed": context.updateStatus = .failed
+            default: context.updateStatus = .idle
+            }
+            context.checkNow = { context.updateStatus = .checking }
             return context
         }
 
         private static func pane(_ name: String?) -> SettingsPane {
             guard let name else { return .general }
             if name == "location" { return .location }
+            if name == "about" { return .about }
             return EventID(rawValue: name).map(SettingsPane.event) ?? .general
         }
 
