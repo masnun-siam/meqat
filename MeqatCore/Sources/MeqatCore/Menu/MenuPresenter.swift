@@ -31,7 +31,7 @@ public enum MenuPresenter {
             let cd = countdown(prohibited.interval!.end.timeIntervalSince(now))
             (title, label) = (
                 "⛔ \(prohibited.id.displayName) ends in \(cd.short)",
-                "\(prohibited.id.displayName), prohibited window, ends in \(cd.spoken)"
+                "\(prohibited.id.displayName), forbidden window, ends in \(cd.spoken)"
             )
         } else if let banner = input.bannerNow {
             (title, label) = ("● \(banner.displayName) now", "\(banner.displayName), now")
@@ -104,7 +104,7 @@ public enum MenuPresenter {
         } else if prohibited {
             marker = .prohibited
         }
-        if prohibited { label = "\(name), prohibited window, \(spokenTime)" }
+        if prohibited { label = "\(name), forbidden window, \(spokenTime)" }
         return MenuRow(
             id: e.id, name: name, marker: marker, isDimmed: prohibited && iv.end <= now, timeText: timeText, detailText: detail,
             accessibilityLabel: label)

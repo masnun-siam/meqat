@@ -31,16 +31,16 @@ struct GeneralPane: View {
             }
             Section {
                 DurationRow(
-                    title: "Shuruq", help: "Starts at sunrise and lasts this long.",
+                    title: EventID.shuruq.displayName, help: "Starts at sunrise and lasts this long.",
                     minutes: $store.settings.general.shuruqMinutes)
                 DurationRow(
-                    title: "Istiwa", help: "Ends at Dhuhr and starts this long before it.",
+                    title: EventID.istiwa.displayName, help: "Ends at Dhuhr and starts this long before it.",
                     minutes: $store.settings.general.istiwaMinutes)
                 DurationRow(
-                    title: "Ghurub", help: "Ends at sunset and starts this long before it.",
+                    title: EventID.ghurub.displayName, help: "Ends at sunset and starts this long before it.",
                     minutes: $store.settings.general.ghurubMinutes)
             } header: {
-                Text("Prohibited windows")
+                Text("Forbidden windows")
             } footer: {
                 Text("Times when voluntary prayer should be avoided. Set how long each one lasts.")
             }

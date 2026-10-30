@@ -49,7 +49,7 @@ final class MenuPresenterTests: XCTestCase {
 
     func testDisabledDuhaSkippedButHasRow() {
         let s = present(at(28, 6, 20))
-        XCTAssertEqual(s.statusTitle, "☾ Istiwa in 5h 16m")
+        XCTAssertEqual(s.statusTitle, "☾ Forbidden (noon) in 5h 16m")
         XCTAssertEqual(s.rows[3].id, .duha)
         XCTAssertEqual(s.rows[3].marker, .current)
     }
@@ -59,8 +59,8 @@ final class MenuPresenterTests: XCTestCase {
             $0.styles[.istiwa] = .disabled
             $0.bannerNow = .asr
         }
-        XCTAssertEqual(s.statusTitle, "⛔ Istiwa ends in 6m")
-        XCTAssertEqual(s.statusAccessibilityLabel, "Istiwa, prohibited window, ends in 6 minutes")
+        XCTAssertEqual(s.statusTitle, "⛔ Forbidden (noon) ends in 6m")
+        XCTAssertEqual(s.statusAccessibilityLabel, "Forbidden (noon), forbidden window, ends in 6 minutes")
         XCTAssertEqual(present(at(28, 11, 47)).statusTitle, "☾ Dhuhr ends in 3h 17m")
     }
 
@@ -85,7 +85,7 @@ final class MenuPresenterTests: XCTestCase {
 
     func testDisabledCurrentFallsBackToNext() {
         let s = present(at(28, 16, 0)) { $0.styles[.asr] = .disabled }
-        XCTAssertEqual(s.statusTitle, "☾ Ghurub in 1h 12m")
+        XCTAssertEqual(s.statusTitle, "☾ Forbidden (sunset) in 1h 12m")
     }
 
     func testLatestStartWinsAmongOverlappingCurrent() {
@@ -105,7 +105,7 @@ final class MenuPresenterTests: XCTestCase {
     func testVoiceOverLabels() {
         let s = present(at(28, 13, 52, 30)) { $0.styles = [:] }
         XCTAssertEqual(s.rows[0].accessibilityLabel, "Tahajjud, done, 01:00")
-        XCTAssertEqual(s.rows[4].accessibilityLabel, "Istiwa, prohibited window, 11:36 to 11:46")
+        XCTAssertEqual(s.rows[4].accessibilityLabel, "Forbidden (noon), forbidden window, 11:36 to 11:46")
         XCTAssertEqual(s.rows[5].accessibilityLabel, "Dhuhr, current, 11:46, ends in 1 hour 11 minutes")
         XCTAssertEqual(s.rows[6].accessibilityLabel, "Asr, next, 15:04, in 1 hour 11 minutes")
         XCTAssertEqual(s.statusAccessibilityLabel, "Dhuhr, current, ends in 1 hour 11 minutes")

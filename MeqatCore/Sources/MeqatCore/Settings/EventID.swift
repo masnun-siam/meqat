@@ -13,5 +13,12 @@ public enum EventID: String, CaseIterable, Codable, Sendable, Equatable {
         }
     }
 
-    public var displayName: String { rawValue.prefix(1).uppercased() + rawValue.dropFirst() }
+    public var displayName: String {
+        switch self {
+        case .shuruq: "Forbidden (sunrise)"
+        case .istiwa: "Forbidden (noon)"
+        case .ghurub: "Forbidden (sunset)"
+        default: rawValue.prefix(1).uppercased() + rawValue.dropFirst()
+        }
+    }
 }
