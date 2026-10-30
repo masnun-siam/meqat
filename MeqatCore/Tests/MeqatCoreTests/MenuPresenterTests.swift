@@ -165,6 +165,35 @@ final class MenuPresenterTests: XCTestCase {
         XCTAssertNil(MenuPresenter.present(MenuInput(now: at(28, 12, 0), timeZone: tz, events: mockup())).emptyState)
     }
 
+    private let notice = UpdateNotice(
+        version: "1.4.0", releaseURL: URL(string: "https://github.com/masnun-siam/meqat/releases/tag/v1.4.0")!)
+
+    func testUpdateRowWhenNoticeAndToggleOn() {
+        let s = present(at(28, 12, 0)) { $0.updateNotice = notice }
+        XCTAssertEqual(s.updateRow?.title, "Update available — 1.4.0")
+        XCTAssertEqual(s.updateRow?.url, notice.releaseURL)
+    }
+
+    func testNoUpdateRowWithoutNotice() {
+        XCTAssertNil(present(at(28, 12, 0)).updateRow)
+    }
+
+    func testNoUpdateRowWhenToggleOff() {
+        let s = present(at(28, 12, 0)) {
+            $0.updateNotice = notice
+            $0.checksForUpdates = false
+        }
+        XCTAssertNil(s.updateRow)
+    }
+
+    func testUpdateRowInEmptyState() {
+        let s = present(at(28, 12, 0)) {
+            $0.hasScheduleForToday = false
+            $0.updateNotice = notice
+        }
+        XCTAssertEqual(s.updateRow?.title, "Update available — 1.4.0")
+    }
+
     func testTwelveHourFormat() {
         let s = present(at(28, 13, 52, 30)) {
             $0.timeFormat = .twelve

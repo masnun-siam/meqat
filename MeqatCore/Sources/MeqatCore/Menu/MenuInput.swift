@@ -22,6 +22,17 @@ public enum MenuLocationInfo: Sendable, Equatable {
     case awaitingPermission, awaitingFix, missing, available
 }
 
+/// A newer release the dropdown links to (FR-5 of the about-and-updates PRD).
+public struct UpdateNotice: Sendable, Equatable {
+    public var version: String
+    public var releaseURL: URL
+
+    public init(version: String, releaseURL: URL) {
+        self.version = version
+        self.releaseURL = releaseURL
+    }
+}
+
 /// Everything the status item and dropdown depend on (FR-15, FR-16). No clock reads.
 public struct MenuInput: Sendable, Equatable {
     public var now: Date
@@ -37,12 +48,15 @@ public struct MenuInput: Sendable, Equatable {
     public var bannerNow: EventID?
     public var showsCouldntRefresh: Bool
     public var timeFormat: TimeFormat
+    public var updateNotice: UpdateNotice?
+    public var checksForUpdates: Bool
 
     public init(
         now: Date, timeZone: TimeZone, events: [ScheduledEvent], styles: [EventID: AlertStyle] = [:], place: String? = nil,
         hasScheduleForToday: Bool = true, sync: MenuSyncInfo = MenuSyncInfo(), location: MenuLocationInfo = .available,
         notificationsAuthorized: Bool = true, bannerNow: EventID? = nil, showsCouldntRefresh: Bool = false,
-        timeFormat: TimeFormat = .twentyFour
+        timeFormat: TimeFormat = .twentyFour,
+        updateNotice: UpdateNotice? = nil, checksForUpdates: Bool = true
     ) {
         self.now = now
         self.timeZone = timeZone
@@ -56,5 +70,7 @@ public struct MenuInput: Sendable, Equatable {
         self.bannerNow = bannerNow
         self.showsCouldntRefresh = showsCouldntRefresh
         self.timeFormat = timeFormat
+        self.updateNotice = updateNotice
+        self.checksForUpdates = checksForUpdates
     }
 }
