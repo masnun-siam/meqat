@@ -69,6 +69,7 @@ Files in `Meqat/Settings/`; one `SettingsPane` enum case per sidebar entry.
 - Each pane is a `struct XPane: View` with `Form { ... }.formStyle(.grouped)` (`GeneralPane`, `LocationPane`, `EventPane`).
 - Settings data: `let/@Bindable store: SettingsStore`, edited in place. Runtime read-only data (calculated windows, place, lookup status, last sync) comes from `let context: SettingsContext`. `AppEnvironment.refreshContext()` fills it; panes never compute it.
 - Numeric inputs clamp with `Bounds.clamped(_, to: Bounds.*)` from core (`DurationRow` in `GeneralPane`, `NumberRow` in `EventPane`). Private row helpers live at the bottom of the pane file.
+- Every setting carries a help line: a second `Text` in the control's label (`label:` closure), or a `Section` footer. `DurationRow` and `NumberRow` take a `help` string; keep the inner `TextField`/`Stepper` titled with `.labelsHidden()`.
 - Pane-local `@State` is for uncommitted input only (`LocationPane` city/country fields); commit through the store.
 - Destructive actions use `confirmationDialog` (`GeneralPane` reset).
 - `SettingsDebugHarness` has `pane(_:)` mapping names to `SettingsPane`; update it when adding a pane that needs a name.
