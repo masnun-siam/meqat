@@ -37,9 +37,19 @@ struct AboutPane: View {
                 }
             }
             Section {
-                Link("GitHub repository", destination: Self.repository)
-                Link("Made by Masnun Siam", destination: Self.author)
-                Link("Buy me a coffee", destination: Self.coffee)
+                Link(destination: Self.repository) {
+                    Label("GitHub repository", systemImage: "chevron.left.forwardslash.chevron.right")
+                }
+                Link(destination: Self.author) {
+                    Label("Made by Masnun Siam", systemImage: "person.crop.circle")
+                }
+                Link(destination: Self.coffee) {
+                    Label("Buy me a coffee", systemImage: "cup.and.saucer")
+                }
+            } header: {
+                Text("Project")
+            } footer: {
+                Text("Meqat is free and open source. Report bugs and follow releases on GitHub.")
             }
         }
         .formStyle(.grouped)
