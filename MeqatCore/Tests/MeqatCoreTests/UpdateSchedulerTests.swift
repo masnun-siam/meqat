@@ -32,8 +32,8 @@ final class UpdateSchedulerTests: XCTestCase {
         for _ in 0..<50 { await Task.yield() }
     }
 
-    private func advance(_ duration: Duration, clockBy seconds: TimeInterval? = nil) async {
-        clock.date.addTimeInterval(seconds ?? Double(duration.components.seconds))
+    private func advance(_ duration: Duration) async {
+        clock.date.addTimeInterval(Double(duration.components.seconds))
         await sleeper.advance(by: duration)
         await settle()
     }
