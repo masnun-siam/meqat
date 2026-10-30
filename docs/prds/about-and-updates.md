@@ -57,7 +57,7 @@ Every Meqat user, on their own Mac. There are no roles or accounts.
 - **FR-4 Update status.** The About pane shows one of:
   - nothing yet checked: no status line;
   - "Checking…";
-  - "You're up to date" with "Last checked <time>" (time in the user's time format setting);
+  - "You're up to date" with "Last checked <date> <time>", e.g. "Last checked 30 Oct 09:05" (time in the user's time format setting, the same format as the Location pane's last sync);
   - "Version <x.y.z> is available" with a "View release" link to that release's page and, below it, "Installed with Homebrew? Run `brew upgrade --cask meqat`";
   - "Couldn't check for updates", only after a failed manual check.
   - A version is newer only if its `major.minor.patch` is numerically greater than the installed one (1.10.0 > 1.9.0). A leading `v` is ignored. A tag that is not `x.y.z` is treated as "no update".
@@ -71,7 +71,8 @@ Every Meqat user, on their own Mac. There are no roles or accounts.
 
 ## Edge cases
 
-- **Concurrency.** A check started while another is running does not start a second request; it waits for the running one's result. The toggle turned off during a check lets that check finish but shows nothing in the menu.
+- **Concurrency.** A check started while another is running does not start a second request; it waits for the running one's result. If any caller of the shared check was "Check now", a failure counts as a manual failure and shows "Couldn't check for updates". The toggle turned off during a check lets that check finish but shows nothing in the menu.
+- **Menu row source.** The menu row follows the current status: it shows only while the status is "available", so it is hidden while a check runs and after a failed manual check, and About and the menu never disagree.
 - **Sleep.** The 24-hour timer counts wall time; after waking past its due time the check runs once, not once per missed day.
 - **Empty state.** Before the first result, About shows no status line and the menu shows no row.
 - **Installed version newer than GitHub** (a local build): "You're up to date".
@@ -190,11 +191,17 @@ None formally defined. Meqat has no telemetry.
 - Check result kept in memory, not persisted. — A check runs 10 s after every launch, so stored state adds nothing.
 - Only `x.y.z` tags from GitHub's "latest" release count. — Matches the release script, which requires `MARKETING_VERSION` to be `x.y.z` and tags `v<version>`.
 
+- A shared check that "Check now" joined fails as a manual check. — The user clicked and is waiting for an answer; a silent failure would look like the button did nothing.
+- The menu row is derived from the current status, not from the last successful result. — One source of truth; About and the menu never disagree.
+- "Last checked" shows date and time ("30 Oct 09:05"), like the Location pane's last sync. — A check from yesterday is not mistaken for today.
+
 ## Open questions
 
 None.
 
 ## Change log
+
+- 2026-10-30: Settled three gaps found while refining the issues: a joined manual check fails visibly (Edge cases "Concurrency"), the menu row follows the current status (Edge cases "Menu row source"), and "Last checked" shows date and time (FR-4). Issues affected: #84, #87, #88.
 
 ## Related
 
