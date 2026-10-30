@@ -1,25 +1,14 @@
 #!/usr/bin/env bash
-# Builds, signs, notarizes and packages Meqat as a DMG. See docs/release-checklist.md.
-# Usage: scripts/release.sh [--dry-run]
-#   --dry-run  unsigned Release build and DMG; needs no credentials or network.
-# Env (full run only): DEVELOPMENT_TEAM, NOTARY_PROFILE.
+# Builds Meqat as an ad-hoc signed, un-notarized DMG. See docs/release-checklist.md.
+# Usage: scripts/release.sh
+# Needs no credentials, environment variables or network.
 set -euo pipefail
 
 cd "$(dirname "$0")/.."
 
-DRY_RUN=0
-case "${1:-}" in
-  "") ;;
-  --dry-run) DRY_RUN=1 ;;
-  *) echo "usage: scripts/release.sh [--dry-run]" >&2; exit 2 ;;
-esac
+[[ $# -eq 0 ]] || { echo "usage: scripts/release.sh" >&2; exit 2; }
 
 die() { echo "error: $*" >&2; exit 1; }
-
-if [[ $DRY_RUN -eq 0 ]]; then
-  [[ -n "${DEVELOPMENT_TEAM:-}" ]] || die "DEVELOPMENT_TEAM is not set (your Apple Developer team ID)"
-  [[ -n "${NOTARY_PROFILE:-}" ]] || die "NOTARY_PROFILE is not set. Create one with: xcrun notarytool store-credentials meqat-notary --apple-id … --team-id …"
-fi
 
 VERSION="$(xcodebuild -project Meqat.xcodeproj -scheme Meqat -configuration Release -showBuildSettings 2>/dev/null \
   | awk '/ MARKETING_VERSION /{print $3}')"
@@ -32,25 +21,16 @@ mkdir -p "$OUT"
 STAGE="$(mktemp -d)"
 trap 'rm -rf "$STAGE"' EXIT
 
-if [[ $DRY_RUN -eq 1 ]]; then
-  echo "==> Building Release (unsigned)"
-  xcodebuild -project Meqat.xcodeproj -scheme Meqat -configuration Release \
-    -derivedDataPath "$OUT/dd" CODE_SIGNING_ALLOWED=NO build
-  APP="$OUT/dd/Build/Products/Release/Meqat.app"
-else
-  echo "==> Archiving"
-  xcodebuild -project Meqat.xcodeproj -scheme Meqat -configuration Release \
-    -archivePath "$OUT/Meqat.xcarchive" DEVELOPMENT_TEAM="$DEVELOPMENT_TEAM" \
-    CODE_SIGN_STYLE=Manual CODE_SIGN_IDENTITY="Developer ID Application" archive
-
-  echo "==> Exporting"
-  OPTIONS="$STAGE/ExportOptions.plist"
-  cp Config/ExportOptions.plist "$OPTIONS"
-  /usr/libexec/PlistBuddy -c "Set :teamID $DEVELOPMENT_TEAM" "$OPTIONS"
-  xcodebuild -exportArchive -archivePath "$OUT/Meqat.xcarchive" \
-    -exportOptionsPlist "$OPTIONS" -exportPath "$OUT/export"
-  APP="$OUT/export/Meqat.app"
-fi
+echo "==> Building Release (ad-hoc signed)"
+# Derived data goes to the internal disk: on a non-APFS repo drive, AppleDouble
+# (._*) files land inside the bundle and codesign rejects them.
+# No entitlements, so no get-task-allow either, and no hardened runtime: it would
+# need the location entitlement, and it only matters for notarization.
+xcodebuild -project Meqat.xcodeproj -scheme Meqat -configuration Release \
+  -derivedDataPath "$STAGE/dd" \
+  CODE_SIGN_STYLE=Manual CODE_SIGN_IDENTITY=- CODE_SIGN_ENTITLEMENTS= DEVELOPMENT_TEAM= \
+  CODE_SIGN_INJECT_BASE_ENTITLEMENTS=NO ENABLE_HARDENED_RUNTIME=NO build
+APP="$STAGE/dd/Build/Products/Release/Meqat.app"
 
 [[ -d "$APP" ]] || die "built app not found at $APP"
 
@@ -59,20 +39,6 @@ mkdir "$STAGE/dmg"
 cp -R "$APP" "$STAGE/dmg/Meqat.app"
 ln -s /Applications "$STAGE/dmg/Applications"
 hdiutil create -volname Meqat -srcfolder "$STAGE/dmg" -ov -format UDZO "$DMG"
-
-if [[ $DRY_RUN -eq 0 ]]; then
-  echo "==> Signing DMG"
-  codesign --sign "Developer ID Application" --timestamp "$DMG"
-
-  echo "==> Notarizing (waits for Apple)"
-  NOTARY_LOG="$STAGE/notary.txt"
-  xcrun notarytool submit "$DMG" --keychain-profile "$NOTARY_PROFILE" --wait | tee "$NOTARY_LOG"
-  grep -q '^ *status: Accepted' "$NOTARY_LOG" \
-    || die "notarization was not accepted; inspect with: xcrun notarytool log <submission id> --keychain-profile \"\$NOTARY_PROFILE\""
-
-  echo "==> Stapling"
-  xcrun stapler staple "$DMG"
-fi
 
 echo "==> SHA-256"
 shasum -a 256 "$DMG"
