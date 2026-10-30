@@ -29,7 +29,11 @@ final class SettingsTests: XCTestCase {
         XCTAssertEqual(EventID.shuruq.kind, .prohibited)
         XCTAssertEqual(EventID.duha.kind, .voluntary)
         XCTAssertEqual(EventID.fajr.kind, .obligatory)
-        XCTAssertEqual(EventID.istiwa.displayName, "Istiwa")
+        XCTAssertEqual(EventID.shuruq.displayName, "Forbidden (sunrise)")
+        XCTAssertEqual(EventID.istiwa.displayName, "Forbidden (noon)")
+        XCTAssertEqual(EventID.ghurub.displayName, "Forbidden (sunset)")
+        XCTAssertEqual(EventID.fajr.displayName, "Fajr")
+        XCTAssertEqual(EventID.istiwa.rawValue, "istiwa")
     }
 
     func testEmptyDefaults() {

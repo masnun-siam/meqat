@@ -85,7 +85,7 @@ struct EventPane: View {
 
     private var sourceHelp: String {
         eventID == .duha
-            ? "Duha always runs from the end of Shuruq to the start of Istiwa, so a static time does not move it."
+            ? "Duha always runs from the end of the sunrise forbidden window to the start of the noon one, so a static time does not move it."
             : "Calculated follows today's prayer times. Static uses the same clock time every day."
     }
 
