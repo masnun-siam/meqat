@@ -1,6 +1,78 @@
-# Meqat
+<p align="center">
+  <img src="Meqat/Assets.xcassets/AppIcon.appiconset/icon_256.png" alt="Meqat app icon" width="128">
+</p>
 
-macOS 14+ menu bar app for prayer times, Jumah, Duha, Tahajjud and the prohibited windows, with a per-event alert (full-screen overlay, banner or nothing). Times come from the [Aladhan API](https://aladhan.com/prayer-times-api) and are cached for offline use.
+<h1 align="center">Meqat</h1>
+
+<p align="center">Menu bar prayer times, prohibited windows and per-event alerts</p>
+
+<p align="center">
+  <a href="https://github.com/masnun-siam/meqat/releases/latest"><img src="https://img.shields.io/github/v/release/masnun-siam/meqat" alt="Latest release"></a>
+  <img src="https://img.shields.io/badge/macOS-14%2B-blue" alt="macOS 14 or later">
+  <a href="https://github.com/masnun-siam/meqat/actions/workflows/ci.yml"><img src="https://github.com/masnun-siam/meqat/actions/workflows/ci.yml/badge.svg" alt="CI status"></a>
+</p>
+
+<p align="center">
+  <a href="https://github.com/masnun-siam/meqat/releases/latest">Download</a> ·
+  <a href="#install">Install</a> ·
+  <a href="#features">Features</a>
+</p>
+
+## Demo
+
+![Menu bar dropdown listing today's events with the current one marked and a countdown](docs/images/menu.png)
+
+![Full-screen overlay showing the event name, its time window and a Dismiss button](docs/images/overlay.png)
+
+![Settings window on the Fajr pane: time source, alert style, start alert offset](docs/images/settings.png)
+
+## Why
+
+Prayer times are easy to find, but a desktop tool that fits how a person actually prays is harder. One alert style for every prayer is easy to miss or too intrusive, and the prohibited windows, Duha, Jumah and Tahajjud get little attention. Meqat lets you choose how hard each event interrupts you, shows the prohibited windows, and keeps working offline or while travelling.
+
+## Features
+
+| Area | What you get |
+|---|---|
+| Events | 11 events: the 5 prayers, Jumah (Fridays), Duha, Tahajjud and the 3 prohibited windows (Shuruq, Istiwa, Ghurub) |
+| Alerts | Per-event style (full-screen overlay, banner or silent), start offset, end alert and pre-warning |
+| Mosque times | Static times to match your mosque instead of the calculated ones |
+| Menu bar | Countdown to the next event; shows ⛔ and the time left inside a prohibited window |
+| Offline | 30+ days of cached times |
+| Location | Automatic, or a manually entered city |
+| Calculation | Choose the calculation method and Asr school |
+| System | Launch at login; About pane and an update notice when a newer release exists |
+
+## Install
+
+Requires macOS 14 (Sonoma) or later.
+
+```sh
+brew install masnun-siam/tap/meqat
+```
+
+Or download the DMG from the [releases page](https://github.com/masnun-siam/meqat/releases) and drag Meqat to Applications.
+
+The build is not notarized, so macOS blocks the first launch. Run once:
+
+```sh
+xattr -dr com.apple.quarantine /Applications/Meqat.app
+```
+
+or open the app, then choose Open Anyway in System Settings › Privacy & Security.
+
+## Usage / first launch
+
+Meqat lives in the menu bar and has no Dock icon. On first launch it asks for your location, or you can enter a city instead. Open Settings from the dropdown to set the calculation method, the alert style of each event and more.
+
+## Privacy
+
+- Coordinates are rounded to about 1 km before use.
+- Only the rounded coordinates, or the city you typed, go to `api.aladhan.com`.
+- The only other request is the update check to GitHub.
+- No telemetry and no accounts.
+
+## Development
 
 | Part | Path | What |
 |---|---|---|
@@ -10,12 +82,12 @@ macOS 14+ menu bar app for prayer times, Jumah, Duha, Tahajjud and the prohibite
 
 No services, ports or third-party packages.
 
-## Prerequisites
+### Prerequisites
 
 - macOS 14 or later, Xcode 26 or later (CI uses the `macos-26` runner; older SDKs report Sendable warnings, which fail the build).
 - For commits: `brew install pre-commit && pre-commit install` (installs the pre-commit and pre-push hooks).
 
-## Quickstart
+### Quickstart
 
 ```sh
 make help     # list targets
@@ -43,7 +115,7 @@ See `Meqat/Debug/`.
 make test-live
 ```
 
-## Checks
+### Checks
 
 | Where | What |
 |---|---|
@@ -54,21 +126,10 @@ make test-live
 
 Warnings are errors in `make test` and `make build`. Formatting rules: `.swift-format`.
 
-## Install
-
-```sh
-brew install masnun-siam/tap/meqat
-```
-
-Or download the DMG from the [releases page](https://github.com/masnun-siam/meqat/releases).
-
 ## Docs
 
-| Doc | For |
-|---|---|
-| `CLAUDE.md` | Rules for AI agents (`AGENTS.md` links to it) |
-| `docs/guides/meqatcore-conventions.md` | How MeqatCore code is written |
-| `docs/guides/app-conventions.md` | How the app target is written |
-| `docs/guides/engineering-workflow.md` | Issues, branches, PRs, board |
-| `docs/prds/meqat.md` | Product requirements |
-| `docs/release-checklist.md` | Release steps and manual checks |
+Docs index: [`docs/README.md`](docs/README.md). Conventions, workflow, PRD and release steps are linked from there and from `CLAUDE.md` (rules for AI agents; `AGENTS.md` links to it).
+
+## Credits
+
+Prayer times come from the [Aladhan API](https://aladhan.com/prayer-times-api).
