@@ -53,7 +53,9 @@ final class AppEnvironment {
         wire()
 
         provider.apply(store.settings.location)
-        UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound]) { _, _ in }
+        UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound]) { [weak self] _, _ in
+            Task { @MainActor in await self?.scheduler.refreshAuthorization() }
+        }
         LoginItemSync.apply(store.settings.general.launchAtLogin, to: loginItem)
         syncAndRebuild(.periodic)
         activity.interval = 2 * 3600
@@ -217,7 +219,10 @@ final class AppEnvironment {
         actions.tryAgain = { [unowned self] in refreshNow() }
         actions.openSettings = { [unowned self] in openSettings(.general) }
         actions.openLocationPane = { [unowned self] in openSettings(.location) }
-        actions.dropdownOpened = { [unowned self] in clearBannerNow() }
+        actions.dropdownOpened = { [unowned self] in
+            clearBannerNow()
+            Task { await scheduler.refreshAuthorization() }
+        }
         return actions
     }
 

@@ -30,6 +30,7 @@ Run on the notarized build installed to `/Applications`.
 - [ ] Permission denied: deny location in System Settings; the app shows its denied state and manual-location path.
 - [ ] Launch at login: with the setting on, Meqat is running after a reboot; with it off, it is not (FR-18).
 - [ ] No Dock icon: Meqat appears only in the menu bar.
+- [ ] System Settings › Notifications lists Meqat with its app icon. If it is missing after an upgrade, run `lsregister -f /Applications/Meqat.app` and `killall usernoted NotificationCenter`.
 - [ ] Memory under 35 MB: Activity Monitor › Memory column, 10 minutes after launch, before Settings or an overlay has been opened.
 - [ ] Overlay replacement: a second alert replaces the overlay shown by the first.
 - [ ] Lock screen: lock the Mac across an alert; the alert behaves as designed.
