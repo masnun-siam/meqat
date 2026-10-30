@@ -12,7 +12,7 @@ Read before changing `Meqat/` (AppKit + SwiftUI, macOS 14+). The app target wire
 | `Meqat/Overlay` | Full-screen alert panels | `OverlayController.swift` |
 | `Meqat/Settings` | Settings window and panes | `SettingsWindowController.swift` |
 | `Meqat/Debug` | DEBUG-only harnesses | `DebugHarness.swift` |
-| `Config/` | `Meqat.entitlements`, `ExportOptions.plist` | `Meqat.entitlements` |
+| `Config/` | `Meqat.entitlements` | `Meqat.entitlements` |
 
 ## Lifecycle and entry point
 
@@ -103,7 +103,7 @@ Add one:
 
 - `project.pbxproj` is **not** edited per file. `Meqat/` is a `PBXFileSystemSynchronizedRootGroup` (`objectVersion = 77`): any file under `Meqat/` joins the `Meqat` target on build. Create the file; do not touch the pbxproj.
 - Exceptions: files outside `Meqat/` (such as `Config/Meqat.entitlements`) are plain file references, and `MeqatCore` is a local package reference. Changing either needs a pbxproj edit.
-- Build: `xcodebuild -project Meqat.xcodeproj -scheme Meqat -configuration Debug -destination 'platform=macOS' CODE_SIGNING_ALLOWED=NO build`.
+- Build: `xcodebuild -project Meqat.xcodeproj -scheme Meqat -configuration Debug -destination 'platform=macOS' CODE_SIGN_STYLE=Manual CODE_SIGN_IDENTITY=- CODE_SIGN_ENTITLEMENTS= DEVELOPMENT_TEAM= build`.
 - Deployment target is 14.0 in both configs; do not use newer APIs without availability checks.
 
 ## Entitlements and permissions
