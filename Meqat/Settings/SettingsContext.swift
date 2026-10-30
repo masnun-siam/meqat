@@ -17,4 +17,8 @@ final class SettingsContext {
     var updateStatus: UpdateStatus = .idle
     var lastCheckedText: String?
     var checkNow: @MainActor () -> Void = {}
+    var testOverlay: @MainActor () -> Void = {}
+    var testBanner: @MainActor () -> Void = {}
+    var refreshAuthorization: @MainActor () -> Void = {}
+    var notificationsAuthorized = true
 }

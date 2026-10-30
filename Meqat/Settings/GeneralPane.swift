@@ -3,6 +3,7 @@ import SwiftUI
 
 struct GeneralPane: View {
     @Bindable var store: SettingsStore
+    let context: SettingsContext
     @State private var confirmingReset = false
 
     var body: some View {
@@ -51,10 +52,21 @@ struct GeneralPane: View {
                     range: Bounds.overlayTimeoutSeconds, unit: "s")
             }
             Section {
+                Button("Show test overlay") { context.testOverlay() }
+                Button("Send test banner") { context.testBanner() }
+            } header: {
+                Text("Test alerts")
+            } footer: {
+                if !context.notificationsAuthorized {
+                    Text("Notifications are off for Meqat. Turn them on in System Settings › Notifications.")
+                }
+            }
+            Section {
                 Button("Reset all settings…") { confirmingReset = true }
             }
         }
         .formStyle(.grouped)
+        .onAppear { context.refreshAuthorization() }
         .confirmationDialog("Reset all settings?", isPresented: $confirmingReset) {
             Button("Reset all settings", role: .destructive) { store.resetAll() }
         } message: {

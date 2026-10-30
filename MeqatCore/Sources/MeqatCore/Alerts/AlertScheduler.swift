@@ -6,6 +6,7 @@ import os
 @MainActor @Observable
 public final class AlertScheduler {
     static let lateTolerance: TimeInterval = 5
+    static let testBannerID = "meqat.test-banner"
 
     public private(set) var notificationsAuthorized = false
     @ObservationIgnored public var onFullScreen: ((PlannedAlert) -> Void)?
@@ -79,6 +80,17 @@ public final class AlertScheduler {
     /// Re-reads notification permission without rebuilding the schedule.
     public func refreshAuthorization() async {
         notificationsAuthorized = await center.isAuthorized()
+    }
+
+    /// Delivers a banner at once so the user can check notifications work. Leaves the plan and timer alone.
+    public func sendTestBanner() async {
+        let content = UNMutableNotificationContent()
+        content.title = "Meqat test alert"
+        content.sound = .default
+        let request = UNNotificationRequest(identifier: Self.testBannerID, content: content, trigger: nil)
+        do { try await center.add(request) } catch {
+            logger.error("Adding the test banner failed: \(error.localizedDescription, privacy: .public)")
+        }
     }
 
     private func request(for alert: PlannedAlert) -> UNNotificationRequest {
