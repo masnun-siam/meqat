@@ -29,7 +29,7 @@ struct SettingsView: View {
             .navigationSplitViewColumnWidth(min: 150, ideal: 170, max: 220)
         } detail: {
             switch navigation.selection {
-            case .general: GeneralPane(store: store)
+            case .general: GeneralPane(store: store, context: context)
             case .location: LocationPane(store: store, context: context)
             case .about: AboutPane(store: store, context: context)
             case .event(let id): EventPane(eventID: id, store: store, context: context)

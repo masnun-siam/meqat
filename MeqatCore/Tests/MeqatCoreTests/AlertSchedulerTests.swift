@@ -193,6 +193,29 @@ final class AlertSchedulerTests: XCTestCase {
         XCTAssertEqual(center.requests.map(\.identifier), ["b"])
     }
 
+    func testSendTestBannerAddsImmediateRequest() async {
+        let s = make { [] }
+        await s.sendTestBanner()
+        XCTAssertEqual(center.requests.map(\.identifier), [AlertScheduler.testBannerID])
+        XCTAssertNil(center.requests[0].trigger)
+        XCTAssertEqual(center.requests[0].content.title, "Meqat test alert")
+    }
+
+    func testSendTestBannerLeavesPlanAndTimer() async {
+        let s = make { [self.alert("a", 60, .banner)] }
+        await rebuild(s)
+        let armed = timer.armed
+        await s.sendTestBanner()
+        XCTAssertEqual(center.requests.map(\.identifier), ["a", AlertScheduler.testBannerID])
+        XCTAssertEqual(timer.armed, armed)
+    }
+
+    func testFailedTestBannerDoesNotThrow() async {
+        center.failingIDs = [AlertScheduler.testBannerID]
+        await make { [] }.sendTestBanner()
+        XCTAssertTrue(center.requests.isEmpty)
+    }
+
     func testFajrOffsetChangeMovesEveryFajrStart() async throws {
         let decoder = JSONDecoder()
         decoder.dateDecodingStrategy = .iso8601

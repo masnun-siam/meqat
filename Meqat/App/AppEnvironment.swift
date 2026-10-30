@@ -58,6 +58,16 @@ final class AppEnvironment {
         statusItem = StatusItemController(state: { [unowned self] in menuState() }, actions: menuActions())
         wire()
         context.checkNow = { [unowned self] in updateChecker.check(.manual) }
+        context.testOverlay = { [unowned self] in
+            let now = Date()
+            overlay.show(
+                OverlayContent(
+                    eventName: "Test alert", start: now, end: now + 3600,
+                    timeoutSeconds: store.settings.general.overlayTimeoutSeconds,
+                    timeFormat: store.settings.general.timeFormat))
+        }
+        context.testBanner = { [unowned self] in Task { await scheduler.sendTestBanner() } }
+        context.refreshAuthorization = { [unowned self] in Task { await scheduler.refreshAuthorization() } }
         if store.settings.general.checkForUpdates { updateScheduler.start(after: UpdateScheduler.launchDelay) }
 
         provider.apply(store.settings.location)
@@ -290,6 +300,7 @@ final class AppEnvironment {
         let format = Self.lastSyncFormat(timeZone, store.settings.general.timeFormat)
         context.lastSyncText = coordinator.status.lastSuccess.map { format.string(from: $0) }
         context.updateStatus = updateChecker.status
+        context.notificationsAuthorized = scheduler.notificationsAuthorized
         if case .upToDate(let checkedAt) = updateChecker.status {
             context.lastCheckedText = format.string(from: checkedAt)
         } else {

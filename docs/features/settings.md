@@ -34,7 +34,7 @@ A `.fixed` source with no `staticTime` behaves as calculated.
 | `SettingsWindowController` | `.shared`; `show(pane:)` selects a pane and opens the 680x480 "Meqat Settings" window (created once, reused). `store` must be set first. |
 | `SettingsView` | `NavigationSplitView`: General, Location, then one row per event (prohibited events get a ⛔). `SettingsNavigation.selection` is a `SettingsPane` |
 | `SettingsContext` | runtime data panes show, not settings: `calculatedWindows`, `lookupStatus`, `place`, `coordinatesText`, `lastSyncText` |
-| `GeneralPane` | Launch at login; Calculation method (`CalculationMethod.all`); Asr school; Time format; three prohibited-window durations; "Reset all settings…" with confirmation |
+| `GeneralPane` | Launch at login; Calculation method (`CalculationMethod.all`); Asr school; Time format; three prohibited-window durations; Full-Screen overlay timeout; Test alerts ("Show test overlay", "Send test banner", with a note when notifications are off); "Reset all settings…" with confirmation |
 | `LocationPane` | Automatic/Manual radio; manual City/Country/State fields normalized by `ManualCityInput`; "Look up" calls `setManualLocation`; shows `lookupStatus` and last sync |
 | `EventPane` | Time source (Calculated/Static + time picker), Style, Start alert (offset), End alert, Pre-warning, Overlay minimum hold, Reset to defaults |
 
