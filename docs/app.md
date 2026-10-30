@@ -103,5 +103,4 @@ From `Meqat.xcodeproj/project.pbxproj` (Debug and Release agree on these):
 | Debug only | `SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG` (enables `Debug/`) |
 | Dependency | Local Swift package `MeqatCore` (`relativePath = MeqatCore`) |
 
-`Config/Meqat.entitlements`: `com.apple.security.app-sandbox`, `com.apple.security.network.client`, `com.apple.security.personal-information.location` (all true).
-`Config/ExportOptions.plist`: developer-id export, manual signing, placeholder `TEAM_ID`; copied by `scripts/release.sh`.
+`Config/Meqat.entitlements`: `com.apple.security.app-sandbox`, `com.apple.security.network.client`, `com.apple.security.personal-information.location` (all true). `make build` and `scripts/release.sh` override `CODE_SIGN_ENTITLEMENTS` to empty and sign ad hoc, so shipped builds carry none and the sandbox stays off.

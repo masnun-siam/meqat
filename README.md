@@ -6,7 +6,7 @@ macOS 14+ menu bar app for prayer times, Jumah, Duha, Tahajjud and the prohibite
 |---|---|---|
 | MeqatCore | `MeqatCore/` | Swift package with all logic and its XCTest suite |
 | Meqat app | `Meqat/`, `Meqat.xcodeproj` | AppKit + SwiftUI menu bar app (scheme `Meqat`) |
-| Release | `scripts/release.sh`, `Config/` | Signed, notarized DMG, built on the owner's Mac |
+| Release | `scripts/release.sh`, `Config/` | Ad-hoc signed, un-notarized DMG, built on the owner's Mac |
 
 No services, ports or third-party packages.
 
@@ -20,7 +20,7 @@ No services, ports or third-party packages.
 ```sh
 make help     # list targets
 make test     # MeqatCore tests (the live Aladhan test is skipped)
-make build    # unsigned Debug app
+make build    # ad-hoc signed Debug app
 make run      # build and launch: a text item (next event) appears in the menu bar, no Dock icon
 make check    # lint + test + build, what CI runs
 ```

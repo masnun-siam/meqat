@@ -4,7 +4,8 @@
 BUILD_DIR ?= $(or $(TMPDIR),/tmp/)meqat/$(notdir $(CURDIR))
 APP := $(BUILD_DIR)/dd/Build/Products/Debug/Meqat.app
 XCODEBUILD := xcodebuild -project Meqat.xcodeproj -scheme Meqat -configuration Debug \
-	-destination 'platform=macOS' -derivedDataPath $(BUILD_DIR)/dd CODE_SIGNING_ALLOWED=NO
+	-destination 'platform=macOS' -derivedDataPath $(BUILD_DIR)/dd \
+	CODE_SIGN_STYLE=Manual CODE_SIGN_IDENTITY=- CODE_SIGN_ENTITLEMENTS= DEVELOPMENT_TEAM=
 
 .PHONY: help check lint format test test-live build run clean
 
@@ -25,7 +26,7 @@ test: ## MeqatCore tests, warnings as errors
 test-live: ## MeqatCore tests including the live Aladhan API
 	MEQAT_LIVE_TESTS=1 swift test --package-path MeqatCore --scratch-path $(BUILD_DIR)/core
 
-build: ## Unsigned Debug app, warnings as errors
+build: ## Ad-hoc signed Debug app, warnings as errors
 	$(XCODEBUILD) SWIFT_TREAT_WARNINGS_AS_ERRORS=YES build
 
 run: build ## Build and launch the app (HARNESS=Overlay|Menu|Settings|LoginItem for a debug harness)

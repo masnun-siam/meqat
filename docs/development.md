@@ -22,7 +22,7 @@ Quickstart commands are in the root `README.md`; this doc is the detail behind t
 | `lint` / `format` | `swift format lint --strict` / `format --in-place` over `MeqatCore` and `Meqat` |
 | `test` | `swift test --package-path MeqatCore` with `-warnings-as-errors` |
 | `test-live` | same with `MEQAT_LIVE_TESTS=1` (hits `api.aladhan.com`, see `AladhanLiveTests.swift`) |
-| `build` | unsigned Debug `xcodebuild` with `SWIFT_TREAT_WARNINGS_AS_ERRORS=YES` |
+| `build` | ad-hoc signed Debug `xcodebuild` with `SWIFT_TREAT_WARNINGS_AS_ERRORS=YES` |
 | `run` | `build`, then `open -n` the app; `HARNESS=<Name>` adds `--args -MeqatDebugHarness <Name>` |
 | `clean` | removes this worktree's `BUILD_DIR` |
 
@@ -78,4 +78,4 @@ flowchart LR
 
 ## Release
 
-Signed builds, notarization and the Homebrew cask are done by the owner on their Mac: `docs/release-checklist.md` and `scripts/release.sh` (`--dry-run` builds an unsigned DMG in `build/release/`). `Config/ExportOptions.plist` is the export template; `Config/Meqat.entitlements` holds App Sandbox, `network.client` and location.
+Releases and the Homebrew cask are done by the owner on their Mac: `docs/release-checklist.md` and `scripts/release.sh`, which builds an ad-hoc signed, un-notarized DMG in `build/release/` with no credentials or network. Ad-hoc signing (`CODE_SIGN_STYLE=Manual CODE_SIGN_IDENTITY=- CODE_SIGN_ENTITLEMENTS= DEVELOPMENT_TEAM=`) binds the bundle ID and `Info.plist` to the signature, which Notification Center needs to register the app. The release build also sets `CODE_SIGN_INJECT_BASE_ENTITLEMENTS=NO ENABLE_HARDENED_RUNTIME=NO`, so it carries no `get-task-allow` and, like 1.x, no hardened runtime (which would need the location entitlement). `Config/Meqat.entitlements` holds App Sandbox, `network.client` and location, but no build embeds it.
