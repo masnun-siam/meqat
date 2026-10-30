@@ -18,7 +18,7 @@ flowchart LR
 
 ## MenuInput (no clock reads, no I/O)
 
-`now`, `timeZone`, `events` (engine output for yesterday..day after tomorrow), `styles` (per-event `AlertStyle`), `place`, `hasScheduleForToday`, `sync: MenuSyncInfo`, `location: MenuLocationInfo`, `notificationsAuthorized`, `bannerNow`, `showsCouldntRefresh`. `AppEnvironment.menuState()` builds it; `MenuSyncInfo(SyncStatus)` and `MenuLocationInfo(LocationState)` map core state (in `App/Composition.swift`).
+`now`, `timeZone`, `events` (engine output for yesterday..day after tomorrow), `styles` (per-event `AlertStyle`), `place`, `hasScheduleForToday`, `sync: MenuSyncInfo`, `location: MenuLocationInfo`, `notificationsAuthorized`, `bannerNow`, `showsCouldntRefresh`, `updateNotice: UpdateNotice?` (version and release URL) and `checksForUpdates` (defaults `nil`, `true`). `AppEnvironment.menuState()` builds it; `MenuSyncInfo(SyncStatus)` and `MenuLocationInfo(LocationState)` map core state (in `App/Composition.swift`).
 
 ## Status title (first match wins)
 
@@ -51,6 +51,7 @@ flowchart LR
 
   Precedence: awaiting permission, then fetching (syncing or awaiting fix), then missing location, then last failure; no failure means fetching.
 - "Notifications are off — Open System Settings" row when `!notificationsAuthorized` (opens the Notifications settings pane URL).
+- `MenuState.updateRow` (`MenuUpdateRow`: `Update available — <x.y.z>` and the release URL) is set only when `updateNotice` is present and `checksForUpdates` is on, with or without a schedule; not rendered yet.
 - Footer text (first match): `Couldn't refresh`, `Syncing…`, `Offline — using cache from d MMM`, `Synced HH:mm` (today) or `Synced d MMM HH:mm`, empty. Times follow `MenuInput.timeFormat` (`h:mm a` when 12-hour). Buttons: Refresh now (disabled while fetching), Settings…, Quit.
 
 ## "Couldn't refresh"
