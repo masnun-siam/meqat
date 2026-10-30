@@ -1,6 +1,6 @@
 import Foundation
 
-/// FR-3, FR-13, FR-15 and FR-16: what the status item and dropdown show. No I/O, no clock reads.
+/// FR-3, FR-13, FR-15 and FR-16, and FR-5 of the about-and-updates PRD: what the status item and dropdown show. No I/O, no clock reads.
 public enum MenuPresenter {
     private static let crescent = "☾"
 
@@ -9,10 +9,14 @@ public enum MenuPresenter {
         let now = input.now
         let footer = footerStatus(input, f)
         let notificationsOff = !input.notificationsAuthorized
+        let updateRow =
+            input.checksForUpdates
+            ? input.updateNotice.map { MenuUpdateRow(title: "Update available — \($0.version)", url: $0.releaseURL) } : nil
         guard input.hasScheduleForToday else {
             return MenuState(
                 statusTitle: crescent, statusAccessibilityLabel: "Meqat", header: nil, rows: [], emptyState: emptyState(input),
-                showsNotificationsOffRow: notificationsOff, footerStatus: footer, refreshEnabled: !input.sync.isFetching)
+                showsNotificationsOffRow: notificationsOff, updateRow: updateRow, footerStatus: footer,
+                refreshEnabled: !input.sync.isFetching)
         }
 
         let valid = input.events.filter { $0.interval != nil }
@@ -53,7 +57,7 @@ public enum MenuPresenter {
         return MenuState(
             statusTitle: title, statusAccessibilityLabel: label, header: header,
             rows: rows(input, today: today, next: next, f), emptyState: nil,
-            showsNotificationsOffRow: notificationsOff, footerStatus: footer, refreshEnabled: !input.sync.isFetching)
+            showsNotificationsOffRow: notificationsOff, updateRow: updateRow, footerStatus: footer, refreshEnabled: !input.sync.isFetching)
     }
 
     // MARK: Rows

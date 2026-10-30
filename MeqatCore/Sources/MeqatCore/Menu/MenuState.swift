@@ -42,6 +42,11 @@ public enum MenuEmptyState: Sendable, Equatable {
     }
 }
 
+public struct MenuUpdateRow: Sendable, Equatable {
+    public let title: String
+    public let url: URL
+}
+
 public struct MenuState: Sendable, Equatable {
     public let statusTitle: String
     public let statusAccessibilityLabel: String
@@ -50,6 +55,8 @@ public struct MenuState: Sendable, Equatable {
     public let rows: [MenuRow]
     public let emptyState: MenuEmptyState?
     public let showsNotificationsOffRow: Bool
+    /// nil unless a newer version is known and the toggle is on.
+    public let updateRow: MenuUpdateRow?
     public let footerStatus: String
     public let refreshEnabled: Bool
 }
