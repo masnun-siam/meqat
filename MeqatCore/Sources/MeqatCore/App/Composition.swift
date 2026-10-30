@@ -53,6 +53,13 @@ extension MenuSyncInfo {
     }
 }
 
+extension UpdateNotice {
+    public init?(_ status: UpdateStatus) {
+        guard case .available(let version, let releaseURL) = status else { return nil }
+        self.init(version: version, releaseURL: releaseURL)
+    }
+}
+
 extension MenuLocationInfo {
     public init(_ state: LocationState) {
         switch state {
