@@ -127,6 +127,7 @@ public struct GeneralSettings: Codable, Sendable, Equatable {
     public var method: Int?
     public var school: School
     public var timeFormat: TimeFormat
+    public var checkForUpdates: Bool
     public var shuruqMinutes: Int { didSet { shuruqMinutes = Bounds.clamped(shuruqMinutes, to: Bounds.windowMinutes) } }
     public var istiwaMinutes: Int { didSet { istiwaMinutes = Bounds.clamped(istiwaMinutes, to: Bounds.windowMinutes) } }
     public var ghurubMinutes: Int { didSet { ghurubMinutes = Bounds.clamped(ghurubMinutes, to: Bounds.windowMinutes) } }
@@ -138,12 +139,13 @@ public struct GeneralSettings: Codable, Sendable, Equatable {
         launchAtLogin: Bool = true, method: Int? = nil, school: School = .shafii,
         timeFormat: TimeFormat = .twentyFour,
         shuruqMinutes: Int = 15, istiwaMinutes: Int = 10, ghurubMinutes: Int = 15,
-        overlayTimeoutSeconds: Int = 60
+        overlayTimeoutSeconds: Int = 60, checkForUpdates: Bool = true
     ) {
         self.launchAtLogin = launchAtLogin
         self.method = method
         self.school = school
         self.timeFormat = timeFormat
+        self.checkForUpdates = checkForUpdates
         self.shuruqMinutes = Bounds.clamped(shuruqMinutes, to: Bounds.windowMinutes)
         self.istiwaMinutes = Bounds.clamped(istiwaMinutes, to: Bounds.windowMinutes)
         self.ghurubMinutes = Bounds.clamped(ghurubMinutes, to: Bounds.windowMinutes)
@@ -161,7 +163,8 @@ public struct GeneralSettings: Codable, Sendable, Equatable {
             shuruqMinutes: try c.decodeIfPresent(Int.self, forKey: .shuruqMinutes) ?? d.shuruqMinutes,
             istiwaMinutes: try c.decodeIfPresent(Int.self, forKey: .istiwaMinutes) ?? d.istiwaMinutes,
             ghurubMinutes: try c.decodeIfPresent(Int.self, forKey: .ghurubMinutes) ?? d.ghurubMinutes,
-            overlayTimeoutSeconds: try c.decodeIfPresent(Int.self, forKey: .overlayTimeoutSeconds) ?? d.overlayTimeoutSeconds)
+            overlayTimeoutSeconds: try c.decodeIfPresent(Int.self, forKey: .overlayTimeoutSeconds) ?? d.overlayTimeoutSeconds,
+            checkForUpdates: try c.decodeIfPresent(Bool.self, forKey: .checkForUpdates) ?? d.checkForUpdates)
     }
 }
 
