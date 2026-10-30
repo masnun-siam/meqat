@@ -44,6 +44,10 @@ Run on the release build installed to `/Applications`.
 - [ ] "Couldn't refresh" shows for 5 s after a failed refresh (turn Wi-Fi off, refresh).
 - [ ] Idle Energy Impact averages below 1 in Activity Monitor over 10 idle minutes.
 - [ ] Alert fires within 1 s of its time after 30 minutes idle in the background (FR-12).
+- [ ] About: third sidebar row, "Version x.y.z (n)" matches the build, each of the three links opens its URL (FR-1).
+- [ ] Update check network: with a network monitor (Little Snitch or `nettop`), one request to `api.github.com` within 15 s of launch; none after relaunch with the toggle off; one at once on switching it on (FR-2).
+- [ ] Menu row: when a newer release exists, "Update available — x.y.z" opens its release page and closes the dropdown; toggling off removes it (FR-5).
+- [ ] Offline: with Wi-Fi off, the automatic check changes nothing; "Check now" shows "Couldn't check for updates"; the prayer schedule keeps updating (FR-6).
 
 ## Homebrew cask
 

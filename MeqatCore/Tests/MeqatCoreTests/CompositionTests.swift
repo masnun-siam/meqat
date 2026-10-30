@@ -66,6 +66,15 @@ final class CompositionTests: XCTestCase {
         XCTAssertNil(MenuSyncInfo(status).lastFailure)
     }
 
+    func testUpdateNoticeMapping() throws {
+        let url = try XCTUnwrap(URL(string: "https://github.com/masnun-siam/meqat/releases/tag/v1.3.0"))
+        XCTAssertEqual(UpdateNotice(.available(version: "1.3.0", releaseURL: url)), UpdateNotice(version: "1.3.0", releaseURL: url))
+        XCTAssertNil(UpdateNotice(.idle))
+        XCTAssertNil(UpdateNotice(.checking))
+        XCTAssertNil(UpdateNotice(.upToDate(checkedAt: Date())))
+        XCTAssertNil(UpdateNotice(.failed))
+    }
+
     func testMenuLocationInfoMapping() {
         XCTAssertEqual(MenuLocationInfo(.awaitingPermission), .awaitingPermission)
         XCTAssertEqual(MenuLocationInfo(.awaitingFix), .awaitingFix)

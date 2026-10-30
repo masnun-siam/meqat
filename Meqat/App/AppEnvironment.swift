@@ -14,6 +14,8 @@ final class AppEnvironment {
     private let provider = LocationProvider()
     private let coordinator: SyncCoordinator
     private let scheduler: AlertScheduler
+    private let updateChecker: UpdateChecker
+    private let updateScheduler: UpdateScheduler
     private let overlay = OverlayController()
     private let loginItem = MainAppLoginItem()
     private let context = SettingsContext()
@@ -37,6 +39,10 @@ final class AppEnvironment {
             Composition.fetchParameters(location: provider.state, settings: store.settings, timeZone: .current)
         }
         self.coordinator = coordinator
+        let updateChecker = UpdateChecker(
+            installedVersion: Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "")
+        self.updateChecker = updateChecker
+        updateScheduler = UpdateScheduler { [updateChecker] in updateChecker.check(.automatic) }
         scheduler = AlertScheduler(center: UNUserNotificationCenter.current(), timer: DispatchAlertTimer()) {
             let plan = Composition.plan(cache: coordinator.cache, settings: store.settings, now: Date(), timeZone: .current)
             #if DEBUG
@@ -51,6 +57,8 @@ final class AppEnvironment {
         SettingsWindowController.shared.context = context
         statusItem = StatusItemController(state: { [unowned self] in menuState() }, actions: menuActions())
         wire()
+        context.checkNow = { [unowned self] in updateChecker.check(.manual) }
+        if store.settings.general.checkForUpdates { updateScheduler.start(after: UpdateScheduler.launchDelay) }
 
         provider.apply(store.settings.location)
         UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound]) { [weak self] _, _ in
@@ -97,6 +105,7 @@ final class AppEnvironment {
                 willSleep: { [unowned self] in scheduler.suspend() },
                 didWake: { [unowned self] in
                     syncAndRebuild(.wake)
+                    updateScheduler.wake()
                     statusItem.refresh()
                     statusItem.rearmTicker()
                 },
@@ -122,6 +131,9 @@ final class AppEnvironment {
         if old.general.launchAtLogin != new.general.launchAtLogin {
             LoginItemSync.apply(new.general.launchAtLogin, to: loginItem)
         }
+        if old.general.checkForUpdates != new.general.checkForUpdates {
+            if new.general.checkForUpdates { updateScheduler.start(after: .zero) } else { updateScheduler.stop() }
+        }
         if old.location != new.location || old.general.method != new.general.method || old.general.school != new.general.school {
             coordinator.trigger(.settingsChanged)
         }
@@ -140,6 +152,7 @@ final class AppEnvironment {
             _ = coordinator.status
             _ = provider.state
             _ = scheduler.notificationsAuthorized
+            _ = updateChecker.status
         } onChange: { [weak self] in
             Task { @MainActor in
                 self?.observedStateChanged()
@@ -253,7 +266,9 @@ final class AppEnvironment {
                 notificationsAuthorized: scheduler.notificationsAuthorized,
                 bannerNow: bannerNow,
                 showsCouldntRefresh: showsCouldntRefresh,
-                timeFormat: settings.general.timeFormat))
+                timeFormat: settings.general.timeFormat,
+                updateNotice: UpdateNotice(updateChecker.status),
+                checksForUpdates: settings.general.checkForUpdates))
     }
 
     private func refreshAll() {
@@ -272,8 +287,13 @@ final class AppEnvironment {
             todays.compactMap { e in e.calculatedInterval.map { (e.id, $0) } }, uniquingKeysWith: { first, _ in first })
         context.place = store.settings.location.placeName(timeZone: timeZone)
         context.coordinatesText = provider.coordinates.map { String(format: "%.2f, %.2f", $0.latitude, $0.longitude) }
-        context.lastSyncText = coordinator.status.lastSuccess.map {
-            Self.lastSyncFormat(timeZone, store.settings.general.timeFormat).string(from: $0)
+        let format = Self.lastSyncFormat(timeZone, store.settings.general.timeFormat)
+        context.lastSyncText = coordinator.status.lastSuccess.map { format.string(from: $0) }
+        context.updateStatus = updateChecker.status
+        if case .upToDate(let checkedAt) = updateChecker.status {
+            context.lastCheckedText = format.string(from: checkedAt)
+        } else {
+            context.lastCheckedText = nil
         }
     }
 
