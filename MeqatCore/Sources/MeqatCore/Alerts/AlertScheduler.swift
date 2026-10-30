@@ -73,6 +73,11 @@ public final class AlertScheduler {
         } else {
             arm(after: now())
         }
+        await refreshAuthorization()
+    }
+
+    /// Re-reads notification permission without rebuilding the schedule.
+    public func refreshAuthorization() async {
         notificationsAuthorized = await center.isAuthorized()
     }
 

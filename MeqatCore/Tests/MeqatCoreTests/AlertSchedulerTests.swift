@@ -173,6 +173,19 @@ final class AlertSchedulerTests: XCTestCase {
         XCTAssertFalse(s.notificationsAuthorized)
     }
 
+    func testRefreshAuthorizationFollowsCenterWithoutRebuild() async {
+        let s = make { [self.alert("a", 60, .banner)] }
+        await rebuild(s)
+        let requests = center.requests.map(\.identifier)
+        center.authorized = false
+        await s.refreshAuthorization()
+        XCTAssertFalse(s.notificationsAuthorized)
+        center.authorized = true
+        await s.refreshAuthorization()
+        XCTAssertTrue(s.notificationsAuthorized)
+        XCTAssertEqual(center.requests.map(\.identifier), requests)
+    }
+
     func testFailedAddDoesNotStopOthers() async {
         center.failingIDs = ["a"]
         let s = make { [self.alert("a", 60, .banner), self.alert("b", 90, .banner)] }
