@@ -49,29 +49,86 @@ struct MenuDropdownView: View {
             }
             .frame(maxWidth: .infinity).padding(16)
         } else {
+            if let hero = state.hero {
+                MenuHeroView(hero: hero)
+                Divider()
+            }
             VStack(spacing: 4) {
                 ForEach(state.rows) { row in
                     MenuRowView(row: row)
                 }
             }
             .padding(.horizontal, 12).padding(.vertical, 8)
+            if let summary = state.forbiddenSummary {
+                Divider()
+                HStack(spacing: 6) {
+                    Image(systemName: "nosign").foregroundStyle(.secondary)
+                    Text(summary.text).lineLimit(1)
+                }
+                .font(.system(size: 12))
+                .padding(.horizontal, 12).padding(.vertical, 8)
+                .accessibilityElement(children: .ignore)
+                .accessibilityLabel(summary.accessibilityLabel)
+            }
         }
     }
 
     private var footer: some View {
-        VStack(spacing: 6) {
-            HStack {
-                Text(state.footerStatus).foregroundStyle(.secondary).lineLimit(1)
-                Spacer()
-                Button("Refresh now") { actions.refreshNow() }.disabled(!state.refreshEnabled)
+        HStack(spacing: 10) {
+            Text(state.footerStatus).foregroundStyle(.secondary).lineLimit(1)
+            Spacer(minLength: 8)
+            Button {
+                actions.refreshNow()
+            } label: {
+                Image(systemName: "arrow.clockwise")
             }
-            HStack {
-                Button("Settings…") { actions.openSettings() }
-                Spacer()
-                Button("Quit") { actions.quit() }
+            .help("Refresh now").accessibilityLabel("Refresh now")
+            .disabled(!state.refreshEnabled)
+            Button {
+                actions.openSettings()
+            } label: {
+                Image(systemName: "gearshape")
             }
+            .help("Settings").accessibilityLabel("Settings")
+            Button("Quit") { actions.quit() }
         }
         .buttonStyle(.link).padding(12)
+    }
+}
+
+private struct MenuHeroView: View {
+    let hero: MenuHero
+
+    private var isForbidden: Bool { hero.kind == .forbidden }
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 4) {
+            Text(hero.title).font(.caption.weight(.semibold)).textCase(.uppercase)
+                .foregroundStyle(isForbidden ? Color.red : Color.secondary)
+            Text(hero.countdownText).font(.system(size: 24, weight: .semibold)).monospacedDigit()
+                .foregroundStyle(isForbidden ? Color.red : Color.primary)
+            if let progress = hero.progress {
+                // Drawn, not ProgressView: the popover is rarely key, and AppKit then draws the bar grey without its tint.
+                GeometryReader { geo in
+                    ZStack(alignment: .leading) {
+                        Capsule().fill(.quaternary)
+                        Capsule().fill(isForbidden ? Color.red : Color.accentColor).frame(width: geo.size.width * progress)
+                    }
+                }
+                .frame(height: 6)
+            }
+            HStack {
+                Text(hero.startText)
+                Spacer(minLength: 8)
+                if let next = hero.nextText { Text(next) }
+            }
+            .font(.system(size: 12)).foregroundStyle(.secondary).monospacedDigit()
+        }
+        .lineLimit(1)
+        .padding(12)
+        .background(isForbidden ? Color.red.opacity(0.08) : Color.clear)
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel(hero.accessibilityLabel)
     }
 }
 
@@ -82,8 +139,7 @@ private struct MenuRowView: View {
         switch row.marker {
         case .done: "✓"
         case .current: "●"
-        case .next: "▶"
-        case .prohibited: "⛔"
+        case .next: "○"
         case .none: ""
         }
     }
@@ -94,11 +150,9 @@ private struct MenuRowView: View {
             Text(row.name)
             Spacer(minLength: 8)
             Text(row.timeText).monospacedDigit()
-            if let detail = row.detailText { Text(detail).foregroundStyle(.secondary) }
         }
         .font(.system(size: 12))
         .lineLimit(1)
-        .opacity(row.isDimmed ? 0.5 : 1)
         .accessibilityElement(children: .ignore)
         .accessibilityLabel(row.accessibilityLabel)
     }

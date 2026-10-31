@@ -1,18 +1,41 @@
 import Foundation
 
 public enum MenuRowMarker: Sendable, Equatable {
-    case none, done, current, next, prohibited
+    case none, done, current, next
 }
 
 public struct MenuRow: Sendable, Equatable, Identifiable {
     public let id: EventID
     public let name: String
     public let marker: MenuRowMarker
-    public let isDimmed: Bool
-    /// `04:52`, `06:05–06:20`, `—` or `23:30 (prev. night)`.
+    /// `04:52`, `06:20–11:36` (Duha), `—` or `23:30 (prev. night)`.
     public let timeText: String
-    /// `ends in 1h 11m` or `1h 11m`.
-    public let detailText: String?
+    public let accessibilityLabel: String
+}
+
+public enum MenuHeroKind: Sendable, Equatable {
+    case current, forbidden, next
+}
+
+/// The dropdown's top block: the status item's event and how long is left.
+public struct MenuHero: Sendable, Equatable {
+    public let kind: MenuHeroKind
+    /// Mixed case (`Dhuhr`, `Forbidden · Noon`, `Next · Asr`); the view uppercases it.
+    public let title: String
+    /// `1h 6m left`, or `4m` for `.next`.
+    public let countdownText: String
+    /// 0…1 through the event; nil for `.next`.
+    public let progress: Double?
+    /// The event's start time.
+    public let startText: String
+    /// `Isha 18:42`; nil for `.next` or when there is no next event.
+    public let nextText: String?
+    public let accessibilityLabel: String
+}
+
+/// `Next forbidden 17:12–17:27` or `No more forbidden windows today`.
+public struct MenuForbiddenSummary: Sendable, Equatable {
+    public let text: String
     public let accessibilityLabel: String
 }
 
@@ -52,7 +75,11 @@ public struct MenuState: Sendable, Equatable {
     public let statusAccessibilityLabel: String
     /// `Wed 28 Oct · Dhaka`; nil without today's schedule.
     public let header: String?
+    /// nil without a current or next event, or without today's schedule.
+    public let hero: MenuHero?
     public let rows: [MenuRow]
+    /// nil without today's schedule.
+    public let forbiddenSummary: MenuForbiddenSummary?
     public let emptyState: MenuEmptyState?
     public let showsNotificationsOffRow: Bool
     /// nil unless a newer version is known and the toggle is on.
