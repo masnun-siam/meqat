@@ -20,7 +20,7 @@
 
 ## Demo
 
-![Menu bar dropdown listing today's events with the current one marked and a countdown](docs/images/menu.png)
+![Menu bar dropdown with a countdown hero above today's event list](docs/images/menu.png)
 
 ![Full-screen overlay showing the event name, its time window and a Dismiss button](docs/images/overlay.png)
 
