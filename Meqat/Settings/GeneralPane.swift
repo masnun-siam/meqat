@@ -61,7 +61,7 @@ struct GeneralPane: View {
                     Text("Notifications are off for Meqat. Turn them on in System Settings › Notifications.")
                 }
             }
-            Section {
+            Section("Reset") {
                 Button("Reset all settings…") { confirmingReset = true }
             }
         }
