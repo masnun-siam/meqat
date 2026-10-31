@@ -14,7 +14,8 @@ public enum MenuPresenter {
             ? input.updateNotice.map { MenuUpdateRow(title: "Update available — \($0.version)", url: $0.releaseURL) } : nil
         guard input.hasScheduleForToday else {
             return MenuState(
-                statusTitle: crescent, statusAccessibilityLabel: "Meqat", header: nil, rows: [], emptyState: emptyState(input),
+                statusTitle: crescent, statusAccessibilityLabel: "Meqat", header: nil, hero: nil, rows: [], forbiddenSummary: nil,
+                emptyState: emptyState(input),
                 showsNotificationsOffRow: notificationsOff, updateRow: updateRow, footerStatus: footer,
                 refreshEnabled: !input.sync.isFetching)
         }
@@ -56,14 +57,66 @@ public enum MenuPresenter {
         let header = f.header.string(from: now) + (input.place.map { " · \($0)" } ?? "")
         return MenuState(
             statusTitle: title, statusAccessibilityLabel: label, header: header,
-            rows: rows(input, today: today, next: next, f), emptyState: nil,
+            hero: hero(prohibited: prohibited, current: current, next: next, now, f),
+            rows: rows(input, today: today, next: next, f),
+            forbiddenSummary: forbiddenSummary(valid, today: today, now, f), emptyState: nil,
             showsNotificationsOffRow: notificationsOff, updateRow: updateRow, footerStatus: footer, refreshEnabled: !input.sync.isFetching)
+    }
+
+    // MARK: Hero and forbidden summary
+
+    /// Follows the status item: a prohibited window wins, then the current event, then the next; `bannerNow` is ignored.
+    private static func hero(
+        prohibited: ScheduledEvent?, current: ScheduledEvent?, next: ScheduledEvent?, _ now: Date, _ f: Formatters
+    ) -> MenuHero? {
+        if let e = prohibited ?? current, let iv = e.interval {
+            let isForbidden = e == prohibited
+            let cd = countdown(iv.end.timeIntervalSince(now))
+            let nextText = next.flatMap { n in n.interval.map { "\(n.id.displayName) \(f.time.string(from: $0.start))" } }
+            let spokenNext = next.flatMap { n in n.interval.map { ", next \(n.id.displayName) at \(f.time.string(from: $0.start))" } }
+            let name = e.id.displayName
+            return MenuHero(
+                kind: isForbidden ? .forbidden : .current, title: isForbidden ? forbiddenTitle(e.id) : name,
+                countdownText: "\(cd.short) left", progress: min(1, max(0, now.timeIntervalSince(iv.start) / iv.duration)),
+                startText: f.time.string(from: iv.start), nextText: nextText,
+                accessibilityLabel: "\(name), \(isForbidden ? "forbidden window" : "current"), \(cd.spoken) left\(spokenNext ?? "")")
+        }
+        guard let next, let iv = next.interval else { return nil }
+        let cd = countdown(iv.start.timeIntervalSince(now))
+        let start = f.time.string(from: iv.start)
+        return MenuHero(
+            kind: .next, title: "Next · \(next.id.displayName)", countdownText: cd.short, progress: nil, startText: start,
+            nextText: nil, accessibilityLabel: "Next, \(next.id.displayName), in \(cd.spoken), at \(start)")
+    }
+
+    private static func forbiddenTitle(_ id: EventID) -> String {
+        switch id {
+        case .shuruq: "Forbidden · Sunrise"
+        case .istiwa: "Forbidden · Noon"
+        case .ghurub: "Forbidden · Sunset"
+        default: id.displayName
+        }
+    }
+
+    /// The date's next prohibited window still to start, whatever its style.
+    private static func forbiddenSummary(_ valid: [ScheduledEvent], today: LocalDate, _ now: Date, _ f: Formatters)
+        -> MenuForbiddenSummary
+    {
+        guard
+            let iv = valid.filter({ $0.id.kind == .prohibited && $0.date == today && $0.interval!.start > now })
+                .map({ $0.interval! }).min(by: { $0.start < $1.start })
+        else {
+            let none = "No more forbidden windows today"
+            return MenuForbiddenSummary(text: none, accessibilityLabel: none)
+        }
+        let (start, end) = (f.time.string(from: iv.start), f.time.string(from: iv.end))
+        return MenuForbiddenSummary(text: "Next forbidden \(start)–\(end)", accessibilityLabel: "Next forbidden window, \(start) to \(end)")
     }
 
     // MARK: Rows
 
     private static func rows(_ input: MenuInput, today: LocalDate, next: ScheduledEvent?, _ f: Formatters) -> [MenuRow] {
-        var list = input.events.filter { $0.date == today }
+        var list = input.events.filter { $0.date == today && $0.id.kind != .prohibited }
         // A Static Tahajjud that started last night is current in today's list from its start.
         if let carried = input.events.first(where: {
             $0.id == .tahajjud && $0.date == today.adding(days: 1) && $0.startsPreviousNight
@@ -76,42 +129,27 @@ public enum MenuPresenter {
 
     private static func row(_ e: ScheduledEvent, today: LocalDate, next: ScheduledEvent?, _ now: Date, _ f: Formatters) -> MenuRow {
         let name = e.id.displayName
-        let prohibited = e.id.kind == .prohibited
         guard let iv = e.interval else {
-            return MenuRow(
-                id: e.id, name: name, marker: prohibited ? .prohibited : .none, isDimmed: false, timeText: "—", detailText: nil,
-                accessibilityLabel: "\(name), no time today")
+            return MenuRow(id: e.id, name: name, marker: .none, timeText: "—", accessibilityLabel: "\(name), no time today")
         }
-        let isRange = prohibited || e.id == .duha
+        let isRange = e.id == .duha
         let start = f.time.string(from: iv.start)
-        let range = "\(start)–\(f.time.string(from: iv.end))"
-        var timeText = isRange ? range : start
+        var timeText = isRange ? "\(start)–\(f.time.string(from: iv.end))" : start
         if e.startsPreviousNight && e.date == today { timeText += " (prev. night)" }
         let spokenTime = isRange ? "\(start) to \(f.time.string(from: iv.end))" : start
 
-        var marker = MenuRowMarker.none
-        var detail: String?
-        var label = "\(name), \(spokenTime)"
-        if iv.end <= now {
-            marker = prohibited ? .prohibited : .done
-            label = "\(name), done, \(spokenTime)"
-        } else if iv.start <= now {
-            marker = .current
-            let cd = countdown(iv.end.timeIntervalSince(now))
-            detail = "ends in \(cd.short)"
-            label = "\(name), current, \(spokenTime), ends in \(cd.spoken)"
-        } else if e == next {
-            marker = .next
-            let cd = countdown(iv.start.timeIntervalSince(now))
-            detail = cd.short
-            label = "\(name), next, \(spokenTime), in \(cd.spoken)"
-        } else if prohibited {
-            marker = .prohibited
-        }
-        if prohibited { label = "\(name), forbidden window, \(spokenTime)" }
+        let marker: MenuRowMarker =
+            if iv.end <= now { .done } else if iv.start <= now { .current } else if e == next { .next } else { .none }
+        let state: String? =
+            switch marker {
+            case .done: "done"
+            case .current: "current"
+            case .next: "next"
+            case .none: nil
+            }
         return MenuRow(
-            id: e.id, name: name, marker: marker, isDimmed: prohibited && iv.end <= now, timeText: timeText, detailText: detail,
-            accessibilityLabel: label)
+            id: e.id, name: name, marker: marker, timeText: timeText,
+            accessibilityLabel: [name, state, spokenTime].compactMap { $0 }.joined(separator: ", "))
     }
 
     // MARK: Empty state and footer
