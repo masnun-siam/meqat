@@ -2,8 +2,9 @@
     import AppKit
     import MeqatCore
 
-    /// `-MeqatDebugHarness Menu` shows the FR-15 mockup day; add `-MeqatDebugEmpty offline` for the empty state
-    /// and `-MeqatDebugUpdate 1.4.0` for the update row.
+    /// `-MeqatDebugHarness Menu` shows the FR-15 mockup day; add `-MeqatDebugEmpty offline` for the empty state,
+    /// `-MeqatDebugUpdate 1.4.0` for the update row, `-MeqatDebugNow 17:15` to start the clock at another time
+    /// (13:52 by default) and `-MeqatDebugTimeFormat 12` for 12-hour times.
     @objc(MeqatDebugMenuHarness)
     final class MenuDebugHarness: NSObject, DebugHarness {
         private static var controller: StatusItemController?
@@ -31,8 +32,11 @@
                     UpdateNotice(version: $0, releaseURL: URL(string: "https://github.com/masnun-siam/meqat/releases/tag/v\($0)")!)
                 }
                 let empty = UserDefaults.standard.string(forKey: "MeqatDebugEmpty") == "offline"
-                // Clock runs on from 13:52 so the title ticks.
-                let offset = at(13, 52).timeIntervalSinceNow
+                let defaults = UserDefaults.standard
+                let start = defaults.string(forKey: "MeqatDebugNow")?.split(separator: ":").compactMap { Int($0) } ?? []
+                // Clock runs on from the start time so the title ticks.
+                let offset = (start.count == 2 ? at(start[0], start[1]) : at(13, 52)).timeIntervalSinceNow
+                let timeFormat: TimeFormat = defaults.string(forKey: "MeqatDebugTimeFormat") == "12" ? .twelve : .twentyFour
                 let synced = at(13, 50)
                 func log(_ name: String) -> @MainActor () -> Void { { print("action:", name) } }
                 let actions = MenuActions(
@@ -46,7 +50,7 @@
                                 now: Date().addingTimeInterval(offset), timeZone: tz, events: events, styles: [.duha: .disabled],
                                 place: "Dhaka",
                                 hasScheduleForToday: !empty, sync: MenuSyncInfo(lastSuccess: synced, lastFailure: empty ? .other : nil),
-                                notificationsAuthorized: false, updateNotice: update))
+                                notificationsAuthorized: false, timeFormat: timeFormat, updateNotice: update))
                     }, actions: actions)
             }
         }
