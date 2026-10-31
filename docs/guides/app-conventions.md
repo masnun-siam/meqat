@@ -89,7 +89,7 @@ Launch: `--args -MeqatDebugHarness <Name>` (Xcode scheme args or the binary). DE
 
 - `AppDelegate` calls `DebugHarnessLauncher.runIfRequested()` first and returns early, so **no** `AppEnvironment`, status item or network runs in harness mode.
 - `DebugHarnessLauncher` (`DebugHarness.swift`) resolves `NSClassFromString("MeqatDebug<Name>Harness")`; the class must conform to `@objc protocol DebugHarness` (`static func run()`).
-- Existing: `Overlay`, `Menu`, `Settings`, `LoginItem`. Extra args are read from `UserDefaults` (`-MeqatDebugPane`, `-MeqatDebugHold`, `-MeqatDebugLookup`, `-MeqatDebugEmpty`, `-MeqatDebugWindows`).
+- Existing: `Overlay`, `Menu`, `Settings`, `LoginItem`. Extra args are read from `UserDefaults` (`-MeqatDebugPane`, `-MeqatDebugHold`, `-MeqatDebugLookup`, `-MeqatDebugEmpty`, `-MeqatDebugUpdate`, `-MeqatDebugNow`, `-MeqatDebugTimeFormat`, `-MeqatDebugWindows`).
 
 Add one:
 

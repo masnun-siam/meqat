@@ -38,7 +38,17 @@ flowchart LR
 ## Dropdown (`MenuDropdownView`, 280 pt wide)
 
 - Header `Wed 28 Oct · Dhaka` (nil without today's schedule).
-- Rows (`MenuRow`, one per event of today): marker `none/done/current/next/prohibited` -> symbol, `timeText` (`04:52`, `06:05–06:20` for prohibited and Duha, `—` when invalid, `(prev. night)` suffix), `detailText` (`ends in 1h 11m` or `1h 11m`), per-row VoiceOver label. Past prohibited rows are dimmed. A Tahajjud carried from last night replaces today's row from its start.
+- Hero (`MenuHero`, nil without a current or next event): picked like the status title (prohibited window, even Disabled, then current, then next; `bannerNow` ignored).
+
+| `kind` | `title` (view uppercases) | `countdownText` | `progress` | `startText` | `nextText` |
+|---|---|---|---|---|---|
+| `.forbidden` (red tint) | `Forbidden · Sunrise/Noon/Sunset` | `6m left` | 0…1 | window start | `Dhuhr 11:46` |
+| `.current` | `Dhuhr` | `1h 11m left` | 0…1 | event start | `Asr 15:04` (nil if no next) |
+| `.next` | `Next · Asr` | `1h 11m` | nil | next start | nil |
+
+  VoiceOver: `Dhuhr, current, 1 hour 11 minutes left, next Asr at 15:04`; `Forbidden (noon), forbidden window, 6 minutes left, next Dhuhr at 11:46`; `Next, Forbidden (noon), in 4 hours 36 minutes, at 11:36`.
+- Rows (`MenuRow`, one per non-prohibited event of today, so 7): marker `none/done/current/next` -> `""/✓/●/○`, `timeText` (`04:52`, `06:20–11:36` for Duha, `—` when invalid, `(prev. night)` suffix), VoiceOver label without countdown (`Dhuhr, current, 11:46`). A Tahajjud carried from last night replaces today's row from its start.
+- Forbidden summary (`MenuForbiddenSummary`) under the rows: `Next forbidden 17:12–17:27` for today's earliest prohibited window still to start, whatever its style, else `No more forbidden windows today`; spoken `Next forbidden window, 17:12 to 17:27`.
 - Empty state replaces rows when `hasScheduleForToday` is false (`MenuEmptyState`):
 
 | State | Message | Button |
@@ -52,7 +62,7 @@ flowchart LR
   Precedence: awaiting permission, then fetching (syncing or awaiting fix), then missing location, then last failure; no failure means fetching.
 - "Notifications are off — Open System Settings" row when `!notificationsAuthorized` (opens the Notifications settings pane URL).
 - `MenuState.updateRow` (`MenuUpdateRow`: `Update available — <x.y.z>` and the release URL) is set only when `updateNotice` is present and `checksForUpdates` is on, with or without a schedule. `MenuDropdownView` renders it as a link row above the footer divider (below the notifications-off row); clicking opens the URL and closes the popover via `dismiss`. Harness: `-MeqatDebugUpdate 1.4.0`.
-- Footer text (first match): `Couldn't refresh`, `Syncing…`, `Offline — using cache from d MMM`, `Synced HH:mm` (today) or `Synced d MMM HH:mm`, empty. Times follow `MenuInput.timeFormat` (`h:mm a` when 12-hour). Buttons: Refresh now (disabled while fetching), Settings…, Quit.
+- Footer text (first match): `Couldn't refresh`, `Syncing…`, `Offline — using cache from d MMM`, `Synced HH:mm` (today) or `Synced d MMM HH:mm`, empty. Times follow `MenuInput.timeFormat` (`h:mm a` when 12-hour). One line: status text, then ↻ (Refresh now, disabled while fetching) and ⚙ (Settings) icon buttons with matching tooltips and VoiceOver labels, then Quit.
 
 ## "Couldn't refresh"
 
@@ -79,4 +89,4 @@ flowchart LR
 
 ## Debug harness
 
-`-MeqatDebugHarness Menu`: status item with a fixed mock day, clock starting at 13:52 and running on, Duha disabled, notifications off; actions print `action: <name>`. Add `-MeqatDebugEmpty offline` for the offline empty state.
+`-MeqatDebugHarness Menu`: status item with a fixed mock day, clock starting at 13:52 and running on, Duha disabled, notifications off; actions print `action: <name>`. Add `-MeqatDebugEmpty offline` for the offline empty state, `-MeqatDebugNow 17:15` to start the clock at another time, `-MeqatDebugTimeFormat 12` for 12-hour times.

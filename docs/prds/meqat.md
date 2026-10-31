@@ -134,29 +134,32 @@ A single local user on their own Mac: Muslim engineers, remote workers and deskt
 
 - **FR-15 Menu bar status.** The status item shows a crescent icon and `<next event> in <countdown>` (for example `☾ Asr in 1h 12m`, or `☾ Asr in 12m` under an hour). The next event is the earliest event whose start is after now and whose style is not Disabled; Disabled events never count, but prohibited windows do unless Disabled. The search runs across dates, so after the last event of a day it is the next day's first eligible event. The countdown is rounded down to whole minutes, shown as `Nh Mm` (`1h 0m` on the hour) and `<1m` under a minute. It updates every minute on the minute. Inside a prohibited window it shows the FR-3 warning state instead, even when that window's style is Disabled (Disabled only silences alerts). When no event qualifies as next, it shows the crescent alone. The status item and each row have VoiceOver labels, for example "Asr, next, in 1 hour 12 minutes" and "Istiwa, prohibited window, 11:36 to 11:46".
 
-  The dropdown shows the date and place, then the 10 events of the calendar date in time order, rolling over at 00:00 local time (so Isha still running after midnight appears in the previous date's list, and Tahajjud is listed under the date of the Fajr it ends at, even if `Lastthird` falls before 00:00; a Static Tahajjud that starts the night before shows as current (●) in today's list from its start, and its start is labelled "(prev. night)" in the next day's list). A row is done once its end has passed (marked ✓; prohibited windows keep ⛔, dimmed), current while now is between its start and end (marked ●, with "ends in <countdown>"), and next when it is the status item's next event (marked ▶, with its countdown). Events that start and end with a range are shown as `start–end`: the prohibited windows and Duha. The footer has "Synced HH:mm" (or "Synced <date> HH:mm" when not today), "Syncing…" while a sync runs, or "Offline — using cache from <date>" (FR-8), then "Refresh now", "Settings…" and "Quit".
-  - Acceptance: at 13:52:30 with Dhuhr 11:46 and Asr at 15:04, the item reads `☾ Asr in 1h 11m`. The dropdown lists 10 rows: Tahajjud through Istiwa done, Dhuhr current, Asr next. With the mockup's times and defaults (Duha Disabled) at 06:20, the item reads `☾ Istiwa in 5h 16m` and Duha still has a row. With every event Disabled outside a prohibited window it shows the crescent alone, and inside Istiwa set to Disabled it still reads `⛔ Istiwa ends in Nm`.
+  The dropdown shows the date and place, then a hero for the status item's event: inside a prohibited window (even when Disabled) its name, "N left", progress through the window, its start and the next event with its time, tinted red; otherwise the current event the same way; otherwise "Next · <event>" with the countdown and its start, without progress. With neither, the hero is omitted. Below it are the 7 prayers and Duha of the calendar date in time order, rolling over at 00:00 local time (so Isha still running after midnight appears in the previous date's list, and Tahajjud is listed under the date of the Fajr it ends at, even if `Lastthird` falls before 00:00; a Static Tahajjud that starts the night before shows as current (●) in today's list from its start, and its start is labelled "(prev. night)" in the next day's list). A row is done once its end has passed (✓), current while now is between its start and end (●), and next when it is the status item's next event (○); rows carry no countdown. Duha is shown as `start–end`. A line under the list reads "Next forbidden <start>–<end>" for the next prohibited window of the date still to start, whatever its style, or "No more forbidden windows today". The footer is one line: "Synced HH:mm" (or "Synced <date> HH:mm" when not today), "Syncing…" while a sync runs, or "Offline — using cache from <date>" (FR-8), then Refresh (↻) and Settings (⚙) icon buttons with tooltips and VoiceOver labels, and "Quit".
+  - Acceptance: at 13:52:30 with Dhuhr 11:46 and Asr at 15:04, the item reads `☾ Asr in 1h 11m`. The dropdown's hero reads Dhuhr, `1h 11m left`, `11:46`, `Asr 15:04`; it lists 7 rows: Tahajjud, Fajr and Duha done, Dhuhr current, Asr next; and the line reads `Next forbidden 17:12–17:27`. With the mockup's times and defaults (Duha Disabled) at 06:20, the item reads `☾ Istiwa in 5h 16m` and Duha still has a row. With every event Disabled outside a prohibited window it shows the crescent alone, and inside Istiwa set to Disabled it still reads `⛔ Istiwa ends in Nm`.
 
 ```
 Menu bar:  ☾ Asr in 1h 11m
 
-┌──────────────────────────────┐
-│ Wed 28 Oct · Dhaka           │
-├──────────────────────────────┤
-│ ✓ Tahajjud      03:41        │
-│ ✓ Fajr          04:52        │
-│ ⛔ Shuruq       06:05–06:20  │
-│ ✓ Duha          06:20–11:36  │
-│ ⛔ Istiwa       11:36–11:46  │
-│ ● Dhuhr         11:46  ends 1h11m │
-│ ▶ Asr           15:04  1h11m │
-│ ⛔ Ghurub       17:12–17:27  │
-│   Maghrib       17:27        │
-│   Isha          18:42        │
-├──────────────────────────────┤
-│ Synced 13:50 · Refresh now   │
-│ Settings…              Quit  │
-└──────────────────────────────┘
+╭────────────────────────────────────────╮
+│ Wed 28 Oct · Dhaka                     │
+│                                        │
+│ DHUHR                                  │
+│ 1h 11m left                            │
+│ ████████████████████████░░░░░░░░░░░░░  │
+│ 11:46                        Asr 15:04 │
+├────────────────────────────────────────┤
+│ ✓ Tahajjud                       01:00 │
+│ ✓ Fajr                           04:52 │
+│ ✓ Duha                     06:20–11:36 │
+│ ● Dhuhr                          11:46 │
+│ ○ Asr                            15:04 │
+│   Maghrib                        17:27 │
+│   Isha                           18:42 │
+├────────────────────────────────────────┤
+│ ⊘ Next forbidden 17:12–17:27           │
+├────────────────────────────────────────┤
+│ Synced 13:50                 ↻  ⚙  Quit│
+╰────────────────────────────────────────╯
 ```
 *The status item and dropdown, as chosen in the interview.*
 
@@ -186,7 +189,7 @@ Menu bar:  ☾ Asr in 1h 11m
 - **FR-18 Launch at login.** A General setting, on by default after the first launch, registers the app as a login item. The app has no Dock icon.
   - Acceptance: with the setting on, Meqat is running after a reboot. With it off, it isn't. The app never appears in the Dock or the Cmd-Tab switcher.
 - **FR-19 Time format.** A General setting picks how times are shown: 24-hour (`15:04`, the default) or 12-hour (`3:04 PM`). It applies to the dropdown's times, ranges, VoiceOver labels and footer sync time, banner titles (FR-13), the overlay's time range (FR-14) and the Location pane's last sync. The examples elsewhere in this PRD show the 24-hour default. Static times are still stored as `HH:mm`.
-  - Acceptance: with 12-hour selected, a row reads `3:04 PM`, Istiwa reads `11:36 AM–11:46 AM`, the footer reads `Synced 3:04 PM`, and the Istiwa start banner reads "⛔ Istiwa · avoid praying until 11:46 AM". With the default, every string matches FR-13 and FR-15. Settings saved before this change load as 24-hour.
+  - Acceptance: with 12-hour selected, a row reads `3:04 PM`, before Istiwa the forbidden line reads `Next forbidden 11:36 AM–11:46 AM`, the footer reads `Synced 3:04 PM`, and the Istiwa start banner reads "⛔ Istiwa · avoid praying until 11:46 AM". With the default, every string matches FR-13 and FR-15. Settings saved before this change load as 24-hour.
 
 ## Edge cases
 

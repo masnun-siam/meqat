@@ -29,7 +29,7 @@ All under `MeqatCore/Sources/MeqatCore/`.
 | `LoginItem/LoginItemSync.swift` | `LoginItemService`, `MainAppLoginItem`, `LoginItemSync` | Applies `launchAtLogin` through `SMAppService`. |
 | `Menu/MenuInput.swift` | `MenuInput`, `MenuSyncInfo`, `MenuLocationInfo`, `MenuFailure` | Everything the presenter needs, as plain values. |
 | `Menu/MenuPresenter.swift` | `MenuPresenter` | Pure: `present(MenuInput) -> MenuState`. |
-| `Menu/MenuState.swift` | `MenuState`, `MenuRow`, `MenuRowMarker`, `MenuEmptyState`, `MenuEmptyAction` | What the dropdown and status title render. |
+| `Menu/MenuState.swift` | `MenuState`, `MenuHero`, `MenuHeroKind`, `MenuForbiddenSummary`, `MenuRow`, `MenuRowMarker`, `MenuEmptyState`, `MenuEmptyAction` | What the dropdown and status title render. |
 | `Overlay/OverlayHold.swift` | `OverlayHold` | Countdown logic for the overlay's hold time. |
 | `Settings/AppSettings.swift` | `AppSettings`, `GeneralSettings`, `LocationSettings`, `EventSettings`, `StartAlert`, `LeadAlert`, `AlertStyle`, `TimeSource`, `School`, `LocationMode`, `Bounds` | Settings model, Codable with defaults. |
 | `Settings/CalculationMethod.swift` | `CalculationMethod` | Static list of 23 Aladhan methods. |
