@@ -32,7 +32,7 @@ Every Meqat user, on their own Mac. There are no roles or accounts.
 
 ## Non-goals
 
-- Downloading, installing or replacing the app (no Sparkle or similar). The main PRD's non-goal stands.
+- Downloading, installing or replacing the app. Withdrawn 2026-11-07: now specified in [in-app-update.md](in-app-update.md).
 - A system notification banner for updates. The notice lives only in the menu dropdown and the About pane.
 - Pre-release or draft builds. Only GitHub's "latest" (non-prerelease, non-draft) release counts.
 - Release notes inside the app. The release page shows them.
@@ -202,6 +202,7 @@ None.
 ## Change log
 
 - 2026-10-30: Settled three gaps found while refining the issues: a joined manual check fails visibly (Edge cases "Concurrency"), the menu row follows the current status (Edge cases "Menu row source"), and "Last checked" shows date and time (FR-4). Issues affected: #84, #87, #88.
+- 2026-11-07: Non-goal "Downloading, installing or replacing the app" withdrawn; `in-app-update.md` adds a click-to-install update on top of FR-4 and FR-5. Epic #78 is closed and unchanged; the work goes to that PRD's own epic.
 
 ## Related
 
