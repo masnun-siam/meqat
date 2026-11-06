@@ -38,40 +38,21 @@ struct EventPane: View {
                     }
                 }
             }
-            Picker(selection: event.style) {
-                Text("Full-Screen Focus").tag(AlertStyle.fullScreen)
-                Text("Banner").tag(AlertStyle.banner)
-                Text("Disabled").tag(AlertStyle.disabled)
-            } label: {
-                Text("Style")
-                Text(
-                    "Full-Screen Focus covers the screen, Banner shows a notification, "
-                        + "Disabled turns off every alert for this event.")
-            }
             Section("Start alert") {
-                Toggle(isOn: event.startAlert.enabled) {
-                    Text("Enabled")
-                    Text("Alert when the event starts.")
-                }
+                StylePicker(style: event.startAlert.style, help: "Alert when the event starts.")
                 NumberRow(
                     title: "Offset", help: "Minutes to shift the start alert: negative is earlier, positive is later.",
                     unit: "min", value: event.startAlert.offsetMinutes,
                     range: Bounds.offsetMinutes, signed: true)
             }
             Section("End alert") {
-                Toggle(isOn: event.endAlert.enabled) {
-                    Text("Enabled")
-                    Text("Alert before the event ends.")
-                }
+                StylePicker(style: event.endAlert.style, help: "Alert before the event ends.")
                 NumberRow(
                     title: "Lead", help: "How many minutes before the end.", unit: "min",
                     value: event.endAlert.leadMinutes, range: Bounds.leadMinutes)
             }
             Section("Pre-warning") {
-                Toggle(isOn: event.preWarning.enabled) {
-                    Text("Enabled")
-                    Text("A banner before the event starts, even when the style is Full-Screen Focus.")
-                }
+                StylePicker(style: event.preWarning.style, help: "Alert before the event starts.")
                 NumberRow(
                     title: "Lead", help: "How many minutes before the start.", unit: "min",
                     value: event.preWarning.leadMinutes, range: Bounds.leadMinutes)
@@ -122,6 +103,22 @@ struct EventPane: View {
     private func isOutsideWindow(_ settings: EventSettings) -> Bool {
         guard let time = settings.staticTime, let window = context.calculatedWindows[eventID] else { return false }
         return StaticTimeHint.isOutside(time, window: window, timeZone: .current)
+    }
+}
+
+private struct StylePicker: View {
+    @Binding var style: AlertStyle
+    let help: String
+
+    var body: some View {
+        Picker(selection: $style) {
+            Text("Full-Screen Focus").tag(AlertStyle.fullScreen)
+            Text("Banner").tag(AlertStyle.banner)
+            Text("Off").tag(AlertStyle.disabled)
+        } label: {
+            Text("Style")
+            Text(help)
+        }
     }
 }
 

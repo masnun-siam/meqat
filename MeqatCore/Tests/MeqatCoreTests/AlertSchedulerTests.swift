@@ -108,7 +108,9 @@ final class AlertSchedulerTests: XCTestCase {
 
     func testDisabledEventHasNoRequests() async {
         var settings = AppSettings()
-        settings.events[.asr]!.style = .disabled
+        settings.events[.asr]!.startAlert.style = .disabled
+        settings.events[.asr]!.endAlert.style = .disabled
+        settings.events[.asr]!.preWarning.style = .disabled
         let events = [
             ScheduledEvent(
                 id: .asr, date: LocalDate(year: 2026, month: 10, day: 28),

@@ -43,9 +43,9 @@ final class SettingsTests: XCTestCase {
             XCTAssertEqual(e.style, [.duha, .tahajjud].contains(id) ? .disabled : .banner, "\(id)")
             XCTAssertEqual(e.timeSource, .calculated)
             XCTAssertNil(e.staticTime)
-            XCTAssertEqual(e.startAlert, StartAlert(enabled: true, offsetMinutes: 0))
-            XCTAssertEqual(e.endAlert, LeadAlert(enabled: false, leadMinutes: 15))
-            XCTAssertEqual(e.preWarning, LeadAlert(enabled: false, leadMinutes: 20))
+            XCTAssertEqual(e.startAlert, StartAlert(style: [.duha, .tahajjud].contains(id) ? .disabled : .banner, offsetMinutes: 0))
+            XCTAssertEqual(e.endAlert, LeadAlert(style: .disabled, leadMinutes: 15))
+            XCTAssertEqual(e.preWarning, LeadAlert(style: .disabled, leadMinutes: 20))
         }
         XCTAssertEqual(s.events.count, 11)
         XCTAssertTrue(s.general.checkForUpdates)
@@ -60,9 +60,9 @@ final class SettingsTests: XCTestCase {
         let json = #"{"version":1,"value":{"fajr":{"style":"fullScreen","startAlert":{"enabled":false,"offsetMinutes":5}}}}"#
         defaults.set(Data(json.utf8), forKey: "settings.events")
         let fajr = store().settings[event: .fajr]
-        XCTAssertEqual(fajr.style, .fullScreen)
-        XCTAssertEqual(fajr.startAlert, StartAlert(enabled: false, offsetMinutes: 5))
-        XCTAssertEqual(fajr.preWarning, LeadAlert(enabled: false, leadMinutes: 20))
+        XCTAssertEqual(fajr.style, .disabled)
+        XCTAssertEqual(fajr.startAlert, StartAlert(style: .disabled, offsetMinutes: 5))
+        XCTAssertEqual(fajr.preWarning, LeadAlert(style: .disabled, leadMinutes: 20))
         XCTAssertEqual(store().settings[event: .dhuhr], .defaults(for: .dhuhr))
     }
 
@@ -92,7 +92,7 @@ final class SettingsTests: XCTestCase {
     func testPartialLeadAlertKeepsDefaultForMissingField() throws {
         let json = #"{"version":1,"value":{"asr":{"preWarning":{"enabled":true}}}}"#
         defaults.set(Data(json.utf8), forKey: "settings.events")
-        XCTAssertEqual(store().settings[event: .asr].preWarning, LeadAlert(enabled: true, leadMinutes: 20))
+        XCTAssertEqual(store().settings[event: .asr].preWarning, LeadAlert(style: .banner, leadMinutes: 20))
     }
 
     func testUnknownVersionGivesDefaults() {
@@ -105,10 +105,15 @@ final class SettingsTests: XCTestCase {
         XCTAssertEqual(a.offsetMinutes, 60)
         a.offsetMinutes = -999
         XCTAssertEqual(a.offsetMinutes, -60)
-        var l = LeadAlert(enabled: true, leadMinutes: 0)
+        var l = LeadAlert(style: .banner, leadMinutes: 0)
         XCTAssertEqual(l.leadMinutes, 1)
         l.leadMinutes = 500
         XCTAssertEqual(l.leadMinutes, 120)
+        var off = StartAlert(style: .disabled, offsetMinutes: -999)
+        XCTAssertEqual(off.offsetMinutes, -60)
+        off.offsetMinutes = 999
+        XCTAssertEqual(off.offsetMinutes, 60)
+        XCTAssertEqual(LeadAlert(style: .disabled, leadMinutes: 500).leadMinutes, 120)
         var g = GeneralSettings(shuruqMinutes: 3, overlayTimeoutSeconds: 9)
         XCTAssertEqual(g.overlayTimeoutSeconds, 10)
         g.overlayTimeoutSeconds = 601
@@ -125,6 +130,8 @@ final class SettingsTests: XCTestCase {
         XCTAssertEqual(try decode(LeadAlert.self, #"{"enabled":true,"leadMinutes":500}"#).leadMinutes, 120)
         XCTAssertEqual(try decode(GeneralSettings.self, #"{"overlayTimeoutSeconds":9}"#).overlayTimeoutSeconds, 10)
         XCTAssertEqual(try decode(GeneralSettings.self, #"{"overlayTimeoutSeconds":601}"#).overlayTimeoutSeconds, 600)
+        XCTAssertEqual(try decode(StartAlert.self, #"{"style":"disabled","offsetMinutes":999}"#).offsetMinutes, 60)
+        XCTAssertEqual(try decode(LeadAlert.self, #"{"style":"disabled","leadMinutes":0}"#).leadMinutes, 1)
         let old = try decode(EventSettings.self, #"{"style":"fullScreen","overlayHoldSeconds":120}"#)
         XCTAssertEqual(old.style, .fullScreen)
         let g = try decode(GeneralSettings.self, #"{"shuruqMinutes":3,"ghurubMinutes":45}"#)
@@ -139,18 +146,19 @@ final class SettingsTests: XCTestCase {
         a.settings.general.school = .hanafi
         a.settings.general.timeFormat = .twelve
         a.setManualLocation(city: "Dhaka", country: "Bangladesh", state: nil)
-        a.settings.events[.fajr]?.style = .fullScreen
+        a.settings.events[.fajr]?.startAlert.style = .fullScreen
+        a.settings.events[.fajr]?.preWarning.style = .banner
         a.settings.events[.fajr]?.timeSource = .fixed
         a.settings.events[.fajr]?.staticTime = ClockTime(hour: 4, minute: 5)
-        a.settings.events[.isha]?.endAlert = LeadAlert(enabled: true, leadMinutes: 30)
+        a.settings.events[.isha]?.endAlert = LeadAlert(style: .fullScreen, leadMinutes: 30)
         XCTAssertEqual(store().settings, a.settings)
         XCTAssertEqual(store().settings[event: .fajr].staticTime, ClockTime(hour: 4, minute: 5))
     }
 
     func testResetEvent() {
         let s = store()
-        s.settings.events[.dhuhr]?.style = .fullScreen
-        s.settings.events[.asr]?.style = .fullScreen
+        s.settings.events[.dhuhr]?.startAlert.style = .fullScreen
+        s.settings.events[.asr]?.startAlert.style = .fullScreen
         s.resetEvent(.dhuhr)
         XCTAssertEqual(s.settings[event: .dhuhr], .defaults(for: .dhuhr))
         XCTAssertEqual(s.settings[event: .asr].style, .fullScreen)
@@ -159,12 +167,113 @@ final class SettingsTests: XCTestCase {
     func testResetAllKeepsLocation() {
         let s = store()
         s.settings.general.school = .hanafi
-        s.settings.events[.asr]?.style = .disabled
+        s.settings.events[.asr]?.startAlert.style = .disabled
         s.setManualLocation(city: "Dhaka", country: "Bangladesh", state: nil)
         s.resetAll()
         XCTAssertEqual(s.settings.general, GeneralSettings())
         XCTAssertEqual(s.settings.events, AppSettings.defaultEvents)
         XCTAssertEqual(s.settings.location, LocationSettings(mode: .manual, manualCity: "Dhaka", manualCountry: "Bangladesh"))
+    }
+
+    private func loadEvents(_ value: String) -> AppSettings {
+        defaults.set(Data((#"{"version":1,"value":"# + value + "}").utf8), forKey: "settings.events")
+        return store().settings
+    }
+
+    func testLegacyFullScreenAllOnCarriesOver() {
+        let s = loadEvents(
+            #"{"fajr":{"style":"fullScreen","startAlert":{"enabled":true},"endAlert":{"enabled":true},"preWarning":{"enabled":true}}}"#)
+        let fajr = s[event: .fajr]
+        XCTAssertEqual(fajr.startAlert, StartAlert(style: .fullScreen, offsetMinutes: 0))
+        XCTAssertEqual(fajr.endAlert, LeadAlert(style: .fullScreen, leadMinutes: 15))
+        XCTAssertEqual(fajr.preWarning, LeadAlert(style: .banner, leadMinutes: 20))
+    }
+
+    func testLegacyDisabledEventTurnsAllOff() {
+        let asr = loadEvents(#"{"asr":{"style":"disabled","startAlert":{"enabled":true}}}"#)[event: .asr]
+        XCTAssertEqual([asr.startAlert.style, asr.endAlert.style, asr.preWarning.style], [.disabled, .disabled, .disabled])
+        XCTAssertEqual(asr.style, .disabled)
+    }
+
+    func testLegacyEndOffKeepsLead() {
+        let asr = loadEvents(#"{"asr":{"style":"banner","endAlert":{"enabled":false,"leadMinutes":30}}}"#)[event: .asr]
+        XCTAssertEqual(asr.startAlert, StartAlert(style: .banner))
+        XCTAssertEqual(asr.endAlert, LeadAlert(style: .disabled, leadMinutes: 30))
+        XCTAssertEqual(asr.preWarning, LeadAlert(style: .disabled, leadMinutes: 20))
+    }
+
+    func testMissingLegacyFieldsTakeOldDefaults() {
+        let s = loadEvents(#"{"fajr":{"startAlert":{"offsetMinutes":5}},"duha":{},"dhuhr":{}}"#)
+        XCTAssertEqual(s[event: .fajr].startAlert, StartAlert(style: .banner, offsetMinutes: 5))
+        XCTAssertEqual(s[event: .duha], .defaults(for: .duha))
+        XCTAssertEqual(s[event: .dhuhr], .defaults(for: .dhuhr))
+        XCTAssertEqual(s[event: .isha], .defaults(for: .isha))
+    }
+
+    func testAlertStyleWinsOverLegacyFields() {
+        let asr = loadEvents(#"{"asr":{"style":"disabled","endAlert":{"style":"banner","enabled":false}}}"#)[event: .asr]
+        XCTAssertEqual(asr.endAlert.style, .banner)
+        XCTAssertEqual(asr.startAlert.style, .disabled)
+    }
+
+    func testUnknownStyleTakesDefaultWithoutResettingGroup() {
+        let s = loadEvents(
+            #"{"fajr":{"style":"loud","startAlert":{"enabled":true}},"duha":{"style":"loud"},"#
+                + #""asr":{"startAlert":{"style":"loud","offsetMinutes":5},"endAlert":{"style":"loud","leadMinutes":30}},"#
+                + #""isha":{"startAlert":{"style":"fullScreen"}}}"#)
+        XCTAssertEqual(s[event: .fajr].startAlert.style, .banner)
+        XCTAssertEqual(s[event: .duha], .defaults(for: .duha))
+        XCTAssertEqual(s[event: .asr].startAlert, StartAlert(style: .banner, offsetMinutes: 5))
+        XCTAssertEqual(s[event: .asr].endAlert, LeadAlert(style: .disabled, leadMinutes: 30))
+        XCTAssertEqual(s[event: .isha].startAlert.style, .fullScreen)
+    }
+
+    func testDerivedEventStyle() {
+        let off = StartAlert(style: .disabled)
+        XCTAssertEqual(EventSettings(startAlert: off, endAlert: LeadAlert(style: .banner, leadMinutes: 15)).style, .banner)
+        XCTAssertEqual(EventSettings(startAlert: off, preWarning: LeadAlert(style: .fullScreen, leadMinutes: 20)).style, .fullScreen)
+        XCTAssertEqual(EventSettings(startAlert: off).style, .disabled)
+        XCTAssertEqual(
+            EventSettings(startAlert: StartAlert(style: .fullScreen), endAlert: LeadAlert(style: .banner, leadMinutes: 15)).style,
+            .fullScreen)
+    }
+
+    func testEncodingWritesLegacyFields() throws {
+        let e = EventSettings(
+            startAlert: StartAlert(style: .disabled, offsetMinutes: 5), endAlert: LeadAlert(style: .fullScreen, leadMinutes: 30),
+            preWarning: LeadAlert(style: .banner, leadMinutes: 20))
+        let json = try XCTUnwrap(JSONSerialization.jsonObject(with: JSONEncoder().encode(e)) as? [String: Any])
+        XCTAssertEqual(json["style"] as? String, "fullScreen")
+        let start = try XCTUnwrap(json["startAlert"] as? [String: Any])
+        XCTAssertEqual(start["style"] as? String, "disabled")
+        XCTAssertEqual(start["enabled"] as? Bool, false)
+        XCTAssertEqual(start["offsetMinutes"] as? Int, 5)
+        let end = try XCTUnwrap(json["endAlert"] as? [String: Any])
+        XCTAssertEqual(end["style"] as? String, "fullScreen")
+        XCTAssertEqual(end["enabled"] as? Bool, true)
+        XCTAssertEqual(end["leadMinutes"] as? Int, 30)
+        XCTAssertEqual(try JSONDecoder().decode(EventSettings.self, from: JSONEncoder().encode(e)), e)
+
+        let a = store()
+        a.settings.events[.fajr] = e
+        XCTAssertEqual(store().settings[event: .fajr], e)
+        let saved = try XCTUnwrap(defaults.data(forKey: "settings.events"))
+        let envelope = try XCTUnwrap(JSONSerialization.jsonObject(with: saved) as? [String: Any])
+        XCTAssertEqual(envelope["version"] as? Int, 1)
+    }
+
+    func testResetGivesPerAlertDefaults() {
+        let s = store()
+        s.settings.events[.isha]?.endAlert.style = .banner
+        s.settings.events[.duha]?.startAlert.style = .fullScreen
+        s.resetEvent(.isha)
+        XCTAssertEqual(s.settings[event: .isha].startAlert.style, .banner)
+        XCTAssertEqual(s.settings[event: .isha].endAlert.style, .disabled)
+        XCTAssertEqual(s.settings[event: .isha].preWarning.style, .disabled)
+        XCTAssertEqual(s.settings[event: .duha].startAlert.style, .fullScreen)
+        s.resetAll()
+        XCTAssertEqual(s.settings[event: .duha].startAlert.style, .disabled)
+        XCTAssertEqual(s.settings[event: .duha].style, .disabled)
     }
 
     func testSwitchToAutomaticClearsManual() {

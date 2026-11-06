@@ -8,10 +8,10 @@ Per-event alerts: a banner (system notification) or a full-screen overlay at a c
 
 | Field | Meaning | Default | Bound |
 |---|---|---|---|
-| `style` | `AlertStyle`: `.fullScreen`, `.banner`, `.disabled` | `.banner`; `.disabled` for `duha`, `tahajjud` | n/a |
-| `startAlert` | `enabled`, `offsetMinutes` from event start | on, 0 | `Bounds.offsetMinutes` -60...60 |
-| `endAlert` | `enabled`, `leadMinutes` before event end | off, 15 | `Bounds.leadMinutes` 1...120 |
-| `preWarning` | `enabled`, `leadMinutes` before event start | off, 20 | 1...120 |
+| `startAlert` | `style` (`AlertStyle`: `.fullScreen`, `.banner`, `.disabled` = Off), `offsetMinutes` from event start | Banner (Off for `duha`, `tahajjud`), 0 | `Bounds.offsetMinutes` -60...60 |
+| `endAlert` | `style`, `leadMinutes` before event end | Off, 15 | `Bounds.leadMinutes` 1...120 |
+| `preWarning` | `style`, `leadMinutes` before event start | Off, 20 | 1...120 |
+| `style` (read-only) | derived: Start's style if not Off, else End's, else Pre-warning's, else `.disabled`; each alert's `enabled` is derived as style is not Off. Both are still written for older builds | n/a | n/a |
 | `overlayHoldSeconds` | minimum overlay hold | 60 | `Bounds.overlayHoldSeconds` 0...300 |
 
 Details in [settings.md](settings.md).
