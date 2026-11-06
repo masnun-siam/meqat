@@ -89,15 +89,15 @@ final class AlertPlannerTests: XCTestCase {
 
     func testOverlayLineIsTitleExceptForStart() {
         let s = settings(
-            .asr, style: .fullScreen, start: StartAlert(), end: LeadAlert(enabled: true, leadMinutes: 15),
-            pre: LeadAlert(enabled: true, leadMinutes: 20))
+            .asr, style: .fullScreen, start: StartAlert(), end: LeadAlert(style: .banner, leadMinutes: 15),
+            pre: LeadAlert(style: .banner, leadMinutes: 20))
         let p = plan([event(.asr, from: at(28, 15, 4), to: at(28, 17, 0))], s)
         XCTAssertEqual(p.map(\.kind), [.preWarning, .start, .end])
         XCTAssertEqual(p.map(\.overlayLine), ["Asr in 20 min", nil, "Asr ends in 15 min"])
     }
 
     func testOverlayLineNamesProhibitedWindowsByDisplayName() {
-        let pre = LeadAlert(enabled: true, leadMinutes: 15)
+        let pre = LeadAlert(style: .banner, leadMinutes: 15)
         let windows: [(EventID, String)] = [
             (.shuruq, "⛔ Forbidden (sunrise) in 15 min"), (.istiwa, "⛔ Forbidden (noon) in 15 min"),
             (.ghurub, "⛔ Forbidden (sunset) in 15 min"),
