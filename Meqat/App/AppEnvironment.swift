@@ -64,7 +64,7 @@ final class AppEnvironment {
                 OverlayContent(
                     eventName: "Test alert", start: now, end: now + 3600,
                     timeoutSeconds: store.settings.general.overlayTimeoutSeconds,
-                    timeFormat: store.settings.general.timeFormat))
+                    timeFormat: store.settings.general.timeFormat, kindLine: nil))
         }
         context.testBanner = { [unowned self] in Task { await scheduler.sendTestBanner() } }
         context.refreshAuthorization = { [unowned self] in Task { await scheduler.refreshAuthorization() } }
@@ -105,7 +105,7 @@ final class AppEnvironment {
                 OverlayContent(
                     eventName: alert.eventID.displayName, start: alert.eventInterval.start,
                     end: alert.eventInterval.end, timeoutSeconds: store.settings.general.overlayTimeoutSeconds,
-                    timeFormat: store.settings.general.timeFormat))
+                    timeFormat: store.settings.general.timeFormat, kindLine: alert.overlayLine))
         }
         scheduler.onBannerFired = { [unowned self] alert in
             if !scheduler.notificationsAuthorized { showBannerNow(alert.eventID) }

@@ -49,6 +49,11 @@ struct OverlayView: View {
                     .accessibilityAddTraits(.isHeader)
                 Text(timeRange)
                     .font(.system(size: 40, weight: .medium))
+                if let line = model.content.kindLine {
+                    Text(line)
+                        .font(.system(size: 40, weight: .medium))
+                        .multilineTextAlignment(.center)
+                }
                 Button(action: dismiss) {
                     Text("Dismiss")
                         .font(.system(size: 22, weight: .semibold))

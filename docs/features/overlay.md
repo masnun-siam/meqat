@@ -8,7 +8,7 @@ The focus screen a `.fullScreen` alert opens. Triggered by [alerts.md](alerts.md
 
 | Symbol | File | Role |
 |---|---|---|
-| `OverlayContent` | `Overlay/OverlayContent.swift` | `eventName`, `start`, `end`, `holdSeconds` |
+| `OverlayContent` | `Overlay/OverlayContent.swift` | `eventName`, `start`, `end`, `timeoutSeconds`, `timeFormat`, `kindLine` |
 | `OverlayController` | `Overlay/OverlayController.swift` | owns panels, hold, 1 s timer, lock/sleep state |
 | `OverlayPanel` | `Overlay/OverlayPanel.swift` | borderless `NSPanel`, one per screen |
 | `OverlayModel`, `OverlayView` | `Overlay/OverlayView.swift` | SwiftUI content; model shared by all panels |
@@ -41,11 +41,12 @@ flowchart TD
 - Multi-display: `buildPanels()` makes one panel per `NSScreen.screens`; the first becomes key. On `NSApplication.didChangeScreenParametersNotification` the panels are closed and rebuilt.
 - A second `show` while one is open replaces the content and restarts the hold on the same model (no second window set). The debug harness exercises this.
 - Lock/screensaver: observes distributed notifications `com.apple.screenIsLocked/Unlocked`, `com.apple.screensaver.didstart/didstop`, and workspace will-sleep/did-wake. While locked or in screensaver, panels are closed and the hold paused; on unlock they are rebuilt and the hold resumes. If unlock happens after `content.end`, the overlay is dropped without being shown.
+- Content: event name, its window, then `kindLine` when set. `AppEnvironment` sets it to `PlannedAlert.overlayLine` (the alert's banner title for End and Pre-warning alerts, `nil` for Start, e.g. "Asr ends in 15 min"); the General pane's Test overlay passes `nil`.
 - Overlay does not persist: `dismiss()` clears content and model. Nothing is stored.
 
 ## Accessibility
 
-- Announcements via `NSAccessibility.post(.announcementRequested)` at high priority: on show (`Dismiss available in N seconds`), every 10 s of remaining hold, and when the hold ends (`Dismiss is available`). Not posted while hidden or asleep.
+- Announcements via `NSAccessibility.post(.announcementRequested)` at high priority: on show and every 10 s of remaining hold: `<event> alert. <kindLine>. Closes in N seconds`, without the kind line when it is `nil`. Not posted while hidden or asleep.
 - The event name has the header trait; the button title uses `.numericText()` transition only when Reduce Motion is off (`.identity` otherwise), and `.animation(nil, value: model.remaining)` stops other animation.
 - Gradient background chosen for white-text contrast (see comment in `OverlayView`).
 
@@ -60,4 +61,4 @@ flowchart TD
 
 ## Debug harness
 
-`-MeqatDebugHarness Overlay` (DEBUG; see `Meqat/Debug/DebugHarness.swift`): shows "Asr" after 3 s, then "Maghrib" at 23 s to test replacement. Hold is 10 s unless `-MeqatDebugHold <n>`.
+`-MeqatDebugHarness Overlay` (DEBUG; see `Meqat/Debug/DebugHarness.swift`): shows "Asr" (no kind line) after 3 s, then "Maghrib" with "Maghrib ends in 15 min" at 23 s to test replacement. Hold is 10 s unless `-MeqatDebugHold <n>`.

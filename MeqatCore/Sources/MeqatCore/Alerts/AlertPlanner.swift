@@ -14,6 +14,9 @@ public struct PlannedAlert: Equatable, Sendable {
     public let style: AlertStyle
     public let title: String
     public let eventInterval: DateInterval
+
+    /// Shown under the event on a full-screen overlay; `nil` for start alerts.
+    public var overlayLine: String? { kind == .start ? nil : title }
 }
 
 public enum AlertPlanner {
