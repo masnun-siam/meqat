@@ -127,7 +127,7 @@ Not affected. The Aladhan and GitHub requests are unchanged; no language paramet
 MeqatCore (FR-4 to FR-7):
 - **Language as an input.** A language value (English or Bangla) is an explicit input to the menu presenter and the alert planner, next to time zone and time format. They never read the process's preferred language themselves, so Bangla output is testable in `make test` on any machine.
 - **Strings.** MeqatCore ships its English and Bangla text as a localized package resource with English as the default localization, and looks strings up in the table for the language it was given. Event display names, countdown units, banner and overlay titles, menu texts and VoiceOver labels all come from it. A missing Bangla entry returns the English text.
-- **Formatting.** Display date formatters use the given language's locale (`en_US_POSIX` for English as today, `bn` for Bangla) with the same fixed date formats, which yields Bangla digits and month and weekday names. Integers inside strings (leads, countdowns) are formatted with the same locale. This replaces the written convention "every DateFormatter uses en_US_POSIX" for display formatters only; formatters that parse or build identifiers (Aladhan dates, alert ids) stay `en_US_POSIX`. The conventions guide is updated in the same change.
+- **Formatting.** Display date formatters use the given language's locale (`en_US_POSIX` for English as today, `bn@numbers=beng` for Bangla) with the same fixed date formats, which yields Bangla digits and month and weekday names. Plain `bn` is not enough: macOS formats it with Latin digits. Integers inside strings (leads, countdowns) are formatted with the same locale (`String(format:locale:)`). This replaces the written convention "every DateFormatter uses en_US_POSIX" for display formatters only; formatters that parse or build identifiers (Aladhan dates, alert ids) stay `en_US_POSIX`. The conventions guide is updated in the same change.
 - **Language resolution.** A small resolver maps the stored override and the Mac's preferred languages to English or Bangla per FR-3; it is pure and unit-tested.
 - Plain English stays byte-identical (FR-7).
 
@@ -190,12 +190,16 @@ None formally defined. There is no telemetry (main PRD non-goal).
 - Version numbers keep Latin digits — they must match the GitHub release and Homebrew cask.
 - Priority medium — no deadline stated.
 - This PRD lifts the main PRD's "localization (English only)" non-goal for Bangla only.
+- Bangla display locale is `bn@numbers=beng`, not `bn` — on macOS 14+ plain `bn` formats Latin digits, which fails FR-6 (found while refining the issues).
+- 12-hour times in Bangla keep the AM/PM markers macOS's Bangla locale gives (currently Latin "AM"/"PM"), as the Non-goals say; the "no Latin letters" checks in FR-4 and FR-5 apply to the 24-hour format, and AM/PM is an allowed exception in 12-hour format.
 
 ## Open questions
 
 None.
 
 ## Change log
+
+- 2026-11-07: Bangla locale changed from `bn` to `bn@numbers=beng` (Technical design › Backend › Formatting); AM/PM exception to the "no Latin letters" checks recorded in Decisions. Both from refining the epic #125 issues.
 
 ## Related
 
