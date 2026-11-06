@@ -143,7 +143,8 @@ final class OverlayController {
 
     private func announce() {
         guard let content, let model else { return }
-        post("\(content.eventName) alert. Closes in \(model.remaining) seconds")
+        let line = content.kindLine.map { " \($0)." } ?? ""
+        post("\(content.eventName) alert.\(line) Closes in \(model.remaining) seconds")
     }
 
     private func post(_ text: String) {

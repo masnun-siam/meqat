@@ -60,7 +60,7 @@ flowchart TD
 
 ## Wiring (`Meqat/App/AppEnvironment.swift`)
 
-- `scheduler.onFullScreen` builds `OverlayContent(eventName, start, end, holdSeconds)` from the alert and the event's `overlayHoldSeconds`, then `overlay.show(_:)`.
+- `scheduler.onFullScreen` builds `OverlayContent(eventName, start, end, timeoutSeconds, timeFormat, kindLine)` from the alert (`kindLine` = `alert.overlayLine`) and the general overlay timeout, then `overlay.show(_:)`.
 - Rebuild triggers: any settings change (`settingsChanged`), cache replaced (`onCacheReplaced`), wake, time zone change, clock change, launch (`syncAndRebuild(.periodic)`), and a 2 h `NSBackgroundActivityScheduler`.
 - Notification permission is requested at launch (`.alert`, `.sound`).
 - DEBUG builds log pending banner ids and fire times via `AppEnvironment.logPlan` (Logger category `app`).

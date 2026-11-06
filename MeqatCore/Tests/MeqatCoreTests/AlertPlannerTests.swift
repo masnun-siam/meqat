@@ -82,6 +82,29 @@ final class AlertPlannerTests: XCTestCase {
             ["⛔ Forbidden (noon) in 20 min", "Forbidden (noon) ends in 15 min", "⛔ Forbidden (noon) · avoid praying until 11:46"])
     }
 
+    func testOverlayLineIsTitleExceptForStart() {
+        let s = settings(
+            .asr, style: .fullScreen, start: StartAlert(), end: LeadAlert(enabled: true, leadMinutes: 15),
+            pre: LeadAlert(enabled: true, leadMinutes: 20))
+        let p = plan([event(.asr, from: at(28, 15, 4), to: at(28, 17, 0))], s)
+        XCTAssertEqual(p.map(\.kind), [.preWarning, .start, .end])
+        XCTAssertEqual(p.map(\.overlayLine), ["Asr in 20 min", nil, "Asr ends in 15 min"])
+    }
+
+    func testOverlayLineNamesProhibitedWindowsByDisplayName() {
+        let pre = LeadAlert(enabled: true, leadMinutes: 15)
+        let windows: [(EventID, String)] = [
+            (.shuruq, "⛔ Forbidden (sunrise) in 15 min"), (.istiwa, "⛔ Forbidden (noon) in 15 min"),
+            (.ghurub, "⛔ Forbidden (sunset) in 15 min"),
+        ]
+        for (id, expected) in windows {
+            let p = plan([event(id, from: at(28, 11, 36), to: at(28, 11, 46))], settings(id, pre: pre))
+            XCTAssertEqual(p.map(\.overlayLine), [expected])
+            let line = p.first?.overlayLine ?? ""
+            for arabic in ["Shuruq", "Istiwa", "Ghurub"] { XCTAssertFalse(line.contains(arabic)) }
+        }
+    }
+
     func testTwelveHourTitles() {
         var s = settings(.istiwa, start: StartAlert())
         s.general.timeFormat = .twelve
