@@ -42,7 +42,7 @@ public enum AlertPlanner {
     }
 
     private static func alerts(for event: ScheduledEvent, _ s: EventSettings, _ formatter: DateFormatter) -> [PlannedAlert] {
-        guard s.style != .disabled, let interval = event.interval else { return [] }
+        guard let interval = event.interval else { return [] }
         let name = event.id.displayName
         let prohibited = event.id.kind == .prohibited
         let start = formatter.string(from: interval.start)
@@ -59,18 +59,18 @@ public enum AlertPlanner {
         if s.startAlert.enabled {
             out.append(
                 make(
-                    .start, interval.start + TimeInterval(s.startAlert.offsetMinutes * 60), s.style,
+                    .start, interval.start + TimeInterval(s.startAlert.offsetMinutes * 60), s.startAlert.style,
                     prohibited ? "⛔ \(name) · avoid praying until \(end)" : "\(name) · \(start)"))
         }
         if s.endAlert.enabled {
             let lead = s.endAlert.leadMinutes
-            out.append(make(.end, interval.end - TimeInterval(lead * 60), s.style, "\(name) ends in \(lead) min"))
+            out.append(make(.end, interval.end - TimeInterval(lead * 60), s.endAlert.style, "\(name) ends in \(lead) min"))
         }
         if s.preWarning.enabled {
             let lead = s.preWarning.leadMinutes
             out.append(
                 make(
-                    .preWarning, interval.start - TimeInterval(lead * 60), .banner,
+                    .preWarning, interval.start - TimeInterval(lead * 60), s.preWarning.style,
                     "\(prohibited ? "⛔ " : "")\(name) in \(lead) min"))
         }
         return out
