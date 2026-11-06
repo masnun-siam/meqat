@@ -20,47 +20,83 @@ public enum TimeSource: String, Codable, Sendable, Equatable {
     case fixed = "static"
 }
 
-public struct StartAlert: Codable, Sendable, Equatable {
-    public var enabled: Bool
-    public var offsetMinutes: Int { didSet { offsetMinutes = Bounds.clamped(offsetMinutes, to: Bounds.offsetMinutes) } }
+/// Keys shared by `StartAlert` and `LeadAlert`. `enabled` is written for builds before per-alert styles and read only to carry their settings over.
+enum AlertCodingKeys: String, CodingKey {
+    case style, enabled, offsetMinutes, leadMinutes
+}
 
-    public init(enabled: Bool = true, offsetMinutes: Int = 0) {
-        self.enabled = enabled
+public struct StartAlert: Codable, Sendable, Equatable {
+    public var style: AlertStyle
+    public var offsetMinutes: Int { didSet { offsetMinutes = Bounds.clamped(offsetMinutes, to: Bounds.offsetMinutes) } }
+    public var enabled: Bool { style != .disabled }
+
+    public init(style: AlertStyle = .banner, offsetMinutes: Int = 0) {
+        self.style = style
         self.offsetMinutes = Bounds.clamped(offsetMinutes, to: Bounds.offsetMinutes)
     }
 
-    public init(from decoder: Decoder) throws {
-        let c = try decoder.container(keyedBy: CodingKeys.self)
+    /// `legacy` is the style this alert had in builds before per-alert styles when its `enabled` was on (default on).
+    init(from decoder: Decoder, defaults d: StartAlert, legacy: AlertStyle) throws {
+        let c = try decoder.container(keyedBy: AlertCodingKeys.self)
         self.init(
-            enabled: try c.decodeIfPresent(Bool.self, forKey: .enabled) ?? true,
-            offsetMinutes: try c.decodeIfPresent(Int.self, forKey: .offsetMinutes) ?? 0)
+            style: try c.decodeAlertStyle(default: d.style, legacy: legacy, legacyEnabled: true),
+            offsetMinutes: try c.decodeIfPresent(Int.self, forKey: .offsetMinutes) ?? d.offsetMinutes)
+    }
+
+    public init(from decoder: Decoder) throws {
+        try self.init(from: decoder, defaults: StartAlert(), legacy: .banner)
+    }
+
+    public func encode(to encoder: Encoder) throws {
+        var c = encoder.container(keyedBy: AlertCodingKeys.self)
+        try c.encode(style, forKey: .style)
+        try c.encode(enabled, forKey: .enabled)
+        try c.encode(offsetMinutes, forKey: .offsetMinutes)
     }
 }
 
 public struct LeadAlert: Codable, Sendable, Equatable {
-    public var enabled: Bool
+    public var style: AlertStyle
     public var leadMinutes: Int { didSet { leadMinutes = Bounds.clamped(leadMinutes, to: Bounds.leadMinutes) } }
+    public var enabled: Bool { style != .disabled }
 
-    public init(enabled: Bool, leadMinutes: Int) {
-        self.enabled = enabled
+    public init(style: AlertStyle, leadMinutes: Int) {
+        self.style = style
         self.leadMinutes = Bounds.clamped(leadMinutes, to: Bounds.leadMinutes)
     }
 
-    public init(from decoder: Decoder, defaults: LeadAlert) throws {
-        let c = try decoder.container(keyedBy: CodingKeys.self)
+    /// `legacy` is the style this alert had in builds before per-alert styles when its `enabled` was on (default off).
+    init(from decoder: Decoder, defaults d: LeadAlert, legacy: AlertStyle) throws {
+        let c = try decoder.container(keyedBy: AlertCodingKeys.self)
         self.init(
-            enabled: try c.decodeIfPresent(Bool.self, forKey: .enabled) ?? defaults.enabled,
-            leadMinutes: try c.decodeIfPresent(Int.self, forKey: .leadMinutes) ?? defaults.leadMinutes)
+            style: try c.decodeAlertStyle(default: d.style, legacy: legacy, legacyEnabled: false),
+            leadMinutes: try c.decodeIfPresent(Int.self, forKey: .leadMinutes) ?? d.leadMinutes)
     }
 
-    // A bare `init(from:)` has no per-field default; `EventSettings` decodes through `init(from:defaults:)`.
+    // A bare `init(from:)` has no per-field default; `EventSettings` decodes through `init(from:defaults:legacy:)`.
     public init(from decoder: Decoder) throws {
-        try self.init(from: decoder, defaults: LeadAlert(enabled: false, leadMinutes: 15))
+        try self.init(from: decoder, defaults: LeadAlert(style: .disabled, leadMinutes: 15), legacy: .banner)
+    }
+
+    public func encode(to encoder: Encoder) throws {
+        var c = encoder.container(keyedBy: AlertCodingKeys.self)
+        try c.encode(style, forKey: .style)
+        try c.encode(enabled, forKey: .enabled)
+        try c.encode(leadMinutes, forKey: .leadMinutes)
+    }
+}
+
+extension KeyedDecodingContainer where K == AlertCodingKeys {
+    /// The saved `style` (an unknown value takes `d`); without one, `legacy` when the saved `enabled` (else `legacyEnabled`) is on, else Off.
+    fileprivate func decodeAlertStyle(default d: AlertStyle, legacy: AlertStyle, legacyEnabled: Bool) throws -> AlertStyle {
+        guard contains(.style) else {
+            return try (decodeIfPresent(Bool.self, forKey: .enabled) ?? legacyEnabled) ? legacy : .disabled
+        }
+        return try decodeIfPresent(String.self, forKey: .style).flatMap(AlertStyle.init(rawValue:)) ?? d
     }
 }
 
 public struct EventSettings: Codable, Sendable, Equatable {
-    public var style: AlertStyle
     public var timeSource: TimeSource
     /// A `.fixed` source with no time behaves as calculated.
     public var staticTime: ClockTime?
@@ -68,13 +104,17 @@ public struct EventSettings: Codable, Sendable, Equatable {
     public var endAlert: LeadAlert
     public var preWarning: LeadAlert
 
+    /// The first alert style that is not Off (start, end, pre-warning), else `.disabled`. Written for builds before per-alert styles.
+    public var style: AlertStyle {
+        [startAlert.style, endAlert.style, preWarning.style].first { $0 != .disabled } ?? .disabled
+    }
+
     public init(
-        style: AlertStyle, timeSource: TimeSource = .calculated, staticTime: ClockTime? = nil,
+        timeSource: TimeSource = .calculated, staticTime: ClockTime? = nil,
         startAlert: StartAlert = StartAlert(),
-        endAlert: LeadAlert = LeadAlert(enabled: false, leadMinutes: 15),
-        preWarning: LeadAlert = LeadAlert(enabled: false, leadMinutes: 20)
+        endAlert: LeadAlert = LeadAlert(style: .disabled, leadMinutes: 15),
+        preWarning: LeadAlert = LeadAlert(style: .disabled, leadMinutes: 20)
     ) {
-        self.style = style
         self.timeSource = timeSource
         self.staticTime = staticTime
         self.startAlert = startAlert
@@ -83,31 +123,50 @@ public struct EventSettings: Codable, Sendable, Equatable {
     }
 
     public static func defaults(for id: EventID) -> EventSettings {
-        EventSettings(style: id == .duha || id == .tahajjud ? .disabled : .banner)
+        EventSettings(startAlert: StartAlert(style: id == .duha || id == .tahajjud ? .disabled : .banner))
     }
 
-    /// Decodes one event; every missing key takes the default for `id`.
+    enum CodingKeys: String, CodingKey {
+        case style, timeSource, staticTime, startAlert, endAlert, preWarning
+    }
+
+    /// Decodes one event; every missing key takes the default for `id`. Alerts without a `style` of their own
+    /// carry over the event-level `style` and `enabled` flags saved by builds before per-alert styles.
     init(from decoder: Decoder, id: EventID) throws {
         let d = Self.defaults(for: id)
         let c = try decoder.container(keyedBy: CodingKeys.self)
+        let legacy = try c.decodeIfPresent(String.self, forKey: .style).flatMap(AlertStyle.init(rawValue:)) ?? d.style
+        let legacyPre: AlertStyle = legacy == .disabled ? .disabled : .banner
         self.init(
-            style: try c.decodeIfPresent(AlertStyle.self, forKey: .style) ?? d.style,
             timeSource: try c.decodeIfPresent(TimeSource.self, forKey: .timeSource) ?? d.timeSource,
             staticTime: try c.decodeIfPresent(ClockTime.self, forKey: .staticTime) ?? d.staticTime,
-            startAlert: try c.decodeIfPresent(StartAlert.self, forKey: .startAlert) ?? d.startAlert,
-            endAlert: try c.decodeLead(forKey: .endAlert, default: d.endAlert),
-            preWarning: try c.decodeLead(forKey: .preWarning, default: d.preWarning))
+            startAlert: c.contains(.startAlert)
+                ? try StartAlert(from: c.superDecoder(forKey: .startAlert), defaults: d.startAlert, legacy: legacy)
+                : StartAlert(style: legacy, offsetMinutes: d.startAlert.offsetMinutes),
+            endAlert: try c.decodeLead(forKey: .endAlert, default: d.endAlert, legacy: legacy),
+            preWarning: try c.decodeLead(forKey: .preWarning, default: d.preWarning, legacy: legacyPre))
     }
 
     public init(from decoder: Decoder) throws {
         try self.init(from: decoder, id: .dhuhr)
     }
+
+    public func encode(to encoder: Encoder) throws {
+        var c = encoder.container(keyedBy: CodingKeys.self)
+        try c.encode(style, forKey: .style)
+        try c.encode(timeSource, forKey: .timeSource)
+        try c.encodeIfPresent(staticTime, forKey: .staticTime)
+        try c.encode(startAlert, forKey: .startAlert)
+        try c.encode(endAlert, forKey: .endAlert)
+        try c.encode(preWarning, forKey: .preWarning)
+    }
 }
 
 extension KeyedDecodingContainer {
-    fileprivate func decodeLead(forKey key: Key, default d: LeadAlert) throws -> LeadAlert {
+    /// A missing lead alert was off in builds before per-alert styles, which is also its default (Off).
+    fileprivate func decodeLead(forKey key: Key, default d: LeadAlert, legacy: AlertStyle) throws -> LeadAlert {
         guard contains(key) else { return d }
-        return try LeadAlert(from: superDecoder(forKey: key), defaults: d)
+        return try LeadAlert(from: superDecoder(forKey: key), defaults: d, legacy: legacy)
     }
 }
 

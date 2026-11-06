@@ -18,12 +18,17 @@ final class AlertPlannerTests: XCTestCase {
     }
 
     private func settings(
-        _ id: EventID, style: AlertStyle = .banner, start: StartAlert = StartAlert(enabled: false),
-        end: LeadAlert = LeadAlert(enabled: false, leadMinutes: 15),
-        pre: LeadAlert = LeadAlert(enabled: false, leadMinutes: 20)
+        _ id: EventID, style: AlertStyle = .banner, start: StartAlert = StartAlert(style: .disabled),
+        end: LeadAlert = LeadAlert(style: .disabled, leadMinutes: 15),
+        pre: LeadAlert = LeadAlert(style: .disabled, leadMinutes: 20)
     ) -> AppSettings {
+        // `style` sets Start's and End's style when on; `.disabled` turns all three Off.
+        var e = EventSettings(startAlert: start, endAlert: end, preWarning: pre)
+        if e.startAlert.enabled { e.startAlert.style = style }
+        if e.endAlert.enabled { e.endAlert.style = style }
+        if style == .disabled { e.preWarning.style = .disabled }
         var s = AppSettings()
-        s.events[id] = EventSettings(style: style, startAlert: start, endAlert: end, preWarning: pre)
+        s.events[id] = e
         return s
     }
 
@@ -32,20 +37,20 @@ final class AlertPlannerTests: XCTestCase {
     }
 
     func testDhuhrStartOffsetAndEndLead() {
-        let s = settings(.dhuhr, start: StartAlert(offsetMinutes: 5), end: LeadAlert(enabled: true, leadMinutes: 15))
+        let s = settings(.dhuhr, start: StartAlert(offsetMinutes: 5), end: LeadAlert(style: .banner, leadMinutes: 15))
         let p = plan([event(.dhuhr, from: at(28, 11, 46), to: at(28, 15, 4))], s)
         XCTAssertEqual(p.map(\.fireDate), [at(28, 11, 51), at(28, 14, 49)])
         XCTAssertEqual(p.map(\.id), ["2026-10-28.dhuhr.start", "2026-10-28.dhuhr.end"])
     }
 
     func testStaticDhuhrMovesStartOnly() {
-        let s = settings(.dhuhr, start: StartAlert(offsetMinutes: 5), end: LeadAlert(enabled: true, leadMinutes: 15))
+        let s = settings(.dhuhr, start: StartAlert(offsetMinutes: 5), end: LeadAlert(style: .banner, leadMinutes: 15))
         let p = plan([event(.dhuhr, from: at(28, 12, 30), to: at(28, 15, 4))], s)
         XCTAssertEqual(p.map(\.fireDate), [at(28, 12, 35), at(28, 14, 49)])
     }
 
     func testIshaEndAlertBeforeMidnight() {
-        let s = settings(.isha, start: StartAlert(enabled: false), end: LeadAlert(enabled: true, leadMinutes: 15))
+        let s = settings(.isha, start: StartAlert(style: .disabled), end: LeadAlert(style: .banner, leadMinutes: 15))
         let p = plan([event(.isha, from: at(28, 19, 0), to: at(29, 0, 14))], s)
         XCTAssertEqual(p.map(\.fireDate), [at(28, 23, 59)])
         XCTAssertEqual(p[0].id, "2026-10-28.isha.end")
@@ -53,7 +58,7 @@ final class AlertPlannerTests: XCTestCase {
 
     func testDisabledAndInvalidHaveNoAlerts() {
         let on = StartAlert()
-        let lead = LeadAlert(enabled: true, leadMinutes: 15)
+        let lead = LeadAlert(style: .banner, leadMinutes: 15)
         let disabled = settings(.asr, style: .disabled, start: on, end: lead, pre: lead)
         XCTAssertTrue(plan([event(.asr, from: at(28, 15, 4), to: at(28, 17, 0))], disabled).isEmpty)
         let enabled = settings(.asr, start: on, end: lead, pre: lead)
@@ -61,7 +66,7 @@ final class AlertPlannerTests: XCTestCase {
     }
 
     func testFullScreenStartEndButBannerPreWarning() {
-        let lead = LeadAlert(enabled: true, leadMinutes: 15)
+        let lead = LeadAlert(style: .banner, leadMinutes: 15)
         let s = settings(.asr, style: .fullScreen, start: StartAlert(), end: lead, pre: lead)
         let p = plan([event(.asr, from: at(28, 15, 4), to: at(28, 17, 0))], s)
         XCTAssertEqual(p.map(\.kind), [.preWarning, .start, .end])
@@ -70,12 +75,12 @@ final class AlertPlannerTests: XCTestCase {
 
     func testTitlesForPrayerAndProhibitedWindow() {
         let s1 = settings(
-            .asr, start: StartAlert(), end: LeadAlert(enabled: true, leadMinutes: 15), pre: LeadAlert(enabled: true, leadMinutes: 20))
+            .asr, start: StartAlert(), end: LeadAlert(style: .banner, leadMinutes: 15), pre: LeadAlert(style: .banner, leadMinutes: 20))
         XCTAssertEqual(
             plan([event(.asr, from: at(28, 15, 4), to: at(28, 17, 0))], s1).map(\.title),
             ["Asr in 20 min", "Asr · 15:04", "Asr ends in 15 min"])
         let s2 = settings(
-            .istiwa, start: StartAlert(), end: LeadAlert(enabled: true, leadMinutes: 15), pre: LeadAlert(enabled: true, leadMinutes: 20))
+            .istiwa, start: StartAlert(), end: LeadAlert(style: .banner, leadMinutes: 15), pre: LeadAlert(style: .banner, leadMinutes: 20))
         // end alert (11:31) precedes start (11:36)
         XCTAssertEqual(
             plan([event(.istiwa, from: at(28, 11, 36), to: at(28, 11, 46))], s2).map(\.title),
@@ -129,9 +134,9 @@ final class AlertPlannerTests: XCTestCase {
     }
 
     func testBannerCapKeepsSoonest60AndFullScreenUncapped() {
-        let on = LeadAlert(enabled: true, leadMinutes: 15)
+        let on = LeadAlert(style: .banner, leadMinutes: 15)
         var s = AppSettings()
-        for id in EventID.allCases { s.events[id] = EventSettings(style: .banner, startAlert: StartAlert(), endAlert: on, preWarning: on) }
+        for id in EventID.allCases { s.events[id] = EventSettings(startAlert: StartAlert(), endAlert: on, preWarning: on) }
         var events: [ScheduledEvent] = []
         for d in 0..<3 {
             for (n, id) in EventID.allCases.enumerated() {
@@ -143,7 +148,10 @@ final class AlertPlannerTests: XCTestCase {
         XCTAssertEqual(p.count, 60)
         XCTAssertEqual(Set(p.map(\.id)).count, 60)
 
-        for id in EventID.allCases { s.events[id]!.style = .fullScreen }
+        for id in EventID.allCases {
+            s.events[id]!.startAlert.style = .fullScreen
+            s.events[id]!.endAlert.style = .fullScreen
+        }
         let full = plan(events, s)
         XCTAssertGreaterThan(full.count, 60)
     }
@@ -152,17 +160,17 @@ final class AlertPlannerTests: XCTestCase {
         let from = at(28, 12, 0)
         let to = at(28, 14, 0)
         var s = settings(
-            .asr, start: StartAlert(offsetMinutes: -60), end: LeadAlert(enabled: true, leadMinutes: 120),
-            pre: LeadAlert(enabled: true, leadMinutes: 1))
+            .asr, start: StartAlert(offsetMinutes: -60), end: LeadAlert(style: .banner, leadMinutes: 120),
+            pre: LeadAlert(style: .banner, leadMinutes: 1))
         XCTAssertEqual(plan([event(.asr, from: from, to: to)], s).map(\.fireDate), [at(28, 11, 0), at(28, 11, 59), at(28, 12, 0)])
         s = settings(
-            .asr, start: StartAlert(offsetMinutes: 60), end: LeadAlert(enabled: true, leadMinutes: 1),
-            pre: LeadAlert(enabled: true, leadMinutes: 120))
+            .asr, start: StartAlert(offsetMinutes: 60), end: LeadAlert(style: .banner, leadMinutes: 1),
+            pre: LeadAlert(style: .banner, leadMinutes: 120))
         XCTAssertEqual(plan([event(.asr, from: from, to: to)], s).map(\.fireDate), [at(28, 10, 0), at(28, 13, 0), at(28, 13, 59)])
     }
 
     func testSameInstantKeptWithDistinctIds() {
-        let s = settings(.asr, start: StartAlert(), end: LeadAlert(enabled: true, leadMinutes: 1))
+        let s = settings(.asr, start: StartAlert(), end: LeadAlert(style: .banner, leadMinutes: 1))
         let p = plan([event(.asr, from: at(28, 15, 0), to: at(28, 15, 1))], s)
         XCTAssertEqual(p.count, 2)
         XCTAssertEqual(p[0].fireDate, p[1].fireDate)

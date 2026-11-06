@@ -12,9 +12,9 @@ The settings model, its persistence, the settings window, and how a change reach
 |---|---|
 | `GeneralSettings` | `launchAtLogin` (true), `method: Int?` (nil = automatic), `school: School` (`.shafii`; `.hanafi`), `timeFormat: TimeFormat` (`.twentyFour`; `.twelve`), `shuruqMinutes` (15), `istiwaMinutes` (10), `ghurubMinutes` (15) |
 | `LocationSettings` | `mode: LocationMode` (`.automatic`/`.manual`), `manualCity`, `manualCountry`, `manualState` |
-| `EventSettings` | `style`, `timeSource` (`.calculated`/`.fixed`), `staticTime: ClockTime?`, `startAlert`, `endAlert`, `preWarning`, `overlayHoldSeconds` (per-field defaults in [alerts.md](alerts.md)) |
+| `EventSettings` | `timeSource` (`.calculated`/`.fixed`), `staticTime: ClockTime?`, `startAlert`, `endAlert`, `preWarning` (each with its own `style`), `overlayHoldSeconds`; `style` is read-only, derived from the alert styles (per-field defaults in [alerts.md](alerts.md)) |
 
-Events: `EventID.allCases` = tahajjud, fajr, shuruq, duha, istiwa, dhuhr, jumah, asr, ghurub, maghrib, isha. Default style is `.banner`, except `.disabled` for duha and tahajjud.
+Events: `EventID.allCases` = tahajjud, fajr, shuruq, duha, istiwa, dhuhr, jumah, asr, ghurub, maghrib, isha. Defaults: Start Banner (Off for duha and tahajjud), End Off, Pre-warning Off.
 
 Bounds (`Bounds`): offset -60...60, lead 1...120, hold 0...300, window minutes 5...30. `Bounds.clamped` is applied in every `init`, every `didSet`, and on decode, so out-of-range values never persist or leak.
 
@@ -23,7 +23,8 @@ A `.fixed` source with no `staticTime` behaves as calculated.
 ## Persistence (`SettingsStore`, `@MainActor @Observable`)
 
 - UserDefaults keys `settings.general`, `settings.location`, `settings.events`. Each value is JSON in an `Envelope {version, value}`; `SettingsStore.version` = 1. A different version, or undecodable data, yields that group's defaults.
-- Decoding is tolerant: a missing key takes the default for that event/field (`EventSettings.init(from:id:)`, `LeadAlert.init(from:defaults:)`, `EventsGroup`).
+- Decoding is tolerant: a missing key takes the default for that event/field (`EventSettings.init(from:id:)`, `StartAlert`/`LeadAlert.init(from:defaults:legacy:)`, `EventsGroup`). An unknown style value takes the default instead of failing the group.
+- Carry-over from settings saved before per-alert styles (1.7.0 and earlier): an alert with no `style` derives it from the event-level `style` and its `enabled` flag (each missing one takes its 1.7.0 default). Event Disabled → all Off; otherwise Start and End take the event style when on, Pre-warning Banner when on, else Off. The derived `style` and `enabled` keys are still written so an older build keeps working; the version stays 1.
 - `settings` is the single mutable property. Its `didSet` saves only the groups that changed, then calls `onChange(old, new)`. Setting an equal value does nothing.
 - Helpers: `resetEvent(_:)`, `resetAll()` (General and every event; location kept), `setLocationMode(_:)` (to `.automatic` clears the manual city), `setManualLocation(city:country:state:)`.
 
@@ -36,7 +37,7 @@ A `.fixed` source with no `staticTime` behaves as calculated.
 | `SettingsContext` | runtime data panes show, not settings: `calculatedWindows`, `lookupStatus`, `place`, `coordinatesText`, `lastSyncText` |
 | `GeneralPane` | Launch at login; Calculation method (`CalculationMethod.all`); Asr school; Time format; three prohibited-window durations; Full-Screen overlay timeout; Test alerts ("Show test overlay", "Send test banner", with a note when notifications are off); Reset ("Reset all settings…", with confirmation) |
 | `LocationPane` | Automatic/Manual radio; manual City/Country/State fields normalized by `ManualCityInput`; "Look up" calls `setManualLocation`; shows `lookupStatus` and last sync |
-| `EventPane` | Time source (Calculated/Static + time picker), Style, Start alert (offset), End alert, Pre-warning, Overlay minimum hold, Reset to defaults |
+| `EventPane` | Time source (Calculated/Static + time picker), Start alert, End alert and Pre-warning (each a Style picker: Full-Screen Focus, Banner, Off, plus its offset or lead), Overlay minimum hold, Reset to defaults |
 
 - Panes bind straight to `store.settings.*`; the number fields clamp to the same `Bounds` as the model.
 - Static time: choosing Static with no time seeds today's calculated start (floored to the minute) or 12:00. A warning shows when the static time is outside the calculated window (`StaticTimeHint.isOutside`, needs `context.calculatedWindows`).
