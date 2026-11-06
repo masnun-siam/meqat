@@ -85,6 +85,21 @@ final class MenuPresenterTests: XCTestCase {
         XCTAssertEqual(s.statusTitle, "☾ Forbidden (sunset) in 1h 12m")
     }
 
+    func testAllOffEventLeavesNowNextAndReturnsWhenOneAlertIsOn() {
+        // Styles built as AppEnvironment.menuState() does: the derived EventSettings.style.
+        var dhuhr = EventSettings(startAlert: StartAlert(style: .disabled))
+        let styles = { [EventID.duha: EventSettings.defaults(for: .duha).style, .dhuhr: dhuhr.style] }
+        let off = present(at(28, 13, 52, 30)) { $0.styles = styles() }
+        XCTAssertEqual(off.statusTitle, "☾ Asr in 1h 11m")
+        XCTAssertEqual(off.hero?.kind, .next)
+        XCTAssertEqual(off.hero?.title, "Next · Asr")
+        dhuhr.endAlert.style = .banner
+        let endOn = present(at(28, 13, 52, 30)) { $0.styles = styles() }
+        XCTAssertEqual(endOn.statusTitle, "☾ Dhuhr ends in 1h 11m")
+        XCTAssertEqual(endOn.hero?.kind, .current)
+        XCTAssertEqual(endOn.hero?.title, "Dhuhr")
+    }
+
     func testLatestStartWinsAmongOverlappingCurrent() {
         let events = [ev(.isha, 28, (18, 42), (23, 59)), ev(.tahajjud, 28, (22, 0), (23, 30))]
         XCTAssertEqual(present(at(28, 22, 30), events: events).statusTitle, "☾ Tahajjud ends in 1h 0m")

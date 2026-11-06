@@ -18,22 +18,24 @@ final class AlertPlannerTests: XCTestCase {
     }
 
     private func settings(
-        _ id: EventID, style: AlertStyle = .banner, start: StartAlert = StartAlert(style: .disabled),
+        _ id: EventID, start: StartAlert = StartAlert(style: .disabled),
         end: LeadAlert = LeadAlert(style: .disabled, leadMinutes: 15),
         pre: LeadAlert = LeadAlert(style: .disabled, leadMinutes: 20)
     ) -> AppSettings {
-        // `style` sets Start's and End's style when on; `.disabled` turns all three Off.
-        var e = EventSettings(startAlert: start, endAlert: end, preWarning: pre)
-        if e.startAlert.enabled { e.startAlert.style = style }
-        if e.endAlert.enabled { e.endAlert.style = style }
-        if style == .disabled { e.preWarning.style = .disabled }
         var s = AppSettings()
-        s.events[id] = e
+        s.events[id] = EventSettings(startAlert: start, endAlert: end, preWarning: pre)
         return s
     }
 
     private func plan(_ events: [ScheduledEvent], _ s: AppSettings, now: Date? = nil) -> [PlannedAlert] {
         AlertPlanner.plan(events: events, settings: s, now: now ?? at(28, 0, 0), timeZone: tz)
+    }
+
+    /// Plans with `tweak` applied to every event's settings.
+    private func plan(_ events: [ScheduledEvent], _ s: AppSettings, _ tweak: (inout EventSettings) -> Void) -> [PlannedAlert] {
+        var t = s
+        for id in t.events.keys { tweak(&t.events[id]!) }
+        return plan(events, t)
     }
 
     func testDhuhrStartOffsetAndEndLead() {
@@ -59,18 +61,46 @@ final class AlertPlannerTests: XCTestCase {
     func testDisabledAndInvalidHaveNoAlerts() {
         let on = StartAlert()
         let lead = LeadAlert(style: .banner, leadMinutes: 15)
-        let disabled = settings(.asr, style: .disabled, start: on, end: lead, pre: lead)
+        let disabled = settings(.asr)
         XCTAssertTrue(plan([event(.asr, from: at(28, 15, 4), to: at(28, 17, 0))], disabled).isEmpty)
         let enabled = settings(.asr, start: on, end: lead, pre: lead)
         XCTAssertTrue(plan([event(.asr, from: at(28, 15, 4), to: at(28, 17, 0), valid: false)], enabled).isEmpty)
     }
 
-    func testFullScreenStartEndButBannerPreWarning() {
-        let lead = LeadAlert(style: .banner, leadMinutes: 15)
-        let s = settings(.asr, style: .fullScreen, start: StartAlert(), end: lead, pre: lead)
+    func testEachAlertFiresInItsOwnStyle() {
+        let s = settings(
+            .asr, start: StartAlert(style: .fullScreen), end: LeadAlert(style: .banner, leadMinutes: 15),
+            pre: LeadAlert(style: .fullScreen, leadMinutes: 20))
         let p = plan([event(.asr, from: at(28, 15, 4), to: at(28, 17, 0))], s)
         XCTAssertEqual(p.map(\.kind), [.preWarning, .start, .end])
-        XCTAssertEqual(p.map(\.style), [.banner, .fullScreen, .fullScreen])
+        XCTAssertEqual(p.map(\.style), [.fullScreen, .fullScreen, .banner])
+    }
+
+    func testFullScreenPreWarningAlone() {
+        let s = settings(.asr, pre: LeadAlert(style: .fullScreen, leadMinutes: 20))
+        let p = plan([event(.asr, from: at(28, 15, 4), to: at(28, 17, 0))], s)
+        XCTAssertEqual(p.map(\.kind), [.preWarning])
+        XCTAssertEqual(p.map(\.style), [.fullScreen])
+        XCTAssertEqual(p.map(\.fireDate), [at(28, 14, 44)])
+        XCTAssertEqual(p.map(\.title), ["Asr in 20 min"])
+    }
+
+    func testEachOffAlertIsNotPlanned() {
+        let asr = [event(.asr, from: at(28, 15, 4), to: at(28, 17, 0))]
+        let on = StartAlert(style: .banner)
+        let lead = LeadAlert(style: .banner, leadMinutes: 15)
+        let off = LeadAlert(style: .disabled, leadMinutes: 15)
+        let kinds = { (s: AppSettings) in self.plan(asr, s).map(\.kind) }
+        XCTAssertEqual(kinds(settings(.asr, start: StartAlert(style: .disabled), end: lead, pre: lead)), [.preWarning, .end])
+        XCTAssertEqual(kinds(settings(.asr, start: on, end: off, pre: lead)), [.preWarning, .start])
+        XCTAssertEqual(kinds(settings(.asr, start: on, end: lead, pre: off)), [.start, .end])
+    }
+
+    func testAllOffYieldsNothingAndOneOnShowsOnlyIt() {
+        let dhuhr = [event(.dhuhr, from: at(28, 11, 46), to: at(28, 15, 4))]
+        XCTAssertTrue(plan(dhuhr, settings(.dhuhr)).isEmpty)
+        let endOnly = settings(.dhuhr, end: LeadAlert(style: .banner, leadMinutes: 15))
+        XCTAssertEqual(plan(dhuhr, endOnly).map(\.id), ["2026-10-28.dhuhr.end"])
     }
 
     func testTitlesForPrayerAndProhibitedWindow() {
@@ -89,7 +119,7 @@ final class AlertPlannerTests: XCTestCase {
 
     func testOverlayLineIsTitleExceptForStart() {
         let s = settings(
-            .asr, style: .fullScreen, start: StartAlert(), end: LeadAlert(style: .banner, leadMinutes: 15),
+            .asr, start: StartAlert(style: .fullScreen), end: LeadAlert(style: .banner, leadMinutes: 15),
             pre: LeadAlert(style: .banner, leadMinutes: 20))
         let p = plan([event(.asr, from: at(28, 15, 4), to: at(28, 17, 0))], s)
         XCTAssertEqual(p.map(\.kind), [.preWarning, .start, .end])
@@ -154,6 +184,13 @@ final class AlertPlannerTests: XCTestCase {
         }
         let full = plan(events, s)
         XCTAssertGreaterThan(full.count, 60)
+        let preOnly = plan(events, s) {
+            $0.startAlert.style = .disabled; $0.endAlert.style = .disabled
+        }
+        let fullOnly = plan(events, s) { $0.preWarning.style = .disabled }
+        XCTAssertLessThanOrEqual(preOnly.count, 60)
+        XCTAssertEqual(full.filter { $0.style == .banner }.map(\.id), preOnly.map(\.id))
+        XCTAssertEqual(full.filter { $0.style == .fullScreen }.map(\.id), fullOnly.map(\.id))
     }
 
     func testBoundsOffsetsAndLeads() {

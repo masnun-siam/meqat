@@ -22,12 +22,12 @@ Details in [settings.md](settings.md).
 
 | Kind (`AlertKind`) | Fires at | Style | Title |
 |---|---|---|---|
-| `.start` | start + `offsetMinutes` | event `style` | `Asr · 15:04`; prohibited: `⛔ Ghurub · avoid praying until 17:27` |
-| `.end` | end - `leadMinutes` | event `style` | `Asr ends in 15 min` |
-| `.preWarning` | start - `leadMinutes` | always `.banner` | `Asr in 20 min` (`⛔ ` prefix if prohibited) |
+| `.start` | start + `offsetMinutes` | `startAlert.style` | `Asr · 15:04`; prohibited: `⛔ Ghurub · avoid praying until 17:27` |
+| `.end` | end - `leadMinutes` | `endAlert.style` | `Asr ends in 15 min` |
+| `.preWarning` | start - `leadMinutes` | `preWarning.style` | `Asr in 20 min` (`⛔ ` prefix if prohibited) |
 
 - Id: `<yyyy-MM-dd list date>.<eventID>.<kind>`, e.g. `2026-10-28.asr.start`. It is also the notification request identifier.
-- Skipped: `style == .disabled` (no alerts of any kind, including pre-warning), events with no `interval` (invalid time), fire dates not in `(now, now + AlertPlanner.horizon]` (48 h).
+- Skipped: alerts whose own style is `.disabled` (all three Off yields nothing), events with no `interval` (invalid time), fire dates not in `(now, now + AlertPlanner.horizon]` (48 h).
 - Sorted by `(fireDate, id)`. Banners are capped at `AlertPlanner.maxBanners` (60, soonest kept); full-screen alerts are never capped.
 - Times in titles are formatted with `settings.general.timeFormat` (`HH:mm` or `h:mm a`) in the given time zone.
 
@@ -68,7 +68,7 @@ flowchart TD
 ## Gotchas
 
 - A full-screen alert in the plan has no OS notification; if the app is quit or suspended it never shows.
-- Pre-warnings are banners even for full-screen events.
+- Full-screen pre-warnings, like every full-screen alert, need the app running.
 - Changing a setting reschedules everything; there is no per-alert diffing.
 
 ## Tests
