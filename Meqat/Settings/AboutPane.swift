@@ -64,7 +64,7 @@ struct AboutPane: View {
             if let text = context.lastCheckedText {
                 Text("Last checked \(text)").foregroundStyle(.secondary)
             }
-        case .available(let version, let url):
+        case .available(let version, let url, _):
             Text("Version \(version) is available")
             Link("View release", destination: url)
             Text("Installed with Homebrew? Run").foregroundStyle(.secondary)

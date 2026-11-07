@@ -26,10 +26,12 @@ public enum MenuLocationInfo: Sendable, Equatable {
 public struct UpdateNotice: Sendable, Equatable {
     public var version: String
     public var releaseURL: URL
+    public var canInstall: Bool
 
-    public init(version: String, releaseURL: URL) {
+    public init(version: String, releaseURL: URL, canInstall: Bool = false) {
         self.version = version
         self.releaseURL = releaseURL
+        self.canInstall = canInstall
     }
 }
 
