@@ -52,7 +52,7 @@ A single local user on their own Mac: Muslim engineers, remote workers and deskt
 - Adhan audio or custom sounds. Banners use the system default sound.
 - Hijri date display, Qibla direction, and localization (English only).
 - Late alerts for events that came and went while the Mac was asleep (FR-12).
-- An in-app auto-updater (for example Sparkle). Updates come through Homebrew or a manual download.
+- A third-party auto-updater (for example Sparkle). Withdrawn in part 2026-11-07: a click-to-install update is specified in [in-app-update.md](in-app-update.md).
 - Snooze on the overlay.
 - Mac App Store distribution in v1. The sandbox stays on so it remains possible later.
 - Telemetry or analytics of any kind.
@@ -385,6 +385,7 @@ None.
 ## Change log
 
 - 2026-10-29 — Added FR-19 (12/24-hour time format); FR-17 and Data updated. Issue: #52.
+- 2026-11-07 — Non-goal "in-app auto-updater" narrowed to third-party updaters; a click-to-install update is now specified in `in-app-update.md`. No existing issues affected.
 
 ## Related
 
