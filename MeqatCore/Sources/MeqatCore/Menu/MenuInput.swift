@@ -53,13 +53,16 @@ public struct MenuInput: Sendable, Equatable {
     public var updateNotice: UpdateNotice?
     public var checksForUpdates: Bool
     public var installState: InstallState
+    /// The language the menu text is in; formatters use its locale (Bangla PRD FR-4 to FR-7).
+    public var language: Language
 
     public init(
         now: Date, timeZone: TimeZone, events: [ScheduledEvent], styles: [EventID: AlertStyle] = [:], place: String? = nil,
         hasScheduleForToday: Bool = true, sync: MenuSyncInfo = MenuSyncInfo(), location: MenuLocationInfo = .available,
         notificationsAuthorized: Bool = true, bannerNow: EventID? = nil, showsCouldntRefresh: Bool = false,
         timeFormat: TimeFormat = .twentyFour,
-        updateNotice: UpdateNotice? = nil, checksForUpdates: Bool = true, installState: InstallState = .idle
+        updateNotice: UpdateNotice? = nil, checksForUpdates: Bool = true, installState: InstallState = .idle,
+        language: Language = .english
     ) {
         self.now = now
         self.timeZone = timeZone
@@ -76,5 +79,6 @@ public struct MenuInput: Sendable, Equatable {
         self.updateNotice = updateNotice
         self.checksForUpdates = checksForUpdates
         self.installState = installState
+        self.language = language
     }
 }

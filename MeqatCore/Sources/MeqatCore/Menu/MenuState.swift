@@ -46,16 +46,6 @@ public enum MenuEmptyAction: Sendable, Equatable {
 public enum MenuEmptyState: Sendable, Equatable {
     case awaitingPermission, fetching, setLocation, cityNotFound, offline
 
-    public var message: String {
-        switch self {
-        case .awaitingPermission: "Waiting for location permission…"
-        case .fetching: "Fetching times…"
-        case .setLocation: "Set your location"
-        case .cityNotFound: "City not found — check Location settings"
-        case .offline: "No schedule — connect to the internet"
-        }
-    }
-
     public var action: MenuEmptyAction? {
         switch self {
         case .awaitingPermission, .setLocation, .cityNotFound: .openLocationPane
@@ -87,6 +77,8 @@ public struct MenuState: Sendable, Equatable {
     /// nil without today's schedule.
     public let forbiddenSummary: MenuForbiddenSummary?
     public let emptyState: MenuEmptyState?
+    /// `Set your location` and the like, in the input's language; nil exactly when `emptyState` is nil.
+    public let emptyMessage: String?
     public let showsNotificationsOffRow: Bool
     /// nil unless a newer version is known and the toggle is on.
     public let updateRow: MenuUpdateRow?

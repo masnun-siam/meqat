@@ -45,7 +45,7 @@ struct MenuDropdownView: View {
     @ViewBuilder private var content: some View {
         if let empty = state.emptyState {
             VStack(spacing: 8) {
-                Text(empty.message).multilineTextAlignment(.center)
+                Text(state.emptyMessage ?? "").multilineTextAlignment(.center)
                 switch empty.action {
                 case .openLocationPane: Button("Open Location settings") { actions.openLocationPane() }
                 case .tryAgain: Button("Try again") { actions.tryAgain() }
