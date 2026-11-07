@@ -41,6 +41,7 @@ All under `MeqatCore/Sources/MeqatCore/`.
 | `Sync/SyncPolicy.swift` | `SyncPolicy`; `FetchParameters.current(...)` | Pure: when to refetch and which months. |
 | `Sync/SyncStatus.swift` | `SyncStatus`, `SyncFailure` | Observable sync state. |
 | `Updates/CommandRunning.swift` | `CommandRunning`, `ProcessCommandRunner` | Seam for running a system tool and waiting for its exit status (`Process`), stubbed in tests. |
+| `Updates/DMGExtractor.swift` | `DMGExtractor`, `DMGError` | Copies `Meqat.app` from a DMG's root: `hdiutil attach -readonly -nobrowse` to a fixed mount point, `ditto --noqtn`, strips `com.apple.quarantine` (`ditto --noqtn` alone keeps it), always detaches once attached. |
 | `Updates/InstallEligibility.swift` | `InstallEligibility`, `InstallFacts` | Pure `canInstall` plus `probe` of the bundle's folder, volume, translocation and sandbox; fails closed. |
 | `Updates/UpdateVerifier.swift` | `UpdateVerifier`, `UpdateVerificationError` | Checks a downloaded update: DMG SHA-256 against GitHub's digest, app bundle id and version, `codesign --verify --deep --strict`. |
 
