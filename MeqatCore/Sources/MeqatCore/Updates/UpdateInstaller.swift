@@ -54,12 +54,7 @@ public final class UpdateInstaller {
         self.terminate = terminate
     }
 
-    public var isRunning: Bool {
-        switch state {
-        case .downloading, .verifying, .installing, .relaunching: return true
-        case .idle, .failed: return false
-        }
-    }
+    public var isRunning: Bool { state.isRunning }
 
     /// Starts an install; does nothing while one runs.
     public func install() {

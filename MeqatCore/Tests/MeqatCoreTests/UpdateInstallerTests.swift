@@ -219,6 +219,13 @@ final class UpdateInstallerTests: XCTestCase {
 
     // MARK: - Happy path
 
+    func testInstallStateIsRunningFromDownloadUntilRelaunch() {
+        let running: [InstallState] = [.downloading(percent: 42), .verifying, .installing, .relaunching]
+        XCTAssertTrue(running.allSatisfy(\.isRunning))
+        XCTAssertFalse(InstallState.idle.isRunning)
+        XCTAssertFalse(InstallState.failed.isRunning)
+    }
+
     func testHappyPathInstallsRelaunchesAndQuits() async {
         let installer = installer!
         let seen = StateBox()

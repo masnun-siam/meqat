@@ -5,7 +5,9 @@
     /// `--args -MeqatDebugHarness Settings` opens the Settings window. Extra arguments:
     /// `-MeqatDebugPane <location|about|eventID>`, `-MeqatDebugWindows 1`,
     /// `-MeqatDebugLookup <idle|lookingUp|found|cityNotFound|unreachable>`,
-    /// `-MeqatDebugUpdate <idle|checking|upToDate|available|failed>`.
+    /// `-MeqatDebugUpdate <idle|checking|upToDate|available|installable|failed>` (`installable` is `available` with
+    /// install possible), `-MeqatDebugInstall <downloading|installing|failed>` (implies `installable`).
+    /// DEBUG builds never install, so this is the only way to see the install lines in About.
     @objc(MeqatDebugSettingsHarness)
     final class SettingsDebugHarness: NSObject, DebugHarness {
         static func run() {
@@ -32,17 +34,29 @@
             default: context.lookupStatus = .idle
             }
             context.lastCheckedText = "30 Oct 09:05"
-            switch args.string(forKey: "MeqatDebugUpdate") {
+            let installState = args.string(forKey: "MeqatDebugInstall")
+            func available(canInstall: Bool) -> UpdateStatus {
+                .available(
+                    version: "1.4.0", releaseURL: URL(string: "https://github.com/masnun-siam/meqat/releases/tag/v1.4.0")!,
+                    canInstall: canInstall)
+            }
+            switch installState == nil ? args.string(forKey: "MeqatDebugUpdate") : "installable" {
             case "checking": context.updateStatus = .checking
             case "upToDate": context.updateStatus = .upToDate(checkedAt: Date())
-            case "available":
-                context.updateStatus = .available(
-                    version: "1.4.0", releaseURL: URL(string: "https://github.com/masnun-siam/meqat/releases/tag/v1.4.0")!,
-                    canInstall: false)
+            case "available": context.updateStatus = available(canInstall: false)
+            case "installable": context.updateStatus = available(canInstall: true)
             case "failed": context.updateStatus = .failed
             default: context.updateStatus = .idle
             }
+            switch installState {
+            case "downloading": context.installState = .downloading(percent: 42)
+            case "installing": context.installState = .installing
+            case "failed": context.installState = .failed
+            default: context.installState = .idle
+            }
             context.checkNow = { context.updateStatus = .checking }
+            context.install = { context.installState = .downloading(percent: 42) }
+            context.cancelInstall = { context.installState = .idle }
             return context
         }
 

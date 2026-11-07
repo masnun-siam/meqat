@@ -6,4 +6,12 @@ public enum InstallState: Sendable, Equatable {
     case installing
     case relaunching
     case failed
+
+    /// An install is under way: from the first download byte until the app quits to relaunch.
+    public var isRunning: Bool {
+        switch self {
+        case .downloading, .verifying, .installing, .relaunching: return true
+        case .idle, .failed: return false
+        }
+    }
 }

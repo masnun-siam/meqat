@@ -15,6 +15,7 @@ final class AppEnvironment {
     private let coordinator: SyncCoordinator
     private let scheduler: AlertScheduler
     private let updateChecker: UpdateChecker
+    private let installer: UpdateInstaller
     private let updateScheduler: UpdateScheduler
     private let overlay = OverlayController()
     private let loginItem = MainAppLoginItem()
@@ -39,8 +40,18 @@ final class AppEnvironment {
             Composition.fetchParameters(location: provider.state, settings: store.settings, timeZone: .current)
         }
         self.coordinator = coordinator
+        let installedVersion = Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? ""
+        #if DEBUG
+            let canInstall = false
+        #else
+            let canInstall = InstallEligibility.canInstall(
+                InstallEligibility.probe(bundleURL: Bundle.main.bundleURL, environment: ProcessInfo.processInfo.environment))
+        #endif
+        let installer = UpdateInstaller(
+            installedVersion: installedVersion, appURL: Bundle.main.bundleURL, terminate: { NSApp.terminate(nil) })
+        self.installer = installer
         let updateChecker = UpdateChecker(
-            installedVersion: Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "")
+            installedVersion: installedVersion, canInstall: canInstall, isInstalling: { [installer] in installer.isRunning })
         self.updateChecker = updateChecker
         updateScheduler = UpdateScheduler { [updateChecker] in updateChecker.check(.automatic) }
         scheduler = AlertScheduler(center: UNUserNotificationCenter.current(), timer: DispatchAlertTimer()) {
@@ -58,6 +69,8 @@ final class AppEnvironment {
         statusItem = StatusItemController(state: { [unowned self] in menuState() }, actions: menuActions())
         wire()
         context.checkNow = { [unowned self] in updateChecker.check(.manual) }
+        context.install = { [unowned self] in installer.install() }
+        context.cancelInstall = { [unowned self] in installer.cancel() }
         context.testOverlay = { [unowned self] in
             let now = Date()
             overlay.show(
@@ -86,6 +99,18 @@ final class AppEnvironment {
         track()
         refreshAll()
     }
+
+    // MARK: Quitting
+
+    /// True while a download or swap runs: quitting then waits for `prepareToQuit()`. `relaunching` quits at once.
+    var needsQuitWait: Bool {
+        switch installer.state {
+        case .downloading, .verifying, .installing: return true
+        case .idle, .relaunching, .failed: return false
+        }
+    }
+
+    func prepareToQuit() async { await installer.prepareToQuit() }
 
     // MARK: Wiring
 
@@ -163,6 +188,7 @@ final class AppEnvironment {
             _ = provider.state
             _ = scheduler.notificationsAuthorized
             _ = updateChecker.status
+            _ = installer.state
         } onChange: { [weak self] in
             Task { @MainActor in
                 self?.observedStateChanged()
@@ -239,6 +265,7 @@ final class AppEnvironment {
     private func menuActions() -> MenuActions {
         var actions = MenuActions()
         actions.refreshNow = { [unowned self] in refreshNow() }
+        actions.installUpdate = { [unowned self] in installer.install() }
         actions.tryAgain = { [unowned self] in refreshNow() }
         actions.openSettings = { [unowned self] in openSettings(.general) }
         actions.openLocationPane = { [unowned self] in openSettings(.location) }
@@ -278,7 +305,8 @@ final class AppEnvironment {
                 showsCouldntRefresh: showsCouldntRefresh,
                 timeFormat: settings.general.timeFormat,
                 updateNotice: UpdateNotice(updateChecker.status),
-                checksForUpdates: settings.general.checkForUpdates))
+                checksForUpdates: settings.general.checkForUpdates,
+                installState: installer.state))
     }
 
     private func refreshAll() {
@@ -300,6 +328,7 @@ final class AppEnvironment {
         let format = Self.lastSyncFormat(timeZone, store.settings.general.timeFormat)
         context.lastSyncText = coordinator.status.lastSuccess.map { format.string(from: $0) }
         context.updateStatus = updateChecker.status
+        context.installState = installer.state
         context.notificationsAuthorized = scheduler.notificationsAuthorized
         if case .upToDate(let checkedAt) = updateChecker.status {
             context.lastCheckedText = format.string(from: checkedAt)
