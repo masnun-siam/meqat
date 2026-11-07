@@ -40,6 +40,7 @@ All under `MeqatCore/Sources/MeqatCore/`.
 | `Sync/SyncCoordinator.swift` | `SyncCoordinator`, `SyncTrigger` | Fetch orchestration: debounce, backoff, cache replace. |
 | `Sync/SyncPolicy.swift` | `SyncPolicy`; `FetchParameters.current(...)` | Pure: when to refetch and which months. |
 | `Sync/SyncStatus.swift` | `SyncStatus`, `SyncFailure` | Observable sync state. |
+| `Updates/InstallEligibility.swift` | `InstallEligibility`, `InstallFacts` | Pure `canInstall` plus `probe` of the bundle's folder, volume, translocation and sandbox; fails closed. |
 
 ## API the app uses
 
