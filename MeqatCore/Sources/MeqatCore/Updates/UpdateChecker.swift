@@ -9,6 +9,8 @@ public final class UpdateChecker {
     @ObservationIgnored private let installedVersion: String
     @ObservationIgnored private let client: ReleaseFetching
     @ObservationIgnored private let now: @Sendable () -> Date
+    @ObservationIgnored private let canInstall: Bool
+    @ObservationIgnored private let isInstalling: @MainActor () -> Bool
     @ObservationIgnored private let logger = Logger(subsystem: MeqatCore.bundleIdentifier, category: "updates")
 
     @ObservationIgnored private var checkTask: Task<Void, Never>?
@@ -18,15 +20,20 @@ public final class UpdateChecker {
     public init(
         installedVersion: String,
         client: ReleaseFetching = GitHubReleaseClient(),
-        now: @escaping @Sendable () -> Date = { Date() }
+        now: @escaping @Sendable () -> Date = { Date() },
+        canInstall: Bool = false,
+        isInstalling: @escaping @MainActor () -> Bool = { false }
     ) {
         self.installedVersion = installedVersion
         self.client = client
         self.now = now
+        self.canInstall = canInstall
+        self.isInstalling = isInstalling
     }
 
-    /// Starts a check; one started while another runs joins it.
+    /// Starts a check; one started while another runs joins it. Skipped while an install runs.
     public func check(_ trigger: UpdateCheckTrigger) {
+        guard !isInstalling() else { return }
         if trigger == .manual { manualPending = true }
         guard checkTask == nil else { return }
         statusBeforeCheck = status
@@ -38,7 +45,7 @@ public final class UpdateChecker {
         do {
             let release = try await client.fetchLatest()
             if let version = ReleaseVersion.newer(tag: release.tag, than: installedVersion) {
-                status = .available(version: version.description, releaseURL: release.pageURL)
+                status = .available(version: version.description, releaseURL: release.pageURL, canInstall: canInstall)
             } else {
                 status = .upToDate(checkedAt: now())
             }
