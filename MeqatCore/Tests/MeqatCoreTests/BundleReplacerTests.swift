@@ -9,18 +9,18 @@ final class BundleReplacerTests: XCTestCase {
     /// Forwards to `FileManager.default` and throws on the Nth call of one method.
     private final class FailingFiles: FileMoving {
         let method: Method?
-        let failingCall: Int
+        let failingCalls: Set<Int>
         private var calls: [Method: Int] = [:]
         private(set) var stagingURL: URL?
 
-        init(failing method: Method? = nil, onCall failingCall: Int = 1) {
+        init(failing method: Method? = nil, onCalls failingCalls: Set<Int> = [1]) {
             self.method = method
-            self.failingCall = failingCall
+            self.failingCalls = failingCalls
         }
 
         private func tick(_ called: Method) throws {
             calls[called, default: 0] += 1
-            if called == method, calls[called] == failingCall { throw InjectedFailure() }
+            if called == method, failingCalls.contains(calls[called]!) { throw InjectedFailure() }
         }
 
         func url(
@@ -131,18 +131,26 @@ final class BundleReplacerTests: XCTestCase {
     }
 
     func testMoveOldAsideFailureLeavesOriginalAndRemovesStaging() throws {
-        let files = FailingFiles(failing: .move, onCall: 1)
+        let files = FailingFiles(failing: .move, onCalls: [1])
         XCTAssertThrowsError(try replace(files)) { XCTAssertEqual($0 as? BundleReplaceError, .swapFailed) }
         XCTAssertEqual(try snapshot(installed), original)
         assertStagingRemoved(files)
     }
 
     func testMoveNewInFailureRestoresOriginalAndRemovesStaging() throws {
-        let files = FailingFiles(failing: .move, onCall: 2)
+        let files = FailingFiles(failing: .move, onCalls: [2])
         XCTAssertThrowsError(try replace(files)) { XCTAssertEqual($0 as? BundleReplaceError, .swapFailed) }
         XCTAssertEqual(try snapshot(installed), original)
         XCTAssertEqual(try parentContents(), ["Meqat.app"])
         assertStagingRemoved(files)
+    }
+
+    func testRollbackFailureKeepsOriginalInStaging() throws {
+        let files = FailingFiles(failing: .move, onCalls: [2, 3])
+        XCTAssertThrowsError(try replace(files)) { XCTAssertEqual($0 as? BundleReplaceError, .swapFailed) }
+        let staging = try XCTUnwrap(files.stagingURL)
+        XCTAssertEqual(try snapshot(staging.appendingPathComponent("Meqat-old.app")), original)
+        try? FileManager.default.removeItem(at: staging)
     }
 
     func testCleanupFailureDoesNotThrow() throws {

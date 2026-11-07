@@ -49,7 +49,7 @@ public struct BundleReplacer {
                 try files.moveItem(at: stagedOld, to: installed)
                 fail("move new in", staging: staging)
             } catch {
-                // ponytail: staging is kept here, it holds the only copy of the original.
+                // Staging is kept: it holds the only copy of the original.
                 logger.error("rollback failed")
             }
             throw BundleReplaceError.swapFailed
