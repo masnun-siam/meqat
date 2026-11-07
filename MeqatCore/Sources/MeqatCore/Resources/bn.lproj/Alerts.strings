@@ -1,0 +1,6 @@
+/* Bangla alert titles (PRD FR-4, FR-5). Keys are the English format strings in AlertPlanner and AlertScheduler. */
+"%1$@ · %2$@" = "%1$@ · %2$@";
+"%1$@ · avoid praying until %2$@" = "%1$@ · %2$@ পর্যন্ত নামাজ পড়বেন না";
+"%1$@ ends in %2$d min" = "%1$@ শেষ হতে %2$d মিনিট বাকি";
+"%1$@ in %2$d min" = "%1$@ শুরু হতে %2$d মিনিট বাকি";
+"Meqat test alert" = "Meqat পরীক্ষামূলক সতর্কবার্তা";

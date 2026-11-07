@@ -83,9 +83,9 @@ public final class AlertScheduler {
     }
 
     /// Delivers a banner at once so the user can check notifications work. Leaves the plan and timer alone.
-    public func sendTestBanner() async {
+    public func sendTestBanner(language: Language = .english) async {
         let content = UNMutableNotificationContent()
-        content.title = "Meqat test alert"
+        content.title = language.localized("Meqat test alert", table: "Alerts")
         content.sound = .default
         let request = UNNotificationRequest(identifier: Self.testBannerID, content: content, trigger: nil)
         do { try await center.add(request) } catch {
