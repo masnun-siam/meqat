@@ -75,6 +75,7 @@ flowchart LR
 | `refreshNow`, `tryAgain` | `coordinator.trigger(.refreshNow)` |
 | `openSettings` | Settings window, General pane |
 | `openLocationPane` | Settings window, Location pane |
+| `installUpdate` | not wired yet (#148): the default no-op; unreachable while `canInstall` is false |
 | `dropdownOpened` | clears `bannerNow` |
 | `quit` | `NSApp.terminate` |
 
@@ -85,7 +86,7 @@ flowchart LR
 
 ## Tests
 
-`MenuPresenterTests`: next/rows, disabled Duha, prohibited precedence, crescent, countdown rounding, tomorrow after Isha, banner now, VoiceOver labels, invalid row, prev-night carry-over, empty-state precedence, footer variants, notifications row and place. `CompositionTests` covers the `MenuSyncInfo`/`MenuLocationInfo` mapping. The controller and views are untested; use the harness.
+`MenuPresenterTests`: next/rows, disabled Duha, prohibited precedence, crescent, countdown rounding, tomorrow after Isha, banner now, VoiceOver labels, invalid row, prev-night carry-over, empty-state precedence, footer variants, notifications row and place, update row per install state. `CompositionTests` covers the `MenuSyncInfo`/`MenuLocationInfo` mapping. The controller and views are untested; use the harness.
 
 ## Debug harness
 
