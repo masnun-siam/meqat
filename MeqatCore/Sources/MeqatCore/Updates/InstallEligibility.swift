@@ -28,10 +28,10 @@ public enum InstallEligibility {
     /// - `translocated`: the path contains `/AppTranslocation/` (the `SecTranslocate` API is not public).
     /// - `sandboxed`: `APP_SANDBOX_CONTAINER_ID` is set in `environment` (pass `ProcessInfo.processInfo.environment`).
     public static func probe(bundleURL: URL, environment: [String: String], fileManager: FileManager = .default) -> InstallFacts {
-        let volumeReadOnly = (try? bundleURL.resourceValues(forKeys: [.volumeIsReadOnlyKey]).volumeIsReadOnly) ?? nil
+        let volumeReadOnly = (try? bundleURL.resourceValues(forKeys: [.volumeIsReadOnlyKey]).volumeIsReadOnly) ?? true
         return InstallFacts(
             parentWritable: fileManager.isWritableFile(atPath: bundleURL.deletingLastPathComponent().path),
-            volumeReadOnly: volumeReadOnly ?? true,
+            volumeReadOnly: volumeReadOnly,
             translocated: bundleURL.path.contains("/AppTranslocation/"),
             sandboxed: environment["APP_SANDBOX_CONTAINER_ID"] != nil)
     }
