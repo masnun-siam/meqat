@@ -3,10 +3,11 @@ import PackageDescription
 
 let package = Package(
     name: "MeqatCore",
+    defaultLocalization: "en",
     platforms: [.macOS(.v14)],
     products: [.library(name: "MeqatCore", targets: ["MeqatCore"])],
     targets: [
-        .target(name: "MeqatCore"),
+        .target(name: "MeqatCore", resources: [.process("Resources")]),
         .testTarget(
             name: "MeqatCoreTests",
             dependencies: ["MeqatCore"],

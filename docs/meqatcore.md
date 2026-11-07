@@ -2,7 +2,7 @@
 
 Covers: MeqatCore/
 
-Swift package (`MeqatCore/Package.swift`, tools 5.9, macOS 14, one library product `MeqatCore`) holding all logic. No UI. Rules live in [guides/meqatcore-conventions.md](guides/meqatcore-conventions.md); the app side is in [app.md](app.md).
+Swift package (`MeqatCore/Package.swift`, tools 5.9, macOS 14, one library product `MeqatCore`, `defaultLocalization: "en"`, `Resources/` processed into `MeqatCore_MeqatCore.bundle`) holding all logic. No UI. Rules live in [guides/meqatcore-conventions.md](guides/meqatcore-conventions.md); the app side is in [app.md](app.md).
 
 ## Sources
 
@@ -34,7 +34,9 @@ All under `MeqatCore/Sources/MeqatCore/`.
 | `Settings/AppSettings.swift` | `AppSettings`, `GeneralSettings`, `LocationSettings`, `EventSettings`, `StartAlert`, `LeadAlert`, `AlertStyle`, `TimeSource`, `School`, `LocationMode`, `Bounds` | Settings model, Codable with defaults. |
 | `Settings/CalculationMethod.swift` | `CalculationMethod` | Static list of 23 Aladhan methods. |
 | `Settings/ClockTime.swift` | `ClockTime` | Hour/minute value for static event times. |
-| `Settings/EventID.swift` | `EventID`, `EventKind` | The fixed set of events (`allCases`), display names and kinds. |
+| `Settings/EventID.swift` | `EventID`, `EventKind` | The fixed set of events (`allCases`), display names (`displayName(in:)` per language) and kinds. |
+| `Settings/Language.swift` | `Language`, `LanguageChoice` | English or Bangla: display locale, pure `resolve(override:preferred:)` from `AppleLanguages`, string lookup in `Resources/<Area>.xcstrings` with English fallback; the picker's System/English/Bangla choice. |
+| `Resources/Events.xcstrings` | (resource) | Bangla event names; English is the default localization and the keys. |
 | `Settings/SettingsStore.swift` | `SettingsStore` | `@Observable` UserDefaults-backed store, `onChange(old, new)`. |
 | `Settings/StaticTimeHint.swift` | `StaticTimeHint` | Whether a static time falls outside the calculated window. |
 | `Sync/SyncCoordinator.swift` | `SyncCoordinator`, `SyncTrigger` | Fetch orchestration: debounce, backoff, cache replace. |
@@ -116,6 +118,7 @@ flowchart LR
 | `MenuPresenterTests` | `MenuPresenter` rows, markers, empty states, status title. |
 | `OverlayHoldTests` | `OverlayHold` remaining and satisfied. |
 | `SettingsTests` | `AppSettings` coding and defaults, `SettingsStore`. |
+| `LanguageTests` | `Language` locales and resolution, `LanguageChoice` mapping, Bangla event names, missing-entry fallback. |
 | `SmokeTests` | `MeqatCore.bundleIdentifier`. |
 | `StaticTimeHintTests` | `StaticTimeHint.isOutside` (Swift Testing `@Suite`). |
 | `SyncCoordinatorTests` | `SyncCoordinator` triggers, retry/backoff, status, cache replace. |

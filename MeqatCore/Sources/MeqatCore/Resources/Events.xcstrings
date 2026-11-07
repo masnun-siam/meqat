@@ -1,0 +1,116 @@
+{
+  "sourceLanguage": "en",
+  "strings": {
+    "Asr": {
+      "localizations": {
+        "bn": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "আসর"
+          }
+        }
+      }
+    },
+    "Dhuhr": {
+      "localizations": {
+        "bn": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "যোহর"
+          }
+        }
+      }
+    },
+    "Duha": {
+      "localizations": {
+        "bn": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "চাশত"
+          }
+        }
+      }
+    },
+    "Fajr": {
+      "localizations": {
+        "bn": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ফজর"
+          }
+        }
+      }
+    },
+    "Forbidden (noon)": {
+      "localizations": {
+        "bn": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "নিষিদ্ধ সময় (দুপুর)"
+          }
+        }
+      }
+    },
+    "Forbidden (sunrise)": {
+      "localizations": {
+        "bn": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "নিষিদ্ধ সময় (সূর্যোদয়)"
+          }
+        }
+      }
+    },
+    "Forbidden (sunset)": {
+      "localizations": {
+        "bn": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "নিষিদ্ধ সময় (সূর্যাস্ত)"
+          }
+        }
+      }
+    },
+    "Isha": {
+      "localizations": {
+        "bn": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "এশা"
+          }
+        }
+      }
+    },
+    "Jumah": {
+      "localizations": {
+        "bn": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "জুমা"
+          }
+        }
+      }
+    },
+    "Maghrib": {
+      "localizations": {
+        "bn": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "মাগরিব"
+          }
+        }
+      }
+    },
+    "Tahajjud": {
+      "localizations": {
+        "bn": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "তাহাজ্জুদ"
+          }
+        }
+      }
+    }
+  },
+  "version": "1.0"
+}
