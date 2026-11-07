@@ -41,8 +41,8 @@ All under `MeqatCore/Sources/MeqatCore/`.
 | `Sync/SyncPolicy.swift` | `SyncPolicy`; `FetchParameters.current(...)` | Pure: when to refetch and which months. |
 | `Sync/SyncStatus.swift` | `SyncStatus`, `SyncFailure` | Observable sync state. |
 | `Updates/CommandRunning.swift` | `CommandRunning`, `ProcessCommandRunner` | Seam for running a system tool and waiting for its exit status (`Process`), stubbed in tests. |
-| `Updates/InstallEligibility.swift` | `InstallEligibility`, `InstallFacts` | Pure `canInstall` plus `probe` of the bundle's folder, volume, translocation and sandbox; fails closed. |
 | `Updates/DownloadTransport.swift` | `DownloadTransport`, `URLSessionDownloadTransport` | Streaming download seam: status plus a body of up to 64 KiB chunks; stubbed in tests. |
+| `Updates/InstallEligibility.swift` | `InstallEligibility`, `InstallFacts` | Pure `canInstall` plus `probe` of the bundle's folder, volume, translocation and sandbox; fails closed. |
 | `Updates/UpdateDownloader.swift` | `UpdateDownloader`, `DownloadError` | Downloads the DMG to a file over `https` only: 60 s inactivity timeout, 50 MB cap, no retries, percent progress; deletes the partial file on failure or cancel. |
 | `Updates/UpdateVerifier.swift` | `UpdateVerifier`, `UpdateVerificationError` | Checks a downloaded update: DMG SHA-256 against GitHub's digest, app bundle id and version, `codesign --verify --deep --strict`. |
 
