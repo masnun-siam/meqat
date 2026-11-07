@@ -30,7 +30,7 @@ struct AboutPane: View {
             Section {
                 statusLines
                 Button("Check now") { context.checkNow() }
-                    .disabled(context.updateStatus == .checking)
+                    .disabled(context.updateStatus == .checking || context.installState.isRunning)
                 Toggle(isOn: $store.settings.general.checkForUpdates) {
                     Text("Check for updates automatically")
                     Text("Asks GitHub once a day whether a newer version exists. Sends nothing about you or this Mac.")
@@ -64,12 +64,35 @@ struct AboutPane: View {
             if let text = context.lastCheckedText {
                 Text("Last checked \(text)").foregroundStyle(.secondary)
             }
-        case .available(let version, let url, _):
-            Text("Version \(version) is available")
-            Link("View release", destination: url)
-            Text("Installed with Homebrew? Run").foregroundStyle(.secondary)
-            Text("brew upgrade --cask meqat").font(.body.monospaced()).textSelection(.enabled)
+        case .available(let version, let url, let canInstall):
+            if canInstall {
+                installLines(version: version, url: url)
+            } else {
+                availableLines(version: version, url: url)
+            }
         case .failed: Text("Couldn't check for updates").foregroundStyle(.secondary)
+        }
+    }
+
+    @ViewBuilder private func availableLines(version: String, url: URL, installButton: Bool = false) -> some View {
+        Text("Version \(version) is available")
+        if installButton { Button("Download and install") { context.install() } }
+        Link("View release", destination: url)
+        Text("Installed with Homebrew? Run").foregroundStyle(.secondary)
+        Text("brew upgrade --cask meqat").font(.body.monospaced()).textSelection(.enabled)
+    }
+
+    @ViewBuilder private func installLines(version: String, url: URL) -> some View {
+        switch context.installState {
+        case .idle: availableLines(version: version, url: url, installButton: true)
+        case .downloading(let percent):
+            Text("Downloading… \(percent)%")
+            Button("Cancel") { context.cancelInstall() }
+        case .verifying, .installing, .relaunching: Text("Installing…")
+        case .failed:
+            Text("Update failed")
+            Button("Download and install") { context.install() }
+            Link("View release", destination: url)
         }
     }
 }

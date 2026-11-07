@@ -75,9 +75,9 @@ flowchart LR
 | `refreshNow`, `tryAgain` | `coordinator.trigger(.refreshNow)` |
 | `openSettings` | Settings window, General pane |
 | `openLocationPane` | Settings window, Location pane |
-| `installUpdate` | not wired yet (#148): the default no-op; unreachable while `canInstall` is false |
+| `installUpdate` | `UpdateInstaller.install()`; reached only when `canInstall` is true |
 | `dropdownOpened` | clears `bannerNow` |
-| `quit` | `NSApp.terminate` |
+| `quit` | `NSApp.terminate`; `AppDelegate.applicationShouldTerminate` defers it while `AppEnvironment.needsQuitWait` (download, verify or swap) until `prepareToQuit()` cancels the download or lets the swap finish |
 
 ## Refresh and ticker
 

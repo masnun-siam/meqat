@@ -8,6 +8,8 @@ Releases are built on the owner's Mac, never in CI. The build is ad-hoc signed a
 
 ## Each release
 
+Keep the release format as it is: the asset named `Meqat-<version>.dmg`, the tag `v<x.y.z>`, `Meqat.app` at the DMG root and the build without entitlements. The in-app installer relies on all four.
+
 1. [ ] Bump `MARKETING_VERSION` and `CURRENT_PROJECT_VERSION` in `Meqat.xcodeproj`.
 2. [ ] Run `scripts/release.sh`. It needs no credentials or network, writes `build/release/Meqat-<version>.dmg` and prints its SHA-256.
 3. [ ] Mount the DMG and check the signature of the app inside it:
@@ -46,7 +48,13 @@ Run on the release build installed to `/Applications`.
 - [ ] Alert fires within 1 s of its time after 30 minutes idle in the background (FR-12).
 - [ ] About: third sidebar row, "Version x.y.z (n)" matches the build, each of the three links opens its URL (FR-1).
 - [ ] Update check network: with a network monitor (Little Snitch or `nettop`), one request to `api.github.com` within 15 s of launch; none after relaunch with the toggle off; one at once on switching it on (FR-2).
-- [ ] Menu row: when a newer release exists, "Update available — x.y.z" opens its release page and closes the dropdown; toggling off removes it (FR-5).
+- [ ] Menu row: when a newer release exists, "Update available — x.y.z" closes the dropdown and installs the update when install is possible, or opens its release page otherwise; toggling off removes it (FR-5).
+- [ ] Install from About: with the previous release in `/Applications`, "Download and install" downloads, relaunches on the new version within 10 s of the download ending, with settings and schedule kept (in-app update FR-1).
+- [ ] Install from the dropdown: the same, started from "Update available — x.y.z" (in-app update FR-5).
+- [ ] Cancel: "Cancel" mid-download returns About to "Download and install" and leaves no update files in the temp folder (in-app update FR-2).
+- [ ] Install offline: with Wi-Fi off, "Download and install" shows "Update failed" and the app keeps running on the old version (in-app update FR-6).
+- [ ] Not installable: run Meqat straight from the mounted DMG; About shows no "Download and install" button and the dropdown row opens the release page (in-app update FR-7).
+- [ ] Quarantine: after an in-app update, `xattr /Applications/Meqat.app` shows no `com.apple.quarantine`.
 - [ ] Offline: with Wi-Fi off, the automatic check changes nothing; "Check now" shows "Couldn't check for updates"; the prayer schedule keeps updating (FR-6).
 
 ## Homebrew cask

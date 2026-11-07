@@ -17,6 +17,9 @@ final class SettingsContext {
     var updateStatus: UpdateStatus = .idle
     var lastCheckedText: String?
     var checkNow: @MainActor () -> Void = {}
+    var installState: InstallState = .idle
+    var install: @MainActor () -> Void = {}
+    var cancelInstall: @MainActor () -> Void = {}
     var testOverlay: @MainActor () -> Void = {}
     var testBanner: @MainActor () -> Void = {}
     var refreshAuthorization: @MainActor () -> Void = {}

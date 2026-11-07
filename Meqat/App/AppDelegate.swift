@@ -15,6 +15,16 @@ final class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCent
         self.environment = environment
     }
 
+    /// Lets a running update cancel its download or finish its swap before Meqat quits.
+    func applicationShouldTerminate(_ sender: NSApplication) -> NSApplication.TerminateReply {
+        guard let environment, environment.needsQuitWait else { return .terminateNow }
+        Task { @MainActor in
+            await environment.prepareToQuit()
+            NSApp.reply(toApplicationShouldTerminate: true)
+        }
+        return .terminateLater
+    }
+
     /// Shows banners while Meqat is frontmost, as it is when the Settings window sends the test banner.
     func userNotificationCenter(
         _ center: UNUserNotificationCenter, willPresent notification: UNNotification
