@@ -35,8 +35,8 @@ All under `MeqatCore/Sources/MeqatCore/`.
 | `Settings/CalculationMethod.swift` | `CalculationMethod` | Static list of 23 Aladhan methods. |
 | `Settings/ClockTime.swift` | `ClockTime` | Hour/minute value for static event times. |
 | `Settings/EventID.swift` | `EventID`, `EventKind` | The fixed set of events (`allCases`), display names (`displayName(in:)` per language) and kinds. |
-| `Settings/Language.swift` | `Language`, `LanguageChoice` | English or Bangla: display locale, pure `resolve(override:preferred:)` from `AppleLanguages`, string lookup in `Resources/<Area>.xcstrings` with English fallback; the picker's System/English/Bangla choice. |
-| `Resources/Events.xcstrings` | (resource) | Bangla event names; English is the default localization and the keys. |
+| `Settings/Language.swift` | `Language`, `LanguageChoice` | English or Bangla: display locale, pure `resolve(override:preferred:)` from `AppleLanguages`, string lookup in `Resources/bn.lproj/<Area>.strings` with English fallback; the picker's System/English/Bangla choice. |
+| `Resources/bn.lproj/Events.strings` | (resource) | Bangla event names; English is the default localization and the keys. |
 | `Settings/SettingsStore.swift` | `SettingsStore` | `@Observable` UserDefaults-backed store, `onChange(old, new)`. |
 | `Settings/StaticTimeHint.swift` | `StaticTimeHint` | Whether a static time falls outside the calculated window. |
 | `Sync/SyncCoordinator.swift` | `SyncCoordinator`, `SyncTrigger` | Fetch orchestration: debounce, backoff, cache replace. |

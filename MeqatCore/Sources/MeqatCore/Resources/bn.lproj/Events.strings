@@ -1,0 +1,12 @@
+/* Bangla event names (PRD FR-5). Keys are the English EventID.displayName. */
+"Tahajjud" = "তাহাজ্জুদ";
+"Fajr" = "ফজর";
+"Forbidden (sunrise)" = "নিষিদ্ধ সময় (সূর্যোদয়)";
+"Duha" = "চাশত";
+"Forbidden (noon)" = "নিষিদ্ধ সময় (দুপুর)";
+"Dhuhr" = "যোহর";
+"Jumah" = "জুমা";
+"Asr" = "আসর";
+"Forbidden (sunset)" = "নিষিদ্ধ সময় (সূর্যাস্ত)";
+"Maghrib" = "মাগরিব";
+"Isha" = "এশা";
