@@ -23,13 +23,15 @@ public enum AlertPlanner {
     public static let horizon: TimeInterval = 48 * 3600
     public static let maxBanners = 60
 
-    public static func plan(events: [ScheduledEvent], settings: AppSettings, now: Date, timeZone: TimeZone) -> [PlannedAlert] {
+    public static func plan(
+        events: [ScheduledEvent], settings: AppSettings, now: Date, timeZone: TimeZone, language: Language = .english
+    ) -> [PlannedAlert] {
         let formatter = DateFormatter()
-        formatter.locale = Locale(identifier: "en_US_POSIX")
+        formatter.locale = language.locale
         formatter.timeZone = timeZone
         formatter.dateFormat = settings.general.timeFormat.dateFormat
 
-        let all = events.flatMap { alerts(for: $0, settings[event: $0.id], formatter) }
+        let all = events.flatMap { alerts(for: $0, settings[event: $0.id], formatter, language) }
             .filter { now < $0.fireDate && $0.fireDate <= now + horizon }
             .sorted { ($0.fireDate, $0.id) < ($1.fireDate, $1.id) }
 
@@ -41,9 +43,11 @@ public enum AlertPlanner {
         }
     }
 
-    private static func alerts(for event: ScheduledEvent, _ s: EventSettings, _ formatter: DateFormatter) -> [PlannedAlert] {
+    private static func alerts(
+        for event: ScheduledEvent, _ s: EventSettings, _ formatter: DateFormatter, _ language: Language
+    ) -> [PlannedAlert] {
         guard let interval = event.interval else { return [] }
-        let name = event.id.displayName
+        let name = event.id.displayName(in: language)
         let prohibited = event.id.kind == .prohibited
         let start = formatter.string(from: interval.start)
         let end = formatter.string(from: interval.end)
@@ -60,19 +64,29 @@ public enum AlertPlanner {
             out.append(
                 make(
                     .start, interval.start + TimeInterval(s.startAlert.offsetMinutes * 60), s.startAlert.style,
-                    prohibited ? "⛔ \(name) · avoid praying until \(end)" : "\(name) · \(start)"))
+                    prohibited
+                        ? "⛔ " + title("%1$@ · avoid praying until %2$@", language, name, end)
+                        : title("%1$@ · %2$@", language, name, start)))
         }
         if s.endAlert.enabled {
             let lead = s.endAlert.leadMinutes
-            out.append(make(.end, interval.end - TimeInterval(lead * 60), s.endAlert.style, "\(name) ends in \(lead) min"))
+            out.append(
+                make(
+                    .end, interval.end - TimeInterval(lead * 60), s.endAlert.style,
+                    title("%1$@ ends in %2$d min", language, name, lead)))
         }
         if s.preWarning.enabled {
             let lead = s.preWarning.leadMinutes
             out.append(
                 make(
                     .preWarning, interval.start - TimeInterval(lead * 60), s.preWarning.style,
-                    "\(prohibited ? "⛔ " : "")\(name) in \(lead) min"))
+                    (prohibited ? "⛔ " : "") + title("%1$@ in %2$d min", language, name, lead)))
         }
         return out
+    }
+
+    /// `key` is the English format string and the key in `bn.lproj/Alerts.strings`; the locale gives Bangla digits.
+    private static func title(_ key: String, _ language: Language, _ args: CVarArg...) -> String {
+        String(format: language.localized(key, table: "Alerts"), locale: language.locale, arguments: args)
     }
 }

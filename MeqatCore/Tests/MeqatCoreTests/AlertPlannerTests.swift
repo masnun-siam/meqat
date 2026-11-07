@@ -27,8 +27,10 @@ final class AlertPlannerTests: XCTestCase {
         return s
     }
 
-    private func plan(_ events: [ScheduledEvent], _ s: AppSettings, now: Date? = nil) -> [PlannedAlert] {
-        AlertPlanner.plan(events: events, settings: s, now: now ?? at(28, 0, 0), timeZone: tz)
+    private func plan(
+        _ events: [ScheduledEvent], _ s: AppSettings, now: Date? = nil, language: Language = .english
+    ) -> [PlannedAlert] {
+        AlertPlanner.plan(events: events, settings: s, now: now ?? at(28, 0, 0), timeZone: tz, language: language)
     }
 
     /// Plans with `tweak` applied to every event's settings.
@@ -212,5 +214,63 @@ final class AlertPlannerTests: XCTestCase {
         XCTAssertEqual(p.count, 2)
         XCTAssertEqual(p[0].fireDate, p[1].fireDate)
         XCTAssertNotEqual(p[0].id, p[1].id)
+    }
+
+    // MARK: Bangla
+
+    private func hasLatin(_ s: String) -> Bool { s.range(of: "[A-Za-z]", options: .regularExpression) != nil }
+
+    func testBanglaEndAlertHasNoLatinLetters() {
+        let s = settings(.asr, end: LeadAlert(style: .banner, leadMinutes: 15))
+        let title = plan([event(.asr, from: at(28, 15, 4), to: at(28, 17, 0))], s, language: .bangla)[0].title
+        XCTAssertEqual(title, "আসর শেষ হতে ১৫ মিনিট বাকি")
+        XCTAssertTrue(title.contains("আসর") && title.contains("১৫ মিনিট"))
+        XCTAssertFalse(hasLatin(title))
+    }
+
+    func testBanglaStartTitleUsesBanglaDigits() {
+        let s = settings(.dhuhr, start: StartAlert())
+        let p = plan([event(.dhuhr, from: at(28, 11, 46), to: at(28, 15, 4))], s, language: .bangla)
+        XCTAssertEqual(p.map(\.title), ["যোহর · ১১:৪৬"])
+    }
+
+    func testBanglaProhibitedStart() {
+        let s = settings(.istiwa, start: StartAlert())
+        let p = plan([event(.istiwa, from: at(28, 11, 36), to: at(28, 11, 46))], s, language: .bangla)
+        XCTAssertEqual(p.map(\.title), ["⛔ নিষিদ্ধ সময় (দুপুর) · ১১:৪৬ পর্যন্ত নামাজ পড়বেন না"])
+    }
+
+    func testBanglaPreWarnings() {
+        let pre = LeadAlert(style: .banner, leadMinutes: 20)
+        let asr = plan([event(.asr, from: at(28, 15, 4), to: at(28, 17, 0))], settings(.asr, pre: pre), language: .bangla)
+        XCTAssertEqual(asr.map(\.title), ["আসর শুরু হতে ২০ মিনিট বাকি"])
+        let noon = plan([event(.istiwa, from: at(28, 11, 36), to: at(28, 11, 46))], settings(.istiwa, pre: pre), language: .bangla)
+        XCTAssertEqual(noon.map(\.title), ["⛔ নিষিদ্ধ সময় (দুপুর) শুরু হতে ২০ মিনিট বাকি"])
+    }
+
+    func testBanglaTwelveHourKeepsAmPmMarker() {
+        var s = settings(.dhuhr, start: StartAlert())
+        s.general.timeFormat = .twelve
+        let title = plan([event(.dhuhr, from: at(28, 15, 4), to: at(28, 17, 0))], s, language: .bangla)[0].title
+        XCTAssertTrue(title.hasPrefix("যোহর · ৩:০৪"), title)
+        // The AM/PM marker is the allowed Latin exception (PRD decision); nothing else is Latin.
+        XCTAssertFalse(hasLatin(title.replacingOccurrences(of: "AM", with: "").replacingOccurrences(of: "PM", with: "")))
+    }
+
+    func testAlertIdsAreTheSameInBothLanguages() {
+        let s = settings(
+            .asr, start: StartAlert(), end: LeadAlert(style: .banner, leadMinutes: 15), pre: LeadAlert(style: .banner, leadMinutes: 20))
+        let events = [event(.asr, from: at(28, 15, 4), to: at(28, 17, 0))]
+        let ids = plan(events, s, language: .bangla).map(\.id)
+        XCTAssertEqual(ids, plan(events, s).map(\.id))
+        XCTAssertEqual(ids, ["2026-10-28.asr.preWarning", "2026-10-28.asr.start", "2026-10-28.asr.end"])
+    }
+
+    func testBanglaOverlayLineIsBanglaTitle() {
+        let s = settings(
+            .asr, start: StartAlert(style: .fullScreen), end: LeadAlert(style: .fullScreen, leadMinutes: 15),
+            pre: LeadAlert(style: .fullScreen, leadMinutes: 20))
+        let p = plan([event(.asr, from: at(28, 15, 4), to: at(28, 17, 0))], s, language: .bangla)
+        XCTAssertEqual(p.map(\.overlayLine), ["আসর শুরু হতে ২০ মিনিট বাকি", nil, "আসর শেষ হতে ১৫ মিনিট বাকি"])
     }
 }

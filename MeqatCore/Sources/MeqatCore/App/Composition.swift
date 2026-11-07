@@ -11,10 +11,12 @@ public enum Composition {
         }
     }
 
-    public static func plan(cache: TimingsCache?, settings: AppSettings, now: Date, timeZone: TimeZone) -> [PlannedAlert] {
+    public static func plan(
+        cache: TimingsCache?, settings: AppSettings, now: Date, timeZone: TimeZone, language: Language = .english
+    ) -> [PlannedAlert] {
         AlertPlanner.plan(
             events: events(cache: cache, settings: settings, now: now, timeZone: timeZone),
-            settings: settings, now: now, timeZone: timeZone)
+            settings: settings, now: now, timeZone: timeZone, language: language)
     }
 
     /// nil while there is no location to fetch for.
