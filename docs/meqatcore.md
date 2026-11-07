@@ -40,7 +40,9 @@ All under `MeqatCore/Sources/MeqatCore/`.
 | `Sync/SyncCoordinator.swift` | `SyncCoordinator`, `SyncTrigger` | Fetch orchestration: debounce, backoff, cache replace. |
 | `Sync/SyncPolicy.swift` | `SyncPolicy`; `FetchParameters.current(...)` | Pure: when to refetch and which months. |
 | `Sync/SyncStatus.swift` | `SyncStatus`, `SyncFailure` | Observable sync state. |
+| `Updates/CommandRunning.swift` | `CommandRunning`, `ProcessCommandRunner` | Seam for running a system tool and waiting for its exit status (`Process`), stubbed in tests. |
 | `Updates/InstallEligibility.swift` | `InstallEligibility`, `InstallFacts` | Pure `canInstall` plus `probe` of the bundle's folder, volume, translocation and sandbox; fails closed. |
+| `Updates/UpdateVerifier.swift` | `UpdateVerifier`, `UpdateVerificationError` | Checks a downloaded update: DMG SHA-256 against GitHub's digest, app bundle id and version, `codesign --verify --deep --strict`. |
 
 ## API the app uses
 
