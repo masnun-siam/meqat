@@ -1,0 +1,40 @@
+{
+  "sourceLanguage" : "en",
+  "strings" : {
+    "NSLocationUsageDescription" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "bn" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Meqat আপনার অবস্থানকে প্রায় ১ কিলোমিটারের মধ্যে আনুমানিক করে, এবং আপনার নামাজের সময় পেতে তা শুধু Aladhan নামাজের সময়ের সেবায় পাঠায়।"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Meqat rounds your location to about 1 km and sends it only to the Aladhan prayer-times service to get your prayer times."
+          }
+        }
+      }
+    },
+    "NSLocationWhenInUseUsageDescription" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "bn" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Meqat আপনার অবস্থানকে প্রায় ১ কিলোমিটারের মধ্যে আনুমানিক করে, এবং আপনার নামাজের সময় পেতে তা শুধু Aladhan নামাজের সময়ের সেবায় পাঠায়।"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Meqat rounds your location to about 1 km and sends it only to the Aladhan prayer-times service to get your prayer times."
+          }
+        }
+      }
+    }
+  },
+  "version" : "1.0"
+}
