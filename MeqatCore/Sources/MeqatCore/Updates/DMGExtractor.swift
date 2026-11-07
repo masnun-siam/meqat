@@ -61,7 +61,7 @@ public struct DMGExtractor: Sendable {
     /// Strips `com.apple.quarantine` from the bundle and everything in it, so the new app launches without
     /// the unidentified-developer block. `ditto --noqtn` alone still copies the attribute (seen on macOS 27).
     /// Returns false if any file kept it.
-    static func removeQuarantine(under app: URL) -> Bool {
+    private static func removeQuarantine(under app: URL) -> Bool {
         let inside = FileManager.default.enumerator(atPath: app.path)?.compactMap { $0 as? String } ?? []
         let paths = [app.path] + inside.map { app.appendingPathComponent($0).path }
         return paths.allSatisfy { removexattr($0, "com.apple.quarantine", XATTR_NOFOLLOW) == 0 || errno == ENOATTR }
