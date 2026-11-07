@@ -18,7 +18,7 @@ flowchart LR
 
 ## MenuInput (no clock reads, no I/O)
 
-`now`, `timeZone`, `events` (engine output for yesterday..day after tomorrow), `styles` (per-event `AlertStyle`), `place`, `hasScheduleForToday`, `sync: MenuSyncInfo`, `location: MenuLocationInfo`, `notificationsAuthorized`, `bannerNow`, `showsCouldntRefresh`, `updateNotice: UpdateNotice?` (version and release URL) and `checksForUpdates` (defaults `nil`, `true`). `AppEnvironment.menuState()` builds it; `MenuSyncInfo(SyncStatus)` and `MenuLocationInfo(LocationState)` map core state (in `App/Composition.swift`).
+`now`, `timeZone`, `events` (engine output for yesterday..day after tomorrow), `styles` (per-event `AlertStyle`), `place`, `hasScheduleForToday`, `sync: MenuSyncInfo`, `location: MenuLocationInfo`, `notificationsAuthorized`, `bannerNow`, `showsCouldntRefresh`, `updateNotice: UpdateNotice?` (version, release URL and `canInstall`, whether this app can install it) and `checksForUpdates` (defaults `nil`, `true`). `AppEnvironment.menuState()` builds it; `MenuSyncInfo(SyncStatus)` and `MenuLocationInfo(LocationState)` map core state (in `App/Composition.swift`).
 
 ## Status title (first match wins)
 
