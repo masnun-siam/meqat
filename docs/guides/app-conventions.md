@@ -108,7 +108,7 @@ Add one:
 
 ## Entitlements and permissions
 
-`Config/Meqat.entitlements`: App Sandbox, `network.client`, `personal-information.location`. Hardened runtime is on. Do not add entitlements (file access, other network roles) without a human decision. Location usage strings are `INFOPLIST_KEY_NS*` build settings in the pbxproj. No third-party packages (`CLAUDE.md`).
+`Config/Meqat.entitlements`: App Sandbox, `network.client`, `personal-information.location`. Hardened runtime is on. Do not add entitlements (file access, other network roles) without a human decision. Location usage strings are `INFOPLIST_KEY_NS*` build settings in the pbxproj (English source); their translations live in `Meqat/InfoPlist.xcstrings`, keyed by the bare Info.plist key (`NSLocationUsageDescription`). The project's `knownRegions` are `en`, `Base`, `bn`. The system draws the permission prompt in the Mac's language (or Meqat's per-app language in System Settings), not from `-AppleLanguages`. No third-party packages (`CLAUDE.md`).
 
 ## What must not go in the app target
 

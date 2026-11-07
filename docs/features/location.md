@@ -53,7 +53,7 @@ Rules:
 - Coordinates are rounded to 2 decimals (about 1 km) at the source in `handleLocations` (`round2`), and again when the request is built (`%.2f` in `AladhanClient`). Raw fixes are never stored.
 - Only rounded coordinates, or the typed city/country/state, go to `api.aladhan.com`, plus the cache copy in `timings.json` (see [prayer-times-sync](prayer-times-sync.md)).
 - Switching modes forgets fixes in memory and strips the location from the cache (`SyncCoordinator.clearCachedLocation()`).
-- Logs carry error kinds only. The usage-description strings (`INFOPLIST_KEY_NSLocationWhenInUseUsageDescription` in `Meqat.xcodeproj/project.pbxproj`) state the rounding and Aladhan-only use. Sandbox entitlements: `com.apple.security.personal-information.location` and `com.apple.security.network.client`.
+- Logs carry error kinds only. The usage-description strings (`INFOPLIST_KEY_NSLocationWhenInUseUsageDescription` in `Meqat.xcodeproj/project.pbxproj`) state the rounding and Aladhan-only use; the Bangla text is in `Meqat/InfoPlist.xcstrings`. Sandbox entitlements: `com.apple.security.personal-information.location` and `com.apple.security.network.client`.
 
 ## Manual city
 
