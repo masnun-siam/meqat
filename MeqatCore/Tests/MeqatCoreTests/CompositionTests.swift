@@ -68,7 +68,10 @@ final class CompositionTests: XCTestCase {
 
     func testUpdateNoticeMapping() throws {
         let url = try XCTUnwrap(URL(string: "https://github.com/masnun-siam/meqat/releases/tag/v1.3.0"))
-        XCTAssertEqual(UpdateNotice(.available(version: "1.3.0", releaseURL: url)), UpdateNotice(version: "1.3.0", releaseURL: url))
+        XCTAssertEqual(
+            UpdateNotice(.available(version: "1.3.0", releaseURL: url, canInstall: false)),
+            UpdateNotice(version: "1.3.0", releaseURL: url))
+        XCTAssertEqual(UpdateNotice(.available(version: "1.3.0", releaseURL: url, canInstall: true))?.canInstall, true)
         XCTAssertNil(UpdateNotice(.idle))
         XCTAssertNil(UpdateNotice(.checking))
         XCTAssertNil(UpdateNotice(.upToDate(checkedAt: Date())))

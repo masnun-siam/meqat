@@ -37,7 +37,8 @@
             case "upToDate": context.updateStatus = .upToDate(checkedAt: Date())
             case "available":
                 context.updateStatus = .available(
-                    version: "1.4.0", releaseURL: URL(string: "https://github.com/masnun-siam/meqat/releases/tag/v1.4.0")!)
+                    version: "1.4.0", releaseURL: URL(string: "https://github.com/masnun-siam/meqat/releases/tag/v1.4.0")!,
+                    canInstall: false)
             case "failed": context.updateStatus = .failed
             default: context.updateStatus = .idle
             }

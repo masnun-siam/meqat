@@ -36,11 +36,14 @@ final class UpdateCheckerTests: XCTestCase {
     private let url = URL(string: "https://example.com/r")!
     private var stub: StubReleases!
     private var checker: UpdateChecker!
+    private var installing = false
 
     override func setUp() async throws {
         stub = StubReleases()
+        installing = false
         let date = fixedNow
-        checker = UpdateChecker(installedVersion: "1.3.0", client: stub, now: { date })
+        checker = UpdateChecker(
+            installedVersion: "1.3.0", client: stub, now: { date }, isInstalling: { [unowned self] in self.installing })
     }
 
     private func eventually(
@@ -74,7 +77,7 @@ final class UpdateCheckerTests: XCTestCase {
     func testNewerTagIsAvailable() async {
         await stub.setTag("v1.4.0")
         await settle(.manual)
-        XCTAssertEqual(checker.status, .available(version: "1.4.0", releaseURL: url))
+        XCTAssertEqual(checker.status, .available(version: "1.4.0", releaseURL: url, canInstall: false))
     }
 
     func testSameNightlyAndOlderAreUpToDate() async {
@@ -95,7 +98,7 @@ final class UpdateCheckerTests: XCTestCase {
         await settle(.automatic)
         await stub.fail(with: URLError(.notConnectedToInternet))
         await settle(.automatic)
-        XCTAssertEqual(checker.status, .available(version: "1.4.0", releaseURL: url))
+        XCTAssertEqual(checker.status, .available(version: "1.4.0", releaseURL: url, canInstall: false))
 
         await stub.setTag("v1.3.0")
         await stub.fail(with: nil)
@@ -140,6 +143,38 @@ final class UpdateCheckerTests: XCTestCase {
     func testNextCheckAfterCompletionRequestsAgain() async {
         await settle(.automatic)
         await settle(.automatic)
+        let calls = await stub.calls
+        XCTAssertEqual(calls, 2)
+    }
+
+    func testAvailableCarriesCanInstall() async {
+        let date = fixedNow
+        checker = UpdateChecker(installedVersion: "1.3.0", client: stub, now: { date }, canInstall: true)
+        await stub.setTag("v1.4.0")
+        await settle(.manual)
+        XCTAssertEqual(checker.status, .available(version: "1.4.0", releaseURL: url, canInstall: true))
+    }
+
+    func testCheckSkippedWhileInstalling() async {
+        installing = true
+        for trigger in [UpdateCheckTrigger.automatic, .manual] {
+            checker.check(trigger)
+            XCTAssertEqual(checker.status, .idle)
+        }
+        await Task.yield()
+        let calls = await stub.calls
+        XCTAssertEqual(calls, 0)
+    }
+
+    func testSkippedManualCheckDoesNotLeaveManualPending() async {
+        await stub.setTag("v1.4.0")
+        await settle(.automatic)
+        installing = true
+        checker.check(.manual)
+        installing = false
+        await stub.fail(with: ReleaseError.http(500))
+        await settle(.automatic)
+        XCTAssertEqual(checker.status, .available(version: "1.4.0", releaseURL: url, canInstall: false))
         let calls = await stub.calls
         XCTAssertEqual(calls, 2)
     }

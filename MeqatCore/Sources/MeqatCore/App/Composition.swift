@@ -55,8 +55,8 @@ extension MenuSyncInfo {
 
 extension UpdateNotice {
     public init?(_ status: UpdateStatus) {
-        guard case .available(let version, let releaseURL) = status else { return nil }
-        self.init(version: version, releaseURL: releaseURL)
+        guard case .available(let version, let releaseURL, let canInstall) = status else { return nil }
+        self.init(version: version, releaseURL: releaseURL, canInstall: canInstall)
     }
 }
 
