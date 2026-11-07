@@ -61,7 +61,7 @@ flowchart LR
 
   Precedence: awaiting permission, then fetching (syncing or awaiting fix), then missing location, then last failure; no failure means fetching.
 - "Notifications are off — Open System Settings" row when `!notificationsAuthorized` (opens the Notifications settings pane URL).
-- `MenuState.updateRow` (`MenuUpdateRow`: `Update available — <x.y.z>` and the release URL) is set only when `updateNotice` is present and `checksForUpdates` is on, with or without a schedule. `MenuDropdownView` renders it as a link row above the footer divider (below the notifications-off row); clicking opens the URL and closes the popover via `dismiss`. Harness: `-MeqatDebugUpdate 1.4.0`.
+- `MenuState.updateRow` (`MenuUpdateRow`: a title and a `MenuUpdateAction?`) is set only when `updateNotice` is present and `checksForUpdates` is on, with or without a schedule. Its content follows `MenuInput.installState`: `idle`/`failed` → `Update available — <x.y.z>` with `.install` when `canInstall`, else `.openRelease(url)`; `downloading` → `Downloading update… <n>%`; `verifying`/`installing`/`relaunching` → `Installing update…`; the last two have a nil action. `MenuDropdownView` renders it as a link row above the footer divider (below the notifications-off row): `.install` calls `MenuActions.installUpdate`, `.openRelease` opens the URL, both close the popover via `dismiss`; a nil action shows the row disabled. Harness: `-MeqatDebugUpdate 1.4.0`.
 - Footer text (first match): `Couldn't refresh`, `Syncing…`, `Offline — using cache from d MMM`, `Synced HH:mm` (today) or `Synced d MMM HH:mm`, empty. Times follow `MenuInput.timeFormat` (`h:mm a` when 12-hour). One line: status text, then ↻ (Refresh now, disabled while fetching) and ⚙ (Settings) icon buttons with matching tooltips and VoiceOver labels, then Quit.
 
 ## "Couldn't refresh"
@@ -75,6 +75,7 @@ flowchart LR
 | `refreshNow`, `tryAgain` | `coordinator.trigger(.refreshNow)` |
 | `openSettings` | Settings window, General pane |
 | `openLocationPane` | Settings window, Location pane |
+| `installUpdate` | not wired yet (#148): the default no-op; unreachable while `canInstall` is false |
 | `dropdownOpened` | clears `bannerNow` |
 | `quit` | `NSApp.terminate` |
 
@@ -85,7 +86,7 @@ flowchart LR
 
 ## Tests
 
-`MenuPresenterTests`: next/rows, disabled Duha, prohibited precedence, crescent, countdown rounding, tomorrow after Isha, banner now, VoiceOver labels, invalid row, prev-night carry-over, empty-state precedence, footer variants, notifications row and place. `CompositionTests` covers the `MenuSyncInfo`/`MenuLocationInfo` mapping. The controller and views are untested; use the harness.
+`MenuPresenterTests`: next/rows, disabled Duha, prohibited precedence, crescent, countdown rounding, tomorrow after Isha, banner now, VoiceOver labels, invalid row, prev-night carry-over, empty-state precedence, footer variants, notifications row and place, update row per install state. `CompositionTests` covers the `MenuSyncInfo`/`MenuLocationInfo` mapping. The controller and views are untested; use the harness.
 
 ## Debug harness
 

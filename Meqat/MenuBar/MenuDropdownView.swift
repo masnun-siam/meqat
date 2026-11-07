@@ -26,10 +26,15 @@ struct MenuDropdownView: View {
             if let update = state.updateRow {
                 Divider()
                 Button(update.title) {
-                    NSWorkspace.shared.open(update.url)
+                    switch update.action {
+                    case .install: actions.installUpdate()
+                    case .openRelease(let url): NSWorkspace.shared.open(url)
+                    case nil: return
+                    }
                     dismiss()
                 }
                 .buttonStyle(.link).padding(12)
+                .disabled(update.action == nil)
             }
             Divider()
             footer

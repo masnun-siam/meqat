@@ -252,7 +252,67 @@ final class MenuPresenterTests: XCTestCase {
     func testUpdateRowWhenNoticeAndToggleOn() {
         let s = present(at(28, 12, 0)) { $0.updateNotice = notice }
         XCTAssertEqual(s.updateRow?.title, "Update available — 1.4.0")
-        XCTAssertEqual(s.updateRow?.url, notice.releaseURL)
+        XCTAssertEqual(s.updateRow?.action, .openRelease(notice.releaseURL))
+    }
+
+    private func updateRow(canInstall: Bool, _ state: InstallState, schedule: Bool = true) -> MenuUpdateRow? {
+        var n = notice
+        n.canInstall = canInstall
+        return present(at(28, 12, 0)) {
+            $0.updateNotice = n
+            $0.installState = state
+            $0.hasScheduleForToday = schedule
+        }.updateRow
+    }
+
+    func testUpdateRowInstallsWhenPossibleInIdleAndFailed() {
+        for state in [InstallState.idle, .failed] {
+            let row = updateRow(canInstall: true, state)
+            XCTAssertEqual(row?.title, "Update available — 1.4.0", "\(state)")
+            XCTAssertEqual(row?.action, .install, "\(state)")
+        }
+    }
+
+    func testUpdateRowOpensReleaseWhenInstallNotPossible() {
+        for state in [InstallState.idle, .failed] {
+            let row = updateRow(canInstall: false, state)
+            XCTAssertEqual(row?.title, "Update available — 1.4.0", "\(state)")
+            XCTAssertEqual(row?.action, .openRelease(notice.releaseURL), "\(state)")
+        }
+    }
+
+    func testUpdateRowWhileDownloading() {
+        XCTAssertEqual(updateRow(canInstall: true, .downloading(percent: 42)), MenuUpdateRow(title: "Downloading update… 42%", action: nil))
+    }
+
+    func testUpdateRowWhileInstalling() {
+        for state in [InstallState.verifying, .installing, .relaunching] {
+            XCTAssertEqual(updateRow(canInstall: true, state), MenuUpdateRow(title: "Installing update…", action: nil), "\(state)")
+        }
+    }
+
+    func testNoUpdateRowWhenToggleOffInAnyInstallState() {
+        let states: [InstallState] = [.idle, .downloading(percent: 42), .verifying, .installing, .relaunching, .failed]
+        for state in states {
+            let s = present(at(28, 12, 0)) {
+                $0.updateNotice = notice
+                $0.checksForUpdates = false
+                $0.installState = state
+            }
+            XCTAssertNil(s.updateRow, "\(state)")
+            XCTAssertNil(present(at(28, 12, 0)) { $0.installState = state }.updateRow, "\(state)")
+        }
+    }
+
+    func testEmptyStateUpdateRowMatchesNormalState() {
+        let states: [InstallState] = [.idle, .downloading(percent: 42), .installing, .failed]
+        for state in states {
+            for canInstall in [true, false] {
+                XCTAssertEqual(
+                    updateRow(canInstall: canInstall, state, schedule: false), updateRow(canInstall: canInstall, state),
+                    "\(state) \(canInstall)")
+            }
+        }
     }
 
     func testNoUpdateRowWithoutNotice() {
