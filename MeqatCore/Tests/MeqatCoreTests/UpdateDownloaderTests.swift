@@ -21,6 +21,7 @@ private final class StubDownloadTransport: DownloadTransport, @unchecked Sendabl
 
     func bytes(for request: URLRequest) async throws -> (AsyncThrowingStream<Data, Error>, HTTPURLResponse) {
         requests.append(request)
+        if Task.isCancelled { throw URLError(.cancelled) }
         let headers = contentLength.map { ["Content-Length": String($0)] } ?? [:]
         let response = HTTPURLResponse(url: request.url!, statusCode: status, httpVersion: nil, headerFields: headers)!
         let stream = AsyncThrowingStream<Data, Error> { [chunks, failure, hold] continuation in
@@ -162,6 +163,20 @@ final class UpdateDownloaderTests: XCTestCase {
     func testMissingFolderThrowsWriteFailed() async {
         let target = dir.appendingPathComponent("missing/Meqat.dmg")
         await assertThrows(DownloadError.writeFailed, StubDownloadTransport(chunks: quarters()), to: target)
+    }
+
+    func testCancelBeforeResponseThrowsCancellation() async {
+        let task = Task { [url, file] in
+            withUnsafeCurrentTask { $0?.cancel() }
+            try await UpdateDownloader(transport: StubDownloadTransport()).download(url, to: file) { _ in }
+        }
+        do {
+            try await task.value
+            XCTFail("expected CancellationError")
+        } catch {
+            XCTAssertTrue(error is CancellationError, "\(error)")
+        }
+        XCTAssertFalse(fileExists)
     }
 
     func testCancelMidBodyThrowsCancellationAndDeletes() async throws {

@@ -24,7 +24,13 @@ public struct UpdateDownloader: Sendable {
     /// Throws `DownloadError`, or a transport `URLError` or `CancellationError` as it is.
     public func download(_ url: URL, to file: URL, progress: @escaping @Sendable (Int) -> Void) async throws {
         guard url.scheme == "https" else { throw DownloadError.insecureURL }
-        let (chunks, response) = try await transport.bytes(for: Self.request(url))
+        let chunks: AsyncThrowingStream<Data, Error>
+        let response: HTTPURLResponse
+        do {
+            (chunks, response) = try await transport.bytes(for: Self.request(url))
+        } catch {
+            throw Self.cancelAware(error)
+        }
         guard response.statusCode == 200 else { throw DownloadError.http(response.statusCode) }
         let expected = response.expectedContentLength
         guard expected <= Self.maxBytes else { throw DownloadError.tooLarge }
@@ -36,9 +42,13 @@ public struct UpdateDownloader: Sendable {
             try await Self.write(chunks, to: handle, expected: expected, progress: progress)
         } catch {
             try? FileManager.default.removeItem(at: file)
-            // URLSession reports a cancelled task as URLError(.cancelled); callers see one cancel error.
-            throw Task.isCancelled ? CancellationError() : error
+            throw Self.cancelAware(error)
         }
+    }
+
+    /// URLSession reports a cancelled task as `URLError(.cancelled)`; callers see one cancel error.
+    private static func cancelAware(_ error: Error) -> Error {
+        Task.isCancelled ? CancellationError() : error
     }
 
     static func request(_ url: URL) -> URLRequest {
