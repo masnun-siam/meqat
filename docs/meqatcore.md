@@ -41,6 +41,8 @@ All under `MeqatCore/Sources/MeqatCore/`.
 | `Sync/SyncPolicy.swift` | `SyncPolicy`; `FetchParameters.current(...)` | Pure: when to refetch and which months. |
 | `Sync/SyncStatus.swift` | `SyncStatus`, `SyncFailure` | Observable sync state. |
 | `Updates/InstallEligibility.swift` | `InstallEligibility`, `InstallFacts` | Pure `canInstall` plus `probe` of the bundle's folder, volume, translocation and sandbox; fails closed. |
+| `Updates/DownloadTransport.swift` | `DownloadTransport`, `URLSessionDownloadTransport` | Streaming download seam: status plus a body of up to 64 KiB chunks; stubbed in tests. |
+| `Updates/UpdateDownloader.swift` | `UpdateDownloader`, `DownloadError` | Downloads the DMG to a file over `https` only: 60 s inactivity timeout, 50 MB cap, no retries, percent progress; deletes the partial file on failure or cancel. |
 
 ## API the app uses
 
