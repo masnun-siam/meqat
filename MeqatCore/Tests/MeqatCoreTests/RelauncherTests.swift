@@ -47,10 +47,25 @@ final class RelauncherTests: XCTestCase {
         defer { try? FileManager.default.removeItem(at: file) }
         try ProcessLauncher().launch(
             URL(fileURLWithPath: "/bin/sh"), ["-c", "echo ok > \"$1\"", "sh", file.path])
+        XCTAssertTrue(appears(file))
+    }
+
+    // `open` swapped for `touch`: proves the real script quotes the path and skips the wait for an exited pid.
+    func testScriptHandsQuotedPathToOpenAfterExit() throws {
+        let file = FileManager.default.temporaryDirectory.appendingPathComponent("a b'c-\(UUID().uuidString)")
+        defer { try? FileManager.default.removeItem(at: file) }
+        let script = Relauncher.script.replacingOccurrences(of: "/usr/bin/open", with: "/usr/bin/touch")
+        var arguments = Relauncher.arguments(app: file, pid: Int32.max)
+        arguments[1] = script
+        try ProcessLauncher().launch(URL(fileURLWithPath: "/bin/sh"), arguments)
+        XCTAssertTrue(appears(file))
+    }
+
+    private func appears(_ file: URL) -> Bool {
         let deadline = Date().addingTimeInterval(2)
         while !FileManager.default.fileExists(atPath: file.path) && Date() < deadline {
             Thread.sleep(forTimeInterval: 0.01)
         }
-        XCTAssertTrue(FileManager.default.fileExists(atPath: file.path))
+        return FileManager.default.fileExists(atPath: file.path)
     }
 }
