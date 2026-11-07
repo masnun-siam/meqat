@@ -21,4 +21,9 @@ public enum EventID: String, CaseIterable, Codable, Sendable, Equatable {
         default: rawValue.prefix(1).uppercased() + rawValue.dropFirst()
         }
     }
+
+    /// The display name in `language`; English is exactly `displayName`.
+    public func displayName(in language: Language) -> String {
+        language.localized(displayName, table: "Events")
+    }
 }

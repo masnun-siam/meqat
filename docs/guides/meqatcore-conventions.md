@@ -11,6 +11,7 @@ Read before changing `MeqatCore/`. Every rule names the file that sets the patte
 | Protocol seam lives next to its consumer, in its own file when small | `Aladhan/HTTPTransport.swift`, `Alerts/NotificationCentering.swift`, `Alerts/AlertTimer.swift` |
 | Cross-concern glue goes in `App/Composition.swift` (stateless `enum` plus extensions) | `Composition`, `MenuSyncInfo.init(_ status:)` |
 | Exceptions: value types and enums of one concern may share a file (`Cache/LocalDate.swift` has `LocalDate` and `YearMonth`; `Cache/TimingsCache.swift` has five types; `Alerts/AlertPlanner.swift` has `AlertKind` and `PlannedAlert`). `FetchParameters.current(...)` lives in `Sync/SyncPolicy.swift`, not in `Cache/` |
+| Localized text lives in `Resources/bn.lproj/<Area>.strings` (English is the default localization and the keys, so there is no `en.lproj`). Not `.xcstrings`: SwiftPM's native build system, the default on CI's toolchain, copies a string catalog without compiling it | `Package.swift` (`defaultLocalization`, `resources`), `Resources/bn.lproj/Events.strings` |
 | Shared constants: `MeqatCore.bundleIdentifier` (`MeqatCore.swift`) is the `Logger` subsystem | `Sync/SyncCoordinator.swift` |
 
 ## Types: value vs reference
@@ -80,7 +81,8 @@ Inject through `init` with production defaults. No singletons, no global mutable
 - Calendar days are `LocalDate` / `YearMonth`, never `Date` ranges (`Cache/LocalDate.swift`). Make one with `LocalDate(date, timeZone:)`.
 - Date arithmetic goes through `LocalDate.adding(days:)` (UTC noon, DST-safe). Weekday uses `LocalDate.weekday` (6 is Friday, used by `EventEngine` for Jumah).
 - Every `Calendar` is `Calendar(identifier: .gregorian)` with `timeZone` set from the injected zone. Never read `.current` inside a pure type; only init defaults do (`{ .current }`).
-- Every `DateFormatter` sets `locale = en_US_POSIX` and `timeZone` (`MenuPresenter.Formatters`, `AlertPlanner.plan`).
+- Every `DateFormatter` sets `locale` and `timeZone`. Display formatters use `Language.locale` (`en_US_POSIX` or `bn@numbers=beng`); formatters that parse or build identifiers (Aladhan dates, alert ids) keep `en_US_POSIX` (`MenuPresenter.Formatters`, `AlertPlanner.plan`).
+- Strings: each area has its own table in `Sources/MeqatCore/Resources/bn.lproj/<Area>.strings`, looked up with `Language.localized(_:table:)`. Keys are the English text, so English output is unchanged and a missing Bangla entry falls back to it. Integers inside strings use `String(format:locale:)` with `Language.locale`. Lookup set by `EventID.displayName(in:)`.
 - Resolve a wall-clock time with `matchingPolicy: .nextTime` so DST gaps move forward (`EventEngine.resolve`, `StaticTimeHint`).
 - `DateInterval` traps on end < start. Build through the guarded helper that returns `nil` (`EventEngine.interval(start:end:)`); `nil` interval means "no window", rendered "—".
 - API timings are ISO 8601 instants (`iso8601=true`); store `Date`, not strings (`AladhanClient.parse`, `DayTimings`).
