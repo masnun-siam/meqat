@@ -59,10 +59,10 @@ Every Meqat user, on their own Mac. There are no roles or accounts.
 - **FR-5 Restart.** Right after the replacement, Meqat quits and the new version launches on its own, with no prompt. An overlay on screen does not delay this. Settings, cache and location carry over, because they live outside the app bundle.
   - Acceptance: after clicking install, within 10 s of the download finishing, the menu bar item is back and About shows "Version 1.8.0 (n)". Settings and the prayer schedule match those from before the update.
 
-- **FR-6 Failure.** A failed download (offline, timeout, non-200), a failed verification or a failed replacement shows "Update failed" with the "View release" link in About, logs the failure kind (no URL or path), deletes the temporary files and leaves the running app as it was. The dropdown row returns to "Update available — x.y.z", so the user can retry. Prayer-time sync and alerts are never affected.
+- **FR-6 Failure.** A failed download (offline, timeout, non-200), a failed verification or a failed replacement shows "Update failed" with the "Download and install" button (to retry) and the "View release" link in About, logs the failure kind (no URL or path), deletes the temporary files and leaves the running app as it was. The dropdown row returns to "Update available — x.y.z", so the user can retry. Prayer-time sync and alerts are never affected.
   - Acceptance: with Wi-Fi off, clicking install shows "Update failed" with "View release". The app keeps running 1.7.0, and clicking the row again retries.
 
-- **FR-7 When install is not possible.** Install is offered only when the running app's bundle is in a folder the user can write to, is not on a read-only volume (such as the mounted DMG) and is not translocated, and the app is not sandboxed (debug builds are). Otherwise About and the dropdown behave exactly as before this feature: no button, and the row opens the release page.
+- **FR-7 When install is not possible.** Install is offered only when the running app's bundle is in a folder the user can write to, is not on a read-only volume (such as the mounted DMG) and is not translocated, and the app is not sandboxed (debug builds are) and is not a DEBUG build. Otherwise About and the dropdown behave exactly as before this feature: no button, and the row opens the release page.
   - Acceptance: running Meqat straight from the mounted DMG, or a debug build, shows no "Download and install" button, and the dropdown row opens the release page.
 
 ## Edge cases
@@ -142,7 +142,7 @@ sequenceDiagram
 
 ### Frontend (app)
 
-- **About pane** (FR-1, FR-2, FR-4, FR-6): in the available state, a "Download and install" button sits above "View release" and the Homebrew hint. While downloading, it shows "Downloading… n%" and "Cancel"; while verifying or installing, "Installing…"; after a failure, "Update failed" and "View release". When install is not possible (FR-7), the pane looks as it does today.
+- **About pane** (FR-1, FR-2, FR-4, FR-6): in the available state, a "Download and install" button sits above "View release" and the Homebrew hint. While downloading, it shows "Downloading… n%" and "Cancel"; while verifying or installing, "Installing…"; after a failure, "Update failed", "Download and install" (retry) and "View release". When install is not possible (FR-7), the pane looks as it does today.
 - **Dropdown row** (FR-1, FR-2): "Update available — x.y.z" starts the install and closes the dropdown. During the install it reads "Downloading update… n%" or "Installing update…" and is disabled. When install is not possible, it opens the release page as today.
 - The app wires the installer to the existing update checker, the About pane and the status item. On quit it cancels a download and waits for a running swap to finish.
 
@@ -191,12 +191,17 @@ None formally defined. Meqat has no telemetry.
 - Built in-house with macOS system tools, not Sparkle. — Project rule: no third-party packages.
 - Priority medium. — It saves DMG users several steps; nothing is broken today.
 - One epic. — It ships as one release.
+- After a failure, About keeps the "Download and install" button as the retry. — With automatic checks off the dropdown row is hidden, so About is the only in-app retry.
+- DEBUG builds never offer install, sandboxed or not. — `make build`/`make run` sign without entitlements, so their debug builds are not sandboxed and would otherwise replace themselves; the full flow is tested only on a `scripts/release.sh` build.
 
 ## Open questions
 
 None.
 
 ## Change log
+
+- 2026-11-07: Added the decision that DEBUG builds never offer install, since `make run` builds are not sandboxed (from refining #136).
+- 2026-11-07: FR-6 and the About pane keep "Download and install" after a failure as the retry, since the dropdown row is hidden with automatic checks off (from refining #136).
 
 ## Related
 
