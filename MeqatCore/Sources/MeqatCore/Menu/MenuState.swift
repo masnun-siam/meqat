@@ -65,9 +65,15 @@ public enum MenuEmptyState: Sendable, Equatable {
     }
 }
 
+public enum MenuUpdateAction: Sendable, Equatable {
+    case install
+    case openRelease(URL)
+}
+
 public struct MenuUpdateRow: Sendable, Equatable {
     public let title: String
-    public let url: URL
+    /// nil while an install runs: the row is shown disabled.
+    public let action: MenuUpdateAction?
 }
 
 public struct MenuState: Sendable, Equatable {

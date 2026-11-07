@@ -1,6 +1,6 @@
 import Foundation
 
-/// FR-3, FR-13, FR-15 and FR-16, and FR-5 of the about-and-updates PRD: what the status item and dropdown show. No I/O, no clock reads.
+/// FR-3, FR-13, FR-15 and FR-16, FR-5 of the about-and-updates PRD, and FR-1, FR-2 and FR-7 of the in-app-update PRD: what the status item and dropdown show. No I/O, no clock reads.
 public enum MenuPresenter {
     private static let crescent = "☾"
 
@@ -9,9 +9,7 @@ public enum MenuPresenter {
         let now = input.now
         let footer = footerStatus(input, f)
         let notificationsOff = !input.notificationsAuthorized
-        let updateRow =
-            input.checksForUpdates
-            ? input.updateNotice.map { MenuUpdateRow(title: "Update available — \($0.version)", url: $0.releaseURL) } : nil
+        let updateRow = updateRow(input)
         guard input.hasScheduleForToday else {
             return MenuState(
                 statusTitle: crescent, statusAccessibilityLabel: "Meqat", header: nil, hero: nil, rows: [], forbiddenSummary: nil,
@@ -187,6 +185,20 @@ public enum MenuPresenter {
         if total < 60 { return ("\(total)m", plural(total, "minute")) }
         let (h, m) = (total / 60, total % 60)
         return ("\(h)h \(m)m", m == 0 ? plural(h, "hour") : "\(plural(h, "hour")) \(plural(m, "minute"))")
+    }
+
+    private static func updateRow(_ input: MenuInput) -> MenuUpdateRow? {
+        guard input.checksForUpdates, let notice = input.updateNotice else { return nil }
+        switch input.installState {
+        case .idle, .failed:
+            return MenuUpdateRow(
+                title: "Update available — \(notice.version)",
+                action: notice.canInstall ? .install : .openRelease(notice.releaseURL))
+        case .downloading(let percent):
+            return MenuUpdateRow(title: "Downloading update… \(percent)%", action: nil)
+        case .verifying, .installing, .relaunching:
+            return MenuUpdateRow(title: "Installing update…", action: nil)
+        }
     }
 
     private struct Formatters {
