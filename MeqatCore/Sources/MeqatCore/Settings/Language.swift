@@ -34,7 +34,7 @@ public enum Language: String, CaseIterable, Sendable, Equatable {
         return bundle.localizedString(forKey: key, value: key, table: table)
     }
 
-    // ponytail: SwiftPM emits no en.lproj for the source language, so only the bn bundle is ever looked up.
+    // SwiftPM emits no en.lproj for the source language, so only the bn bundle is ever looked up.
     private static let banglaBundle: Bundle? = Bundle.module.path(forResource: "bn", ofType: "lproj").flatMap(Bundle.init(path:))
 }
 
