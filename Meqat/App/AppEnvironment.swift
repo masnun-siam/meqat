@@ -345,7 +345,7 @@ final class AppEnvironment {
         }
     }
 
-    private static func lastSyncFormat(_ timeZone: TimeZone, _ format: TimeFormat, _ language: Language) -> DateFormatter {
+    static func lastSyncFormat(_ timeZone: TimeZone, _ format: TimeFormat, _ language: Language) -> DateFormatter {
         let f = DateFormatter()
         f.locale = language.locale
         f.timeZone = timeZone
