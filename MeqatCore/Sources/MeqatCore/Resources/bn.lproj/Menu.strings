@@ -1,0 +1,61 @@
+/* Bangla menu text (PRD FR-4 to FR-6). Keys are the English format strings in MenuPresenter. */
+
+/* Status title and its VoiceOver label */
+"%1$@ ends in %2$@" = "%1$@ শেষ হতে %2$@";
+"%1$@, forbidden window, ends in %2$@" = "%1$@, নিষিদ্ধ সময়, শেষ হতে %2$@";
+"%@ now" = "%@ এখন";
+"%@, now" = "%@, এখন";
+"%1$@, current, ends in %2$@" = "%1$@, চলমান, শেষ হতে %2$@";
+"%1$@ in %2$@" = "%1$@ %2$@ পরে";
+"%1$@, next, in %2$@" = "%1$@, পরবর্তী, %2$@ পরে";
+
+/* Hero */
+"%@ left" = "%@ বাকি";
+", next %1$@ at %2$@" = ", পরবর্তী %1$@ %2$@-এ";
+"forbidden window" = "নিষিদ্ধ সময়";
+"current" = "চলমান";
+"Next · %@" = "পরবর্তী · %@";
+"Next, %1$@, in %2$@, at %3$@" = "পরবর্তী, %1$@, %2$@ পরে, %3$@-এ";
+"Forbidden · Sunrise" = "নিষিদ্ধ · সূর্যোদয়";
+"Forbidden · Noon" = "নিষিদ্ধ · দুপুর";
+"Forbidden · Sunset" = "নিষিদ্ধ · সূর্যাস্ত";
+
+/* Forbidden summary */
+"No more forbidden windows today" = "আজ আর কোনো নিষিদ্ধ সময় নেই";
+"Next forbidden %1$@–%2$@" = "পরবর্তী নিষিদ্ধ সময় %1$@–%2$@";
+"Next forbidden window, %1$@ to %2$@" = "পরবর্তী নিষিদ্ধ সময়, %1$@ থেকে %2$@";
+
+/* Rows */
+"%@, no time today" = "%@, আজ কোনো সময় নেই";
+" (prev. night)" = " (আগের রাত)";
+"%1$@ to %2$@" = "%1$@ থেকে %2$@";
+"done" = "শেষ";
+"next" = "পরবর্তী";
+
+/* Empty states */
+"Waiting for location permission…" = "লোকেশনের অনুমতির অপেক্ষায়…";
+"Fetching times…" = "সময় আনা হচ্ছে…";
+"Set your location" = "আপনার লোকেশন সেট করুন";
+"City not found — check Location settings" = "শহর পাওয়া যায়নি — লোকেশন সেটিংস দেখুন";
+"No schedule — connect to the internet" = "সময়সূচি নেই — ইন্টারনেটে সংযোগ দিন";
+
+/* Footer */
+"Couldn't refresh" = "রিফ্রেশ করা যায়নি";
+"Syncing…" = "সিঙ্ক হচ্ছে…";
+"Offline — using cache from %@" = "অফলাইন — %@-এর ক্যাশ ব্যবহার হচ্ছে";
+"Synced %@" = "সিঙ্ক হয়েছে %@";
+
+/* Countdown */
+"<1m" = "<১মি";
+"less than a minute" = "এক মিনিটের কম";
+"%dm" = "%dমি";
+"%1$dh %2$dm" = "%1$dঘ %2$dমি";
+"%d minute" = "%d মিনিট";
+"%d minutes" = "%d মিনিট";
+"%d hour" = "%d ঘণ্টা";
+"%d hours" = "%d ঘণ্টা";
+
+/* Update row; the version keeps Latin digits */
+"Update available — %@" = "আপডেট আছে — %@";
+"Downloading update… %d%%" = "আপডেট ডাউনলোড হচ্ছে… %d%%";
+"Installing update…" = "আপডেট ইনস্টল হচ্ছে…";

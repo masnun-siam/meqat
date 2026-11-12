@@ -379,4 +379,156 @@ final class MenuPresenterTests: XCTestCase {
         XCTAssertTrue(s.showsNotificationsOffRow)
         XCTAssertEqual(s.header, "Wed 28 Oct · Dhaka")
     }
+
+    // MARK: Bangla
+
+    private func bangla(_ now: Date, events: [ScheduledEvent]? = nil, _ tweak: (inout MenuInput) -> Void = { _ in }) -> MenuState {
+        present(now, events: events) {
+            $0.language = .bangla
+            tweak(&$0)
+        }
+    }
+
+    private func assertNoLatin(_ text: String?, allowing allowed: [String] = [], file: StaticString = #filePath, line: UInt = #line) {
+        let stripped = allowed.reduce(text ?? "") { $0.replacingOccurrences(of: $1, with: "") }
+        XCTAssertNil(stripped.range(of: "[A-Za-z0-9]", options: .regularExpression), text ?? "nil", file: file, line: line)
+    }
+
+    func testBanglaStatusTitleAndLabel() {
+        let s = bangla(at(28, 13, 52, 30))
+        XCTAssertEqual(s.statusTitle, "☾ যোহর শেষ হতে ১ঘ ১১মি")
+        XCTAssertEqual(s.statusAccessibilityLabel, "যোহর, চলমান, শেষ হতে ১ ঘণ্টা ১১ মিনিট")
+        XCTAssertEqual(bangla(at(28, 11, 40)).statusTitle, "⛔ নিষিদ্ধ সময় (দুপুর) শেষ হতে ৬মি")
+        XCTAssertEqual(bangla(at(28, 11, 40)).statusAccessibilityLabel, "নিষিদ্ধ সময় (দুপুর), নিষিদ্ধ সময়, শেষ হতে ৬ মিনিট")
+        XCTAssertEqual(bangla(at(28, 15, 5)) { $0.bannerNow = .asr }.statusTitle, "● আসর এখন")
+        XCTAssertEqual(bangla(at(28, 15, 5)) { $0.bannerNow = .asr }.statusAccessibilityLabel, "আসর, এখন")
+        let next = bangla(at(28, 16, 0)) { $0.styles[.asr] = .disabled }
+        XCTAssertEqual(next.statusTitle, "☾ নিষিদ্ধ সময় (সূর্যাস্ত) ১ঘ ১২মি পরে")
+        XCTAssertEqual(next.statusAccessibilityLabel, "নিষিদ্ধ সময় (সূর্যাস্ত), পরবর্তী, ১ ঘণ্টা ১২ মিনিট পরে")
+    }
+
+    func testBanglaNamesAndTimes() {
+        let s = bangla(at(28, 13, 52, 30))
+        XCTAssertEqual(s.rows[2].name, "চাশত")
+        XCTAssertEqual(s.rows[1].timeText, "০৪:৫২")
+        XCTAssertEqual(s.rows[2].timeText, "০৬:২০–১১:৩৬")
+        XCTAssertEqual(bangla(at(28, 1, 0), events: [ev(.fajr, 28, (5, 12), (6, 5))]).rows[0].timeText, "০৫:১২")
+    }
+
+    func testBanglaCountdowns() {
+        let asr = [ev(.asr, 28, (15, 4), (17, 0))]
+        XCTAssertEqual(bangla(at(28, 13, 59), events: asr).statusTitle, "☾ আসর ১ঘ ৫মি পরে")
+        XCTAssertEqual(bangla(at(28, 14, 52), events: asr).statusTitle, "☾ আসর ১২মি পরে")
+        XCTAssertEqual(bangla(at(28, 15, 3, 1), events: asr).statusTitle, "☾ আসর <১মি পরে")
+        XCTAssertEqual(bangla(at(28, 15, 3, 1), events: asr).statusAccessibilityLabel, "আসর, পরবর্তী, এক মিনিটের কম পরে")
+        XCTAssertEqual(bangla(at(28, 14, 4), events: asr).statusAccessibilityLabel, "আসর, পরবর্তী, ১ ঘণ্টা পরে")
+    }
+
+    func testBanglaHeaderKeepsPlace() {
+        XCTAssertEqual(bangla(at(28, 12, 0)) { $0.place = "Dhaka" }.header, "বুধ ২৮ অক্টো · Dhaka")
+    }
+
+    func testBanglaHeroSummaryRowsAndFooter() {
+        let s = bangla(at(28, 13, 52, 30)) { $0.styles = [:] }
+        XCTAssertEqual(s.hero?.countdownText, "১ঘ ১১মি বাকি")
+        XCTAssertEqual(s.hero?.nextText, "আসর ১৫:০৪")
+        XCTAssertEqual(s.hero?.accessibilityLabel, "যোহর, চলমান, ১ ঘণ্টা ১১ মিনিট বাকি, পরবর্তী আসর ১৫:০৪-এ")
+        XCTAssertEqual(
+            s.forbiddenSummary, MenuForbiddenSummary(text: "পরবর্তী নিষিদ্ধ সময় ১৭:১২–১৭:২৭", accessibilityLabel: "পরবর্তী নিষিদ্ধ সময়, ১৭:১২ থেকে ১৭:২৭"))
+        XCTAssertEqual(s.rows[0].accessibilityLabel, "তাহাজ্জুদ, শেষ, ০১:০০")
+        XCTAssertEqual(s.rows[2].accessibilityLabel, "চাশত, শেষ, ০৬:২০ থেকে ১১:৩৬")
+        XCTAssertEqual(s.rows[4].accessibilityLabel, "আসর, পরবর্তী, ১৫:০৪")
+
+        let forbidden = bangla(at(28, 11, 40)).hero
+        XCTAssertEqual(forbidden?.title, "নিষিদ্ধ · দুপুর")
+        XCTAssertEqual(forbidden?.accessibilityLabel, "নিষিদ্ধ সময় (দুপুর), নিষিদ্ধ সময়, ৬ মিনিট বাকি, পরবর্তী যোহর ১১:৪৬-এ")
+        let next = bangla(at(28, 7, 0)).hero
+        XCTAssertEqual(next?.title, "পরবর্তী · নিষিদ্ধ সময় (দুপুর)")
+        XCTAssertEqual(next?.accessibilityLabel, "পরবর্তী, নিষিদ্ধ সময় (দুপুর), ৪ ঘণ্টা ৩৬ মিনিট পরে, ১১:৩৬-এ")
+        XCTAssertEqual(bangla(at(28, 17, 30)).forbiddenSummary?.text, "আজ আর কোনো নিষিদ্ধ সময় নেই")
+
+        let prev = bangla(at(29, 12, 0), events: [ev(.tahajjud, 29, (23, 30), (4, 50), prev: true, fromDay: 28)])
+        XCTAssertEqual(prev.rows[0].timeText, "২৩:৩০ (আগের রাত)")
+        let invalid = bangla(at(28, 6, 0), events: [ev(.duha, 28, nil, nil)])
+        XCTAssertEqual(invalid.rows[0].accessibilityLabel, "চাশত, আজ কোনো সময় নেই")
+
+        func footer(_ sync: MenuSyncInfo, couldnt: Bool = false) -> String {
+            bangla(at(28, 12, 0)) {
+                $0.sync = sync
+                $0.showsCouldntRefresh = couldnt
+            }.footerStatus
+        }
+        XCTAssertEqual(footer(MenuSyncInfo(lastSuccess: at(28, 9, 5))), "সিঙ্ক হয়েছে ০৯:০৫")
+        XCTAssertEqual(footer(MenuSyncInfo(lastSuccess: at(27, 9, 5))), "সিঙ্ক হয়েছে ২৭ অক্টো ০৯:০৫")
+        XCTAssertEqual(footer(MenuSyncInfo(lastSuccess: at(27, 9, 5), offlineSince: at(28, 8, 0))), "অফলাইন — ২৭ অক্টো-এর ক্যাশ ব্যবহার হচ্ছে")
+        XCTAssertEqual(footer(MenuSyncInfo(), couldnt: true), "রিফ্রেশ করা যায়নি")
+        XCTAssertEqual(footer(MenuSyncInfo(isFetching: true)), "সিঙ্ক হচ্ছে…")
+    }
+
+    func testEmptyMessages() {
+        func message(_ language: Language, _ loc: MenuLocationInfo, failure: MenuFailure? = nil) -> String? {
+            present(at(28, 12, 0)) {
+                $0.language = language
+                $0.hasScheduleForToday = false
+                $0.location = loc
+                $0.sync = MenuSyncInfo(lastFailure: failure)
+            }.emptyMessage
+        }
+        XCTAssertEqual(message(.english, .awaitingPermission), "Waiting for location permission…")
+        XCTAssertEqual(message(.english, .awaitingFix), "Fetching times…")
+        XCTAssertEqual(message(.english, .missing, failure: .other), "Set your location")
+        XCTAssertEqual(message(.english, .available, failure: .cityNotFound), "City not found — check Location settings")
+        XCTAssertEqual(message(.english, .available, failure: .other), "No schedule — connect to the internet")
+        XCTAssertEqual(message(.bangla, .awaitingPermission), "লোকেশনের অনুমতির অপেক্ষায়…")
+        XCTAssertEqual(message(.bangla, .awaitingFix), "সময় আনা হচ্ছে…")
+        XCTAssertEqual(message(.bangla, .missing, failure: .other), "আপনার লোকেশন সেট করুন")
+        XCTAssertEqual(message(.bangla, .available, failure: .cityNotFound), "শহর পাওয়া যায়নি — লোকেশন সেটিংস দেখুন")
+        XCTAssertEqual(message(.bangla, .available, failure: .other), "সময়সূচি নেই — ইন্টারনেটে সংযোগ দিন")
+        XCTAssertNil(present(at(28, 12, 0)).emptyMessage)
+    }
+
+    func testBanglaUpdateRowKeepsLatinVersion() {
+        func row(_ state: InstallState) -> String? {
+            bangla(at(28, 12, 0)) {
+                $0.updateNotice = UpdateNotice(version: "1.8.0", releaseURL: notice.releaseURL)
+                $0.installState = state
+            }.updateRow?.title
+        }
+        XCTAssertEqual(row(.idle), "আপডেট আছে — 1.8.0")
+        XCTAssertEqual(row(.downloading(percent: 42)), "আপডেট ডাউনলোড হচ্ছে… ৪২%")
+        XCTAssertEqual(row(.installing), "আপডেট ইনস্টল হচ্ছে…")
+    }
+
+    func testBanglaTwelveHour() {
+        let s = bangla(at(28, 13, 52, 30)) {
+            $0.timeFormat = .twelve
+            $0.sync = MenuSyncInfo(lastSuccess: at(28, 15, 4))
+        }
+        XCTAssertEqual(s.rows[2].timeText, "৬:২০ AM–১১:৩৬ AM")
+        XCTAssertEqual(s.footerStatus, "সিঙ্ক হয়েছে ৩:০৪ PM")
+    }
+
+    func testBanglaTwentyFourHourHasNoLatin() {
+        for now in [at(28, 13, 52, 30), at(28, 11, 40), at(28, 7, 0), at(28, 17, 30)] {
+            let s = bangla(now) {
+                $0.place = "Dhaka"
+                $0.styles = [:]
+            }
+            assertNoLatin(s.statusTitle)
+            assertNoLatin(s.statusAccessibilityLabel)
+            assertNoLatin(s.header, allowing: ["Dhaka"])
+            assertNoLatin(s.hero?.title)
+            assertNoLatin(s.hero?.countdownText)
+            assertNoLatin(s.hero?.startText)
+            assertNoLatin(s.hero?.nextText)
+            assertNoLatin(s.hero?.accessibilityLabel)
+            assertNoLatin(s.forbiddenSummary?.text)
+            assertNoLatin(s.forbiddenSummary?.accessibilityLabel)
+            s.rows.forEach {
+                assertNoLatin($0.name)
+                assertNoLatin($0.timeText)
+                assertNoLatin($0.accessibilityLabel)
+            }
+        }
+    }
 }

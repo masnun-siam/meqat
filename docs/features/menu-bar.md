@@ -49,7 +49,7 @@ flowchart LR
   VoiceOver: `Dhuhr, current, 1 hour 11 minutes left, next Asr at 15:04`; `Forbidden (noon), forbidden window, 6 minutes left, next Dhuhr at 11:46`; `Next, Forbidden (noon), in 4 hours 36 minutes, at 11:36`.
 - Rows (`MenuRow`, one per non-prohibited event of today, so 7): marker `none/done/current/next` -> `""/✓/●/○`, `timeText` (`04:52`, `06:20–11:36` for Duha, `—` when invalid, `(prev. night)` suffix), VoiceOver label without countdown (`Dhuhr, current, 11:46`). A Tahajjud carried from last night replaces today's row from its start.
 - Forbidden summary (`MenuForbiddenSummary`) under the rows: `Next forbidden 17:12–17:27` for today's earliest prohibited window still to start, whatever its style, else `No more forbidden windows today`; spoken `Next forbidden window, 17:12 to 17:27`.
-- Empty state replaces rows when `hasScheduleForToday` is false (`MenuEmptyState`):
+- Empty state replaces rows when `hasScheduleForToday` is false (`MenuEmptyState`; the view shows `MenuState.emptyMessage`, built by the presenter in the input language):
 
 | State | Message | Button |
 |---|---|---|
@@ -63,6 +63,8 @@ flowchart LR
 - "Notifications are off — Open System Settings" row when `!notificationsAuthorized` (opens the Notifications settings pane URL).
 - `MenuState.updateRow` (`MenuUpdateRow`: a title and a `MenuUpdateAction?`) is set only when `updateNotice` is present and `checksForUpdates` is on, with or without a schedule. Its content follows `MenuInput.installState`: `idle`/`failed` → `Update available — <x.y.z>` with `.install` when `canInstall`, else `.openRelease(url)`; `downloading` → `Downloading update… <n>%`; `verifying`/`installing`/`relaunching` → `Installing update…`; the last two have a nil action. `MenuDropdownView` renders it as a link row above the footer divider (below the notifications-off row): `.install` calls `MenuActions.installUpdate`, `.openRelease` opens the URL, both close the popover via `dismiss`; a nil action shows the row disabled. Harness: `-MeqatDebugUpdate 1.4.0`.
 - Footer text (first match): `Couldn't refresh`, `Syncing…`, `Offline — using cache from d MMM`, `Synced HH:mm` (today) or `Synced d MMM HH:mm`, empty. Times follow `MenuInput.timeFormat` (`h:mm a` when 12-hour). One line: status text, then ↻ (Refresh now, disabled while fetching) and ⚙ (Settings) icon buttons with matching tooltips and VoiceOver labels, then Quit.
+
+- Language: `MenuInput.language` (default `.english`) picks the text. Every string above is a key in `MeqatCore/Sources/MeqatCore/Resources/bn.lproj/Menu.strings` (English text as the key, positional `%1$@` so Bangla can reorder); event names come from `EventID.displayName(in:)`. Formatters use `language.locale`, so Bangla shows Bangla digits and weekday and month names in both time formats (`☾ যোহর শেষ হতে ১ঘ ১১মি`, `বুধ ২৮ অক্টো · Dhaka`). The place name and the update version stay as given; 12-hour Bangla keeps macOS's AM/PM.
 
 ## "Couldn't refresh"
 

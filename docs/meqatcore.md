@@ -29,7 +29,7 @@ All under `MeqatCore/Sources/MeqatCore/`.
 | `LoginItem/LoginItemSync.swift` | `LoginItemService`, `MainAppLoginItem`, `LoginItemSync` | Applies `launchAtLogin` through `SMAppService`. |
 | `Menu/MenuInput.swift` | `MenuInput`, `MenuSyncInfo`, `MenuLocationInfo`, `MenuFailure` | Everything the presenter needs, as plain values. |
 | `Menu/MenuPresenter.swift` | `MenuPresenter` | Pure: `present(MenuInput) -> MenuState`. |
-| `Menu/MenuState.swift` | `MenuState`, `MenuHero`, `MenuHeroKind`, `MenuForbiddenSummary`, `MenuRow`, `MenuRowMarker`, `MenuEmptyState`, `MenuEmptyAction` | What the dropdown and status title render. |
+| `Menu/MenuState.swift` | `MenuState` (with `emptyMessage`), `MenuHero`, `MenuHeroKind`, `MenuForbiddenSummary`, `MenuRow`, `MenuRowMarker`, `MenuEmptyState`, `MenuEmptyAction` | What the dropdown and status title render. |
 | `Overlay/OverlayHold.swift` | `OverlayHold` | Countdown logic for the overlay's hold time. |
 | `Settings/AppSettings.swift` | `AppSettings`, `GeneralSettings`, `LocationSettings`, `EventSettings`, `StartAlert`, `LeadAlert`, `AlertStyle`, `TimeSource`, `School`, `LocationMode`, `Bounds` | Settings model, Codable with defaults. |
 | `Settings/CalculationMethod.swift` | `CalculationMethod` | Static list of 23 Aladhan methods. |
@@ -37,6 +37,7 @@ All under `MeqatCore/Sources/MeqatCore/`.
 | `Settings/EventID.swift` | `EventID`, `EventKind` | The fixed set of events (`allCases`), display names (`displayName(in:)` per language) and kinds. |
 | `Settings/Language.swift` | `Language`, `LanguageChoice` | English or Bangla: display locale, pure `resolve(override:preferred:)` from `AppleLanguages`, string lookup in `Resources/bn.lproj/<Area>.strings` with English fallback; the picker's System/English/Bangla choice. |
 | `Resources/bn.lproj/Events.strings` | (resource) | Bangla event names; English is the default localization and the keys. |
+| `Resources/bn.lproj/Menu.strings` | (resource) | Bangla status title, dropdown and footer text for `MenuPresenter`. |
 | `Settings/SettingsStore.swift` | `SettingsStore` | `@Observable` UserDefaults-backed store, `onChange(old, new)`. |
 | `Settings/StaticTimeHint.swift` | `StaticTimeHint` | Whether a static time falls outside the calculated window. |
 | `Sync/SyncCoordinator.swift` | `SyncCoordinator`, `SyncTrigger` | Fetch orchestration: debounce, backoff, cache replace. |
@@ -115,7 +116,7 @@ flowchart LR
 | `LocationProviderTests` | `LocationProvider` states, throttling, timeout, with fake manager and clock. |
 | `LoginItemSyncTests` | `LoginItemSync.apply` with `FakeLoginItem`. |
 | `ManualCityInputTests` | `ManualCityInput.normalized`. |
-| `MenuPresenterTests` | `MenuPresenter` rows, markers, empty states, status title. |
+| `MenuPresenterTests` | `MenuPresenter` rows, markers, empty states, status title; Bangla text, digits and dates in both time formats. |
 | `OverlayHoldTests` | `OverlayHold` remaining and satisfied. |
 | `SettingsTests` | `AppSettings` coding and defaults, `SettingsStore`. |
 | `LanguageTests` | `Language` locales and resolution, `LanguageChoice` mapping, Bangla event names, missing-entry fallback. |
