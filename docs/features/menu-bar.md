@@ -65,6 +65,7 @@ flowchart LR
 - Footer text (first match): `Couldn't refresh`, `Syncing…`, `Offline — using cache from d MMM`, `Synced HH:mm` (today) or `Synced d MMM HH:mm`, empty. Times follow `MenuInput.timeFormat` (`h:mm a` when 12-hour). One line: status text, then ↻ (Refresh now, disabled while fetching) and ⚙ (Settings) icon buttons with matching tooltips and VoiceOver labels, then Quit.
 
 - Language: `MenuInput.language` (default `.english`; the app passes its launch language from `AppEnvironment`) picks the text. Every string above is a key in `MeqatCore/Sources/MeqatCore/Resources/bn.lproj/Menu.strings` (English text as the key, positional `%1$@` so Bangla can reorder); event names come from `EventID.displayName(in:)`. Formatters use `language.locale`, so Bangla shows Bangla digits and weekday and month names in both time formats (`☾ যোহর শেষ হতে ১ঘ ১১মি`, `বুধ ২৮ অক্টো · Dhaka`). The place name and the update version stay as given; 12-hour Bangla keeps macOS's AM/PM.
+- The view's own text (the notifications-off row, Open Location settings, Try again, Quit, and the Refresh now and Settings tooltips and VoiceOver labels) is in `Meqat/MenuBar/Dropdown.xcstrings`, English text as the key; `Bundle.main` picks `bn.lproj` when Meqat runs in Bangla.
 
 ## "Couldn't refresh"
 
