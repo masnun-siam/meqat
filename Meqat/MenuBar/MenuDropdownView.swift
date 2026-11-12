@@ -18,8 +18,10 @@ struct MenuDropdownView: View {
             content
             if state.showsNotificationsOffRow {
                 Divider()
-                Button("Notifications are off — Open System Settings") {
+                Button {
                     NSWorkspace.shared.open(Self.notificationsPane)
+                } label: {
+                    Text("Notifications are off — Open System Settings", tableName: "Dropdown")
                 }
                 .buttonStyle(.link).padding(12)
             }
@@ -47,8 +49,18 @@ struct MenuDropdownView: View {
             VStack(spacing: 8) {
                 Text(state.emptyMessage ?? "").multilineTextAlignment(.center)
                 switch empty.action {
-                case .openLocationPane: Button("Open Location settings") { actions.openLocationPane() }
-                case .tryAgain: Button("Try again") { actions.tryAgain() }
+                case .openLocationPane:
+                    Button {
+                        actions.openLocationPane()
+                    } label: {
+                        Text("Open Location settings", tableName: "Dropdown")
+                    }
+                case .tryAgain:
+                    Button {
+                        actions.tryAgain()
+                    } label: {
+                        Text("Try again", tableName: "Dropdown")
+                    }
                 case nil: EmptyView()
                 }
             }
@@ -87,15 +99,19 @@ struct MenuDropdownView: View {
             } label: {
                 Image(systemName: "arrow.clockwise")
             }
-            .help("Refresh now").accessibilityLabel("Refresh now")
+            .help(Text("Refresh now", tableName: "Dropdown")).accessibilityLabel(Text("Refresh now", tableName: "Dropdown"))
             .disabled(!state.refreshEnabled)
             Button {
                 actions.openSettings()
             } label: {
                 Image(systemName: "gearshape")
             }
-            .help("Settings").accessibilityLabel("Settings")
-            Button("Quit") { actions.quit() }
+            .help(Text("Settings", tableName: "Dropdown")).accessibilityLabel(Text("Settings", tableName: "Dropdown"))
+            Button {
+                actions.quit()
+            } label: {
+                Text("Quit", tableName: "Dropdown")
+            }
         }
         .buttonStyle(.link).padding(12)
     }

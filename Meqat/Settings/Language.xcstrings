@@ -1,0 +1,76 @@
+{
+  "sourceLanguage" : "en",
+  "strings" : {
+    "Language" : {
+      "localizations" : {
+        "bn" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ভাষা"
+          }
+        }
+      }
+    },
+    "Later" : {
+      "localizations" : {
+        "bn" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "পরে"
+          }
+        }
+      }
+    },
+    "Meqat relaunches to switch language." : {
+      "localizations" : {
+        "bn" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ভাষা বদলাতে Meqat আবার চালু হয়।"
+          }
+        }
+      }
+    },
+    "Relaunch Meqat to change the language?" : {
+      "localizations" : {
+        "bn" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ভাষা বদলাতে Meqat আবার চালু করবেন?"
+          }
+        }
+      }
+    },
+    "Relaunch Now" : {
+      "localizations" : {
+        "bn" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "এখনই আবার চালু করুন"
+          }
+        }
+      }
+    },
+    "System" : {
+      "localizations" : {
+        "bn" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "সিস্টেম"
+          }
+        }
+      }
+    },
+    "Until then, Meqat stays in its current language." : {
+      "localizations" : {
+        "bn" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ততক্ষণ Meqat বর্তমান ভাষাতেই থাকবে।"
+          }
+        }
+      }
+    }
+  },
+  "version" : "1.0"
+}

@@ -56,6 +56,7 @@ Run on the release build installed to `/Applications`.
 - [ ] Not installable: run Meqat straight from the mounted DMG; About shows no "Download and install" button and the dropdown row opens the release page (in-app update FR-7).
 - [ ] Quarantine: after an in-app update, `xattr /Applications/Meqat.app` shows no `com.apple.quarantine`.
 - [ ] Offline: with Wi-Fi off, the automatic check changes nothing; "Check now" shows "Couldn't check for updates"; the prayer schedule keeps updating (FR-6).
+- [ ] Bangla: launch once with `open -n /Applications/Meqat.app --args -AppleLanguages '(bn)'`. The menu, the overlay (Settings › General › Show test overlay) and a test banner (Send test banner) show Bangla text and digits, with no English word except "Meqat", calculation-method names, the place name and version numbers (Bangla PRD FR-4).
 
 ## Homebrew cask
 
