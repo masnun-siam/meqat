@@ -46,6 +46,7 @@ A `.fixed` source with no `staticTime` behaves as calculated.
 - `lookupStatus` (`idle, lookingUp, found, cityNotFound, unreachable`) is driven by `AppEnvironment.updateLookup` from `SyncStatus` after a manual city is set. "Look up" is disabled while looking up or when the input does not normalize.
 - `refreshContext()` refills `SettingsContext` on every refresh and before opening the window. `coordinatesText`, `lastSyncText` and `lastCheckedText` are formatted with `language.locale` (English stays `en_US_POSIX`, Bangla gets Bangla digits and months).
 - Locale: in Bangla, `SettingsWindowController` sets the window's SwiftUI `\.locale` to `bn@numbers=beng`, so views format numbers with Bangla digits; in English it is `.autoupdatingCurrent`, SwiftUI's default.
+- Text: each localized pane reads its strings from its own catalog in `Meqat/Settings/<Pane>.xcstrings` (`en` and `bn`) with `Text("…", tableName: "<Pane>")`, or `String(localized:table:)` for plain strings (`LocationPane.statusText`, `TextField` titles). Keys are the English text; interpolations become `%@` arguments, so the place name, the version (`AboutPane.versionText`, passed as strings) and `brew upgrade --cask meqat` (`Text(verbatim:)`) stay Latin. Done for Location and About.
 
 ## Propagation (`AppEnvironment.settingsChanged(old, new)`)
 
