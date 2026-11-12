@@ -28,15 +28,15 @@ struct LocationPane: View {
     var body: some View {
         Form {
             Picker(selection: modeBinding) {
-                Text("Automatic (uses this Mac's location)").tag(false)
-                Text("Manual city").tag(true)
+                Text("Automatic (uses this Mac's location)", tableName: "Location").tag(false)
+                Text("Manual city", tableName: "Location").tag(true)
             } label: {
-                Text("Location")
-                Text("Automatic uses this Mac's location. Manual uses the city you enter.")
+                Text("Location", tableName: "Location")
+                Text("Automatic uses this Mac's location. Manual uses the city you enter.", tableName: "Location")
             }
             .pickerStyle(.radioGroup)
             if manualSelected { manualSection } else { automaticSection }
-            Text("Last sync: \(context.lastSyncText ?? "never")").foregroundStyle(.secondary)
+            lastSyncLine.foregroundStyle(.secondary)
         }
         .formStyle(.grouped)
     }
@@ -57,37 +57,42 @@ struct LocationPane: View {
             })
     }
 
+    private var lastSyncLine: Text {
+        guard let text = context.lastSyncText else { return Text("Last sync: never", tableName: "Location") }
+        return Text("Last sync: \(text)", tableName: "Location")
+    }
+
     private var automaticSection: some View {
         Section {
-            Text("Current place: \(context.place ?? "—")")
+            Text("Current place: \(context.place ?? "—")", tableName: "Location")
             if let coordinates = context.coordinatesText { Text(coordinates).foregroundStyle(.secondary) }
         }
     }
 
     private var manualSection: some View {
         Section {
-            TextField("City", text: $city).onSubmit(commit)
-            TextField("Country", text: $country).onSubmit(commit)
-            TextField("State or region (optional)", text: $state).onSubmit(commit)
-            Button("Look up", action: commit)
+            TextField(String(localized: "City", table: "Location"), text: $city).onSubmit(commit)
+            TextField(String(localized: "Country", table: "Location"), text: $country).onSubmit(commit)
+            TextField(String(localized: "State or region (optional)", table: "Location"), text: $state).onSubmit(commit)
+            Button(action: commit) { Text("Look up", tableName: "Location") }
                 .keyboardShortcut(.defaultAction)
                 .disabled(!canCommit)
             if let text = statusText { Text(text).foregroundStyle(.secondary) }
         } footer: {
-            Text("Look up finds the city and fetches its prayer times.")
+            Text("Look up finds the city and fetches its prayer times.", tableName: "Location")
         }
     }
 
     private var statusText: String? {
         switch context.lookupStatus {
         case .idle: return nil
-        case .lookingUp: return "Looking up…"
+        case .lookingUp: return String(localized: "Looking up…", table: "Location")
         case .found:
             // Shows the committed place, not unsaved edits in the fields.
             let l = store.settings.location
             return [l.manualCity, l.manualState, l.manualCountry].compactMap { $0 }.joined(separator: ", ")
-        case .cityNotFound: return "City not found"
-        case .unreachable: return "Couldn't reach the server — try again"
+        case .cityNotFound: return String(localized: "City not found", table: "Location")
+        case .unreachable: return String(localized: "Couldn't reach the server — try again", table: "Location")
         }
     }
 
