@@ -20,6 +20,8 @@ final class AppEnvironment {
     private let overlay = OverlayController()
     private let loginItem = MainAppLoginItem()
     private let context = SettingsContext()
+    /// Resolved once per launch; a language change applies on relaunch (Bangla PRD FR-2).
+    private let language: Language
     private let activity = NSBackgroundActivityScheduler(identifier: "com.masnunsiam.Meqat.periodic")
     private var statusItem: StatusItemController!
     private var systemEvents: SystemEvents?
@@ -33,6 +35,8 @@ final class AppEnvironment {
     private var lookupSawFetch = false
 
     init() {
+        let language = Language.resolve(override: nil, preferred: Locale.preferredLanguages)
+        self.language = language
         let store = store
         let provider = provider
         let directory = (try? CacheStore.defaultDirectory()) ?? FileManager.default.temporaryDirectory
@@ -55,7 +59,8 @@ final class AppEnvironment {
         self.updateChecker = updateChecker
         updateScheduler = UpdateScheduler { [updateChecker] in updateChecker.check(.automatic) }
         scheduler = AlertScheduler(center: UNUserNotificationCenter.current(), timer: DispatchAlertTimer()) {
-            let plan = Composition.plan(cache: coordinator.cache, settings: store.settings, now: Date(), timeZone: .current)
+            let plan = Composition.plan(
+                cache: coordinator.cache, settings: store.settings, now: Date(), timeZone: .current, language: language)
             #if DEBUG
                 Self.logPlan(plan)
             #endif
@@ -64,6 +69,7 @@ final class AppEnvironment {
     }
 
     func start() {
+        context.language = language
         SettingsWindowController.shared.store = store
         SettingsWindowController.shared.context = context
         statusItem = StatusItemController(state: { [unowned self] in menuState() }, actions: menuActions())
@@ -77,9 +83,9 @@ final class AppEnvironment {
                 OverlayContent(
                     eventName: "Test alert", start: now, end: now + 3600,
                     timeoutSeconds: store.settings.general.overlayTimeoutSeconds,
-                    timeFormat: store.settings.general.timeFormat, kindLine: nil))
+                    timeFormat: store.settings.general.timeFormat, kindLine: nil, language: language))
         }
-        context.testBanner = { [unowned self] in Task { await scheduler.sendTestBanner() } }
+        context.testBanner = { [unowned self] in Task { await scheduler.sendTestBanner(language: language) } }
         context.refreshAuthorization = { [unowned self] in Task { await scheduler.refreshAuthorization() } }
         if store.settings.general.checkForUpdates { updateScheduler.start(after: UpdateScheduler.launchDelay) }
 
@@ -128,9 +134,9 @@ final class AppEnvironment {
         scheduler.onFullScreen = { [unowned self] alert in
             overlay.show(
                 OverlayContent(
-                    eventName: alert.eventID.displayName, start: alert.eventInterval.start,
+                    eventName: alert.eventID.displayName(in: language), start: alert.eventInterval.start,
                     end: alert.eventInterval.end, timeoutSeconds: store.settings.general.overlayTimeoutSeconds,
-                    timeFormat: store.settings.general.timeFormat, kindLine: alert.overlayLine))
+                    timeFormat: store.settings.general.timeFormat, kindLine: alert.overlayLine, language: language))
         }
         scheduler.onBannerFired = { [unowned self] alert in
             if !scheduler.notificationsAuthorized { showBannerNow(alert.eventID) }
@@ -306,7 +312,7 @@ final class AppEnvironment {
                 timeFormat: settings.general.timeFormat,
                 updateNotice: UpdateNotice(updateChecker.status),
                 checksForUpdates: settings.general.checkForUpdates,
-                installState: installer.state))
+                installState: installer.state, language: language))
     }
 
     private func refreshAll() {
@@ -324,8 +330,10 @@ final class AppEnvironment {
         context.calculatedWindows = Dictionary(
             todays.compactMap { e in e.calculatedInterval.map { (e.id, $0) } }, uniquingKeysWith: { first, _ in first })
         context.place = store.settings.location.placeName(timeZone: timeZone)
-        context.coordinatesText = provider.coordinates.map { String(format: "%.2f, %.2f", $0.latitude, $0.longitude) }
-        let format = Self.lastSyncFormat(timeZone, store.settings.general.timeFormat)
+        context.coordinatesText = provider.coordinates.map {
+            String(format: "%.2f, %.2f", locale: language.locale, $0.latitude, $0.longitude)
+        }
+        let format = Self.lastSyncFormat(timeZone, store.settings.general.timeFormat, language)
         context.lastSyncText = coordinator.status.lastSuccess.map { format.string(from: $0) }
         context.updateStatus = updateChecker.status
         context.installState = installer.state
@@ -337,9 +345,9 @@ final class AppEnvironment {
         }
     }
 
-    private static func lastSyncFormat(_ timeZone: TimeZone, _ format: TimeFormat) -> DateFormatter {
+    private static func lastSyncFormat(_ timeZone: TimeZone, _ format: TimeFormat, _ language: Language) -> DateFormatter {
         let f = DateFormatter()
-        f.locale = Locale(identifier: "en_US_POSIX")
+        f.locale = language.locale
         f.timeZone = timeZone
         f.dateFormat = "d MMM " + format.dateFormat
         return f

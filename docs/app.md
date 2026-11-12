@@ -21,11 +21,11 @@ All under `Meqat/`. Everything is `@MainActor` unless noted.
 | `Overlay/OverlayController.swift` | `OverlayController` | Shows the full-screen overlay per screen; hides on lock/screensaver; uses `OverlayHold`. |
 | `Overlay/OverlayPanel.swift` | `OverlayPanel` | `NSPanel` subclass for the overlay window. |
 | `Overlay/OverlayView.swift` | `OverlayView`, `OverlayModel` | SwiftUI overlay content and its observable model. |
-| `Overlay/OverlayContent.swift` | `OverlayContent` | Event name, start, end and hold seconds. |
+| `Overlay/OverlayContent.swift` | `OverlayContent` | Event name, start, end, hold seconds, time format, kind line and language. |
 | `Settings/SettingsWindowController.swift` | `SettingsWindowController` (`.shared`) | Lazily creates the Settings window; needs `store` and `context` set first. |
 | `Settings/SettingsView.swift` | `SettingsView`, `SettingsNavigation` | Sidebar `NavigationSplitView` switching panes. |
 | `Settings/SettingsPane.swift` | `SettingsPane` | `general`, `location`, `event(EventID)`. |
-| `Settings/SettingsContext.swift` | `SettingsContext`, `LookupStatus` | Runtime, non-setting data panes show (windows, place, last sync, lookup status). |
+| `Settings/SettingsContext.swift` | `SettingsContext`, `LookupStatus` | Runtime, non-setting data panes show (windows, place, last sync, lookup status, launch language). |
 | `Settings/GeneralPane.swift` | `GeneralPane` | Launch at login, method, school, durations, reset all. |
 | `Settings/LocationPane.swift` | `LocationPane` | Automatic/manual location, uses `ManualCityInput`. |
 | `Settings/EventPane.swift` | `EventPane` | Per-event settings, uses `StaticTimeHint`. |

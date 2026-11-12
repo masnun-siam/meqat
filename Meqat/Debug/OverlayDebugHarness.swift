@@ -17,7 +17,7 @@
                 controller.show(
                     OverlayContent(
                         eventName: name, start: now, end: now.addingTimeInterval(7200), timeoutSeconds: hold, timeFormat: .twentyFour,
-                        kindLine: kindLine))
+                        kindLine: kindLine, language: Language.resolve(override: nil, preferred: Locale.preferredLanguages)))
             }
             DispatchQueue.main.asyncAfter(deadline: .now() + 3) { MainActor.assumeIsolated { fire("Asr") } }
             DispatchQueue.main.asyncAfter(deadline: .now() + 23) { MainActor.assumeIsolated { fire("Maghrib", "Maghrib ends in 15 min") } }

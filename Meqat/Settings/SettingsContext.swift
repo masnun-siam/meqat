@@ -24,4 +24,6 @@ final class SettingsContext {
     var testBanner: @MainActor () -> Void = {}
     var refreshAuthorization: @MainActor () -> Void = {}
     var notificationsAuthorized = true
+    /// The launch language; set once by the app wiring before the window opens.
+    var language: Language = .english
 }

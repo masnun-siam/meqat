@@ -22,6 +22,7 @@
 
         @MainActor private static func makeContext(_ args: UserDefaults) -> SettingsContext {
             let context = SettingsContext()
+            context.language = Language.resolve(override: nil, preferred: Locale.preferredLanguages)
             context.place = "Dhaka"
             context.coordinatesText = "23.81, 90.41"
             context.lastSyncText = "Synced 13:50"
