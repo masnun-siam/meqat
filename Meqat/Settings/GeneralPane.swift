@@ -1,3 +1,4 @@
+import AppKit
 import MeqatCore
 import SwiftUI
 
@@ -5,9 +6,19 @@ struct GeneralPane: View {
     @Bindable var store: SettingsStore
     let context: SettingsContext
     @State private var confirmingReset = false
+    @State private var languageChoice = LanguageChoice(override: Self.storedOverride)
+    @State private var askingRelaunch = false
 
     var body: some View {
         Form {
+            Picker(selection: languageSelection) {
+                Text("System", tableName: "Language").tag(LanguageChoice.system)
+                Text(verbatim: "English").tag(LanguageChoice.english)
+                Text(verbatim: "বাংলা").tag(LanguageChoice.bangla)
+            } label: {
+                Text("Language", tableName: "Language")
+                Text("Meqat relaunches to switch language.", tableName: "Language")
+            }
             Toggle(isOn: $store.settings.general.launchAtLogin) {
                 Text("Launch at login")
                 Text("Opens Meqat automatically when you log in to this Mac.")
@@ -71,6 +82,57 @@ struct GeneralPane: View {
             Button("Reset all settings", role: .destructive) { store.resetAll() }
         } message: {
             Text("Restores every default. Your location is kept.")
+        }
+        .alert(Text("Relaunch Meqat to change the language?", tableName: "Language"), isPresented: $askingRelaunch) {
+            Button {
+                Self.relaunch()
+            } label: {
+                Text("Relaunch Now", tableName: "Language")
+            }
+            Button(role: .cancel) {
+            } label: {
+                Text("Later", tableName: "Language")
+            }
+        } message: {
+            Text("Until then, Meqat stays in its current language.", tableName: "Language")
+        }
+    }
+
+    /// Stores the choice as Meqat's own `AppleLanguages` override at once, and asks to relaunch
+    /// only when it changes the language in effect (Bangla PRD FR-1, FR-2).
+    private var languageSelection: Binding<LanguageChoice> {
+        Binding(
+            get: { languageChoice },
+            set: { choice in
+                languageChoice = choice
+                if let override = choice.override {
+                    UserDefaults.standard.set(override, forKey: Self.appleLanguagesKey)
+                } else {
+                    UserDefaults.standard.removeObject(forKey: Self.appleLanguagesKey)
+                }
+                askingRelaunch = Language.resolve(override: choice.override, preferred: Self.macPreferred) != context.language
+            })
+    }
+
+    private static let appleLanguagesKey = "AppleLanguages"
+
+    /// Meqat's own override only; `stringArray(forKey:)` would fall through to the Mac's list and hide System.
+    private static var storedOverride: [String]? {
+        UserDefaults.standard.persistentDomain(forName: Bundle.main.bundleIdentifier ?? "")?[appleLanguagesKey] as? [String]
+    }
+
+    /// The Mac's preferred languages, ignoring Meqat's override.
+    private static var macPreferred: [String] {
+        UserDefaults.standard.persistentDomain(forName: UserDefaults.globalDomain)?[appleLanguagesKey] as? [String] ?? []
+    }
+
+    /// Opens a new instance, then quits this one; if the launch fails Meqat keeps running.
+    private static func relaunch() {
+        let configuration = NSWorkspace.OpenConfiguration()
+        configuration.createsNewApplicationInstance = true
+        NSWorkspace.shared.openApplication(at: Bundle.main.bundleURL, configuration: configuration) { _, error in
+            guard error == nil else { return }
+            Task { @MainActor in NSApp.terminate(nil) }
         }
     }
 }
