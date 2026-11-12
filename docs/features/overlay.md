@@ -8,7 +8,7 @@ The focus screen a `.fullScreen` alert opens. Triggered by [alerts.md](alerts.md
 
 | Symbol | File | Role |
 |---|---|---|
-| `OverlayContent` | `Overlay/OverlayContent.swift` | `eventName`, `start`, `end`, `timeoutSeconds`, `timeFormat`, `kindLine` |
+| `OverlayContent` | `Overlay/OverlayContent.swift` | `eventName`, `start`, `end`, `timeoutSeconds`, `timeFormat`, `kindLine`, `language` |
 | `OverlayController` | `Overlay/OverlayController.swift` | owns panels, hold, 1 s timer, lock/sleep state |
 | `OverlayPanel` | `Overlay/OverlayPanel.swift` | borderless `NSPanel`, one per screen |
 | `OverlayModel`, `OverlayView` | `Overlay/OverlayView.swift` | SwiftUI content; model shared by all panels |

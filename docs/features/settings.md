@@ -34,7 +34,7 @@ A `.fixed` source with no `staticTime` behaves as calculated.
 |---|---|
 | `SettingsWindowController` | `.shared`; `show(pane:)` selects a pane and opens the 680x480 "Meqat Settings" window (created once, reused). `store` must be set first. |
 | `SettingsView` | `NavigationSplitView`: General, Location, then one row per event (prohibited events get a ⛔). `SettingsNavigation.selection` is a `SettingsPane` |
-| `SettingsContext` | runtime data panes show, not settings: `calculatedWindows`, `lookupStatus`, `place`, `coordinatesText`, `lastSyncText`, `updateStatus`, `installState`, plus the `checkNow`, `install` and `cancelInstall` closures |
+| `SettingsContext` | runtime data panes show, not settings: `calculatedWindows`, `lookupStatus`, `place`, `coordinatesText`, `lastSyncText`, `lastCheckedText`, `updateStatus`, `installState`, `language` (the launch language), plus the `checkNow`, `install` and `cancelInstall` closures |
 | `AboutPane` | Version, update status and "Check now" (disabled while checking or installing), the update toggle, project links. When an update is `available` with `canInstall`, the lines follow `installState`: `idle` adds "Download and install"; `downloading` shows "Downloading… n%" and "Cancel"; `verifying`/`installing`/`relaunching` show "Installing…"; `failed` shows "Update failed", the button again and "View release". Without `canInstall` (DEBUG builds, a read-only or translocated location) only "View release" and the Homebrew hint show |
 | `GeneralPane` | Launch at login; Calculation method (`CalculationMethod.all`); Asr school; Time format; three prohibited-window durations; Full-Screen overlay timeout; Test alerts ("Show test overlay", "Send test banner", with a note when notifications are off); Reset ("Reset all settings…", with confirmation) |
 | `LocationPane` | Automatic/Manual radio; manual City/Country/State fields normalized by `ManualCityInput`; "Look up" calls `setManualLocation`; shows `lookupStatus` and last sync |
@@ -44,7 +44,8 @@ A `.fixed` source with no `staticTime` behaves as calculated.
 - Static time: choosing Static with no time seeds today's calculated start (floored to the minute) or 12:00. A warning shows when the static time is outside the calculated window (`StaticTimeHint.isOutside`, needs `context.calculatedWindows`).
 - Minimum hold is disabled unless the style is Full-Screen Focus.
 - `lookupStatus` (`idle, lookingUp, found, cityNotFound, unreachable`) is driven by `AppEnvironment.updateLookup` from `SyncStatus` after a manual city is set. "Look up" is disabled while looking up or when the input does not normalize.
-- `refreshContext()` refills `SettingsContext` on every refresh and before opening the window.
+- `refreshContext()` refills `SettingsContext` on every refresh and before opening the window. `coordinatesText`, `lastSyncText` and `lastCheckedText` are formatted with `language.locale` (English stays `en_US_POSIX`, Bangla gets Bangla digits and months).
+- Locale: in Bangla, `SettingsWindowController` sets the window's SwiftUI `\.locale` to `bn@numbers=beng`, so views format numbers with Bangla digits; in English it is `.autoupdatingCurrent`, SwiftUI's default.
 
 ## Propagation (`AppEnvironment.settingsChanged(old, new)`)
 

@@ -61,7 +61,8 @@ flowchart TD
 
 ## Wiring (`Meqat/App/AppEnvironment.swift`)
 
-- `scheduler.onFullScreen` builds `OverlayContent(eventName, start, end, timeoutSeconds, timeFormat, kindLine)` from the alert (`kindLine` = `alert.overlayLine`) and the general overlay timeout, then `overlay.show(_:)`.
+- Language: `AppEnvironment` resolves it once in `init()` (`Language.resolve(override: nil, preferred: Locale.preferredLanguages)`, which already holds `-AppleLanguages` and the app's `AppleLanguages` override) and passes it to `Composition.plan`, `sendTestBanner(language:)` and `OverlayContent`. A change applies on relaunch; the launch rebuild re-adds every pending banner in the new language.
+- `scheduler.onFullScreen` builds `OverlayContent(eventName, start, end, timeoutSeconds, timeFormat, kindLine, language)` from the alert (`eventName` = `eventID.displayName(in: language)`, `kindLine` = `alert.overlayLine`) and the general overlay timeout, then `overlay.show(_:)`.
 - Rebuild triggers: any settings change (`settingsChanged`), cache replaced (`onCacheReplaced`), wake, time zone change, clock change, launch (`syncAndRebuild(.periodic)`), and a 2 h `NSBackgroundActivityScheduler`.
 - Notification permission is requested at launch (`.alert`, `.sound`).
 - DEBUG builds log pending banner ids and fire times via `AppEnvironment.logPlan` (Logger category `app`).
