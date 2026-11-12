@@ -203,6 +203,11 @@ final class AlertSchedulerTests: XCTestCase {
         XCTAssertEqual(center.requests[0].content.title, "Meqat test alert")
     }
 
+    func testSendTestBannerInBangla() async {
+        await make { [] }.sendTestBanner(language: .bangla)
+        XCTAssertEqual(center.requests.map(\.content.title), ["Meqat পরীক্ষামূলক সতর্কবার্তা"])
+    }
+
     func testSendTestBannerLeavesPlanAndTimer() async {
         let s = make { [self.alert("a", 60, .banner)] }
         await rebuild(s)

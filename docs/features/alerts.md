@@ -30,6 +30,7 @@ Details in [settings.md](settings.md).
 - Skipped: alerts whose own style is `.disabled` (all three Off yields nothing), events with no `interval` (invalid time), fire dates not in `(now, now + AlertPlanner.horizon]` (48 h).
 - Sorted by `(fireDate, id)`. Banners are capped at `AlertPlanner.maxBanners` (60, soonest kept); full-screen alerts are never capped.
 - Times in titles are formatted with `settings.general.timeFormat` (`HH:mm` or `h:mm a`) in the given time zone.
+- `language` (default `.english`) picks the title text: Bangla names, wording from `Resources/bn.lproj/Alerts.strings` (keys are the English format strings) and Bangla digits via `Language.locale`, e.g. `আসর শেষ হতে ১৫ মিনিট বাকি`. The 12-hour AM/PM marker stays as macOS gives it. Ids stay Latin. `AlertScheduler.sendTestBanner(language:)` does the same for the test banner.
 
 ## AlertScheduler (`@MainActor @Observable`)
 
@@ -73,7 +74,7 @@ flowchart TD
 
 ## Tests
 
-- `AlertPlannerTests`: offsets/leads, static time, disabled, titles, horizon, banner cap, bounds, same-instant ids.
+- `AlertPlannerTests`: offsets/leads, static time, disabled, titles, horizon, banner cap, bounds, same-instant ids, Bangla titles and ids.
 - `AlertSchedulerTests` (fake center and timer): pending set equals plan banners, rebuild merging, tolerance drop, suspend, authorization, failed add.
 - `CompositionTests`: default plan is banners only and bounded.
 
