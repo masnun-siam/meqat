@@ -81,7 +81,7 @@ final class AppEnvironment {
             let now = Date()
             overlay.show(
                 OverlayContent(
-                    eventName: "Test alert", start: now, end: now + 3600,
+                    eventName: String(localized: "Test alert", table: "Overlay"), start: now, end: now + 3600,
                     timeoutSeconds: store.settings.general.overlayTimeoutSeconds,
                     timeFormat: store.settings.general.timeFormat, kindLine: nil, language: language))
         }

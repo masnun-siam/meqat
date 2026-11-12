@@ -43,6 +43,7 @@ flowchart TD
 - Lock/screensaver: observes distributed notifications `com.apple.screenIsLocked/Unlocked`, `com.apple.screensaver.didstart/didstop`, and workspace will-sleep/did-wake. While locked or in screensaver, panels are closed and the hold paused; on unlock they are rebuilt and the hold resumes. If unlock happens after `content.end`, the overlay is dropped without being shown.
 - Content: event name, its window, then `kindLine` when set. `AppEnvironment` sets it to `PlannedAlert.overlayLine` (the alert's banner title for End and Pre-warning alerts, `nil` for Start, e.g. "Asr ends in 15 min"); the General pane's Test overlay passes `nil`.
 - Overlay does not persist: `dismiss()` clears content and model. Nothing is stored.
+- Language: `OverlayContent.language` (the launch language) picks the text. The view's own strings (Dismiss, `Closes in m:ss`, the VoiceOver announcements, the test overlay's "Test alert") are keys in `Meqat/Overlay/Overlay.xcstrings`, English text as the key. The time range and the countdown are formatted with `language.locale`, and in Bangla the panel's SwiftUI `\.locale` is `bn@numbers=beng`, so Bangla shows Bangla digits in both time formats (12-hour keeps macOS's AM/PM). Event names come from `EventID.displayName(in:)`, the kind line from `AlertPlanner`.
 
 ## Accessibility
 
@@ -61,4 +62,4 @@ flowchart TD
 
 ## Debug harness
 
-`-MeqatDebugHarness Overlay` (DEBUG; see `Meqat/Debug/DebugHarness.swift`): shows "Asr" (no kind line) after 3 s, then "Maghrib" with "Maghrib ends in 15 min" at 23 s to test replacement. Hold is 10 s unless `-MeqatDebugHold <n>`.
+`-MeqatDebugHarness Overlay` (DEBUG; see `Meqat/Debug/DebugHarness.swift`): shows "Asr" (no kind line) after 3 s, then "Maghrib" with "Maghrib ends in 15 min" at 23 s to test replacement. The kind line is the one `AlertPlanner` plans for a Maghrib End alert at lead 15. Names and kind line follow the launch language: add `-AppleLanguages '(bn)'` for Bangla. Hold is 10 s unless `-MeqatDebugHold <n>`.

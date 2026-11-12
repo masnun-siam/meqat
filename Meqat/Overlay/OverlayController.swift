@@ -98,7 +98,10 @@ final class OverlayController {
         guard let model else { return }
         panels = NSScreen.screens.map { screen in
             let panel = OverlayPanel(screen: screen)
-            panel.contentView = NSHostingView(rootView: OverlayView(model: model) { [weak self] in self?.dismiss() })
+            // Bangla views format numbers with Bengali digits; English keeps SwiftUI's default locale, unchanged.
+            let locale = model.content.language == .bangla ? model.content.language.locale : .autoupdatingCurrent
+            panel.contentView = NSHostingView(
+                rootView: OverlayView(model: model) { [weak self] in self?.dismiss() }.environment(\.locale, locale))
             panel.onCancel = { [weak self] in self?.dismiss() }
             return panel
         }
@@ -143,8 +146,14 @@ final class OverlayController {
 
     private func announce() {
         guard let content, let model else { return }
-        let line = content.kindLine.map { " \($0)." } ?? ""
-        post("\(content.eventName) alert.\(line) Closes in \(model.remaining) seconds")
+        let locale = content.language.locale
+        if let line = content.kindLine {
+            let format = String(localized: "%1$@ alert. %2$@. Closes in %3$d seconds", table: "Overlay")
+            post(String(format: format, locale: locale, content.eventName, line, model.remaining))
+        } else {
+            let format = String(localized: "%1$@ alert. Closes in %2$d seconds", table: "Overlay")
+            post(String(format: format, locale: locale, content.eventName, model.remaining))
+        }
     }
 
     private func post(_ text: String) {

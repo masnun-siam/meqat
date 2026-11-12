@@ -30,13 +30,15 @@ struct OverlayView: View {
 
     private var timeRange: String {
         let f = DateFormatter()
-        f.locale = Locale(identifier: "en_US_POSIX")
+        f.locale = model.content.language.locale
         f.dateFormat = model.content.timeFormat.dateFormat
         return "\(f.string(from: model.content.start))–\(f.string(from: model.content.end))"
     }
 
     private var closesIn: String {
-        String(format: "Closes in %d:%02d", model.remaining / 60, model.remaining % 60)
+        String(
+            format: String(localized: "Closes in %d:%02d", table: "Overlay"), locale: model.content.language.locale,
+            model.remaining / 60, model.remaining % 60)
     }
 
     var body: some View {
@@ -55,7 +57,7 @@ struct OverlayView: View {
                         .multilineTextAlignment(.center)
                 }
                 Button(action: dismiss) {
-                    Text("Dismiss")
+                    Text("Dismiss", tableName: "Overlay")
                         .font(.system(size: 22, weight: .semibold))
                         .padding(.horizontal, 24)
                         .padding(.vertical, 8)
