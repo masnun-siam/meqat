@@ -1,0 +1,596 @@
+{
+  "sourceLanguage" : "en",
+  "strings" : {
+    "12-hour (3:30 PM)" : {
+      "localizations" : {
+        "bn" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "১২ ঘণ্টা (৩:৩০ PM)"
+          }
+        }
+      }
+    },
+    "24-hour (15:30)" : {
+      "localizations" : {
+        "bn" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "২৪ ঘণ্টা (১৫:৩০)"
+          }
+        }
+      }
+    },
+    "About" : {
+      "localizations" : {
+        "bn" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "সম্পর্কে"
+          }
+        }
+      }
+    },
+    "Alert before the event ends." : {
+      "localizations" : {
+        "bn" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "সময় শেষ হওয়ার আগে সতর্ক করে।"
+          }
+        }
+      }
+    },
+    "Alert before the event starts." : {
+      "localizations" : {
+        "bn" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "সময় শুরু হওয়ার আগে সতর্ক করে।"
+          }
+        }
+      }
+    },
+    "Alert when the event starts." : {
+      "localizations" : {
+        "bn" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "সময় শুরু হলে সতর্ক করে।"
+          }
+        }
+      }
+    },
+    "Asr school" : {
+      "localizations" : {
+        "bn" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "আসরের মাযহাব"
+          }
+        }
+      }
+    },
+    "Auto-dismiss after" : {
+      "localizations" : {
+        "bn" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "নিজে থেকে বন্ধ হবে"
+          }
+        }
+      }
+    },
+    "Automatic (nearest authority)" : {
+      "localizations" : {
+        "bn" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "স্বয়ংক্রিয় (নিকটতম কর্তৃপক্ষ)"
+          }
+        }
+      }
+    },
+    "Banner" : {
+      "localizations" : {
+        "bn" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ব্যানার"
+          }
+        }
+      }
+    },
+    "Calculated" : {
+      "localizations" : {
+        "bn" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "হিসাব করা"
+          }
+        }
+      }
+    },
+    "Calculated follows today's prayer times. Static uses the same clock time every day." : {
+      "localizations" : {
+        "bn" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "হিসাব করা সময় আজকের নামাজের সময় মেনে চলে। নির্দিষ্ট সময় প্রতিদিন ঘড়ির একই সময় ব্যবহার করে।"
+          }
+        }
+      }
+    },
+    "Calculation method" : {
+      "localizations" : {
+        "bn" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "হিসাবের পদ্ধতি"
+          }
+        }
+      }
+    },
+    "Changes when Asr begins: Hanafi starts it later than Shafi'i." : {
+      "localizations" : {
+        "bn" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "আসর কখন শুরু হয় তা বদলায়: হানাফী মতে শাফেয়ীর চেয়ে দেরিতে শুরু হয়।"
+          }
+        }
+      }
+    },
+    "Closes the full-screen alert on its own after this long." : {
+      "localizations" : {
+        "bn" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "এতক্ষণ পরে পূর্ণ-স্ক্রিন সতর্কবার্তা নিজে থেকেই বন্ধ হয়।"
+          }
+        }
+      }
+    },
+    "Duha always runs from the end of the sunrise forbidden window to the start of the noon one, so a static time does not move it." : {
+      "localizations" : {
+        "bn" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "চাশত সবসময় সূর্যোদয়ের নিষিদ্ধ সময় শেষ হওয়া থেকে দুপুরের নিষিদ্ধ সময় শুরু হওয়া পর্যন্ত চলে, তাই নির্দিষ্ট সময় দিলেও এটি সরে না।"
+          }
+        }
+      }
+    },
+    "End alert" : {
+      "localizations" : {
+        "bn" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "শেষের সতর্কবার্তা"
+          }
+        }
+      }
+    },
+    "Ends at Dhuhr and starts this long before it." : {
+      "localizations" : {
+        "bn" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "যোহরে শেষ হয়, শুরু হয় তার এতক্ষণ আগে।"
+          }
+        }
+      }
+    },
+    "Ends at sunset and starts this long before it." : {
+      "localizations" : {
+        "bn" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "সূর্যাস্তে শেষ হয়, শুরু হয় তার এতক্ষণ আগে।"
+          }
+        }
+      }
+    },
+    "Forbidden windows" : {
+      "localizations" : {
+        "bn" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "নিষিদ্ধ সময়"
+          }
+        }
+      }
+    },
+    "Full-Screen Focus" : {
+      "localizations" : {
+        "bn" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "পূর্ণ-স্ক্রিন ফোকাস"
+          }
+        }
+      }
+    },
+    "Full-Screen overlay" : {
+      "localizations" : {
+        "bn" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "পূর্ণ-স্ক্রিন ওভারলে"
+          }
+        }
+      }
+    },
+    "General" : {
+      "localizations" : {
+        "bn" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "সাধারণ"
+          }
+        }
+      }
+    },
+    "Hanafi" : {
+      "localizations" : {
+        "bn" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "হানাফী"
+          }
+        }
+      }
+    },
+    "How many minutes before the end." : {
+      "localizations" : {
+        "bn" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "শেষ হওয়ার কত মিনিট আগে।"
+          }
+        }
+      }
+    },
+    "How many minutes before the start." : {
+      "localizations" : {
+        "bn" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "শুরু হওয়ার কত মিনিট আগে।"
+          }
+        }
+      }
+    },
+    "Launch at login" : {
+      "localizations" : {
+        "bn" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "লগইনের সময় চালু করুন"
+          }
+        }
+      }
+    },
+    "Lead" : {
+      "localizations" : {
+        "bn" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "কত আগে"
+          }
+        }
+      }
+    },
+    "Location" : {
+      "localizations" : {
+        "bn" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "লোকেশন"
+          }
+        }
+      }
+    },
+    "Meqat Settings" : {
+      "localizations" : {
+        "bn" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Meqat সেটিংস"
+          }
+        }
+      }
+    },
+    "Minutes to shift the start alert: negative is earlier, positive is later." : {
+      "localizations" : {
+        "bn" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "শুরুর সতর্কবার্তা কত মিনিট সরবে: ঋণাত্মক মানে আগে, ধনাত্মক মানে পরে।"
+          }
+        }
+      }
+    },
+    "Notifications are off for Meqat. Turn them on in System Settings › Notifications." : {
+      "localizations" : {
+        "bn" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Meqat-এর নোটিফিকেশন বন্ধ। সিস্টেম সেটিংস › নোটিফিকেশন-এ গিয়ে চালু করুন।"
+          }
+        }
+      }
+    },
+    "Off" : {
+      "localizations" : {
+        "bn" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "বন্ধ"
+          }
+        }
+      }
+    },
+    "Offset" : {
+      "localizations" : {
+        "bn" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "সরানো"
+          }
+        }
+      }
+    },
+    "Opens Meqat automatically when you log in to this Mac." : {
+      "localizations" : {
+        "bn" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "এই Mac-এ লগইন করলে Meqat নিজে থেকেই চালু হয়।"
+          }
+        }
+      }
+    },
+    "Pre-warning" : {
+      "localizations" : {
+        "bn" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "আগাম সতর্কতা"
+          }
+        }
+      }
+    },
+    "Reset" : {
+      "localizations" : {
+        "bn" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "রিসেট"
+          }
+        }
+      }
+    },
+    "Reset all settings" : {
+      "localizations" : {
+        "bn" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "সব সেটিংস রিসেট করুন"
+          }
+        }
+      }
+    },
+    "Reset all settings?" : {
+      "localizations" : {
+        "bn" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "সব সেটিংস রিসেট করবেন?"
+          }
+        }
+      }
+    },
+    "Reset all settings…" : {
+      "localizations" : {
+        "bn" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "সব সেটিংস রিসেট করুন…"
+          }
+        }
+      }
+    },
+    "Reset to defaults" : {
+      "localizations" : {
+        "bn" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ডিফল্টে রিসেট করুন"
+          }
+        }
+      }
+    },
+    "Restores every default. Your location is kept." : {
+      "localizations" : {
+        "bn" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "সব ডিফল্ট ফিরে আসে। আপনার লোকেশন থেকে যায়।"
+          }
+        }
+      }
+    },
+    "Send test banner" : {
+      "localizations" : {
+        "bn" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "পরীক্ষামূলক ব্যানার পাঠান"
+          }
+        }
+      }
+    },
+    "Shafi'i" : {
+      "localizations" : {
+        "bn" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "শাফেয়ী"
+          }
+        }
+      }
+    },
+    "Show test overlay" : {
+      "localizations" : {
+        "bn" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "পরীক্ষামূলক ওভারলে দেখান"
+          }
+        }
+      }
+    },
+    "Source" : {
+      "localizations" : {
+        "bn" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "উৎস"
+          }
+        }
+      }
+    },
+    "Start alert" : {
+      "localizations" : {
+        "bn" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "শুরুর সতর্কবার্তা"
+          }
+        }
+      }
+    },
+    "Starts at sunrise and lasts this long." : {
+      "localizations" : {
+        "bn" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "সূর্যোদয়ে শুরু হয়ে এতক্ষণ থাকে।"
+          }
+        }
+      }
+    },
+    "Static" : {
+      "localizations" : {
+        "bn" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "নির্দিষ্ট"
+          }
+        }
+      }
+    },
+    "Static time" : {
+      "localizations" : {
+        "bn" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "নির্দিষ্ট সময়"
+          }
+        }
+      }
+    },
+    "Style" : {
+      "localizations" : {
+        "bn" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ধরন"
+          }
+        }
+      }
+    },
+    "Test alerts" : {
+      "localizations" : {
+        "bn" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "পরীক্ষামূলক সতর্কবার্তা"
+          }
+        }
+      }
+    },
+    "The authority whose rules set the prayer times. Automatic picks the one nearest your location." : {
+      "localizations" : {
+        "bn" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "যে কর্তৃপক্ষের নিয়মে নামাজের সময় ঠিক হয়। স্বয়ংক্রিয় বেছে নেয় আপনার লোকেশনের সবচেয়ে কাছেরটি।"
+          }
+        }
+      }
+    },
+    "Time" : {
+      "localizations" : {
+        "bn" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "সময়"
+          }
+        }
+      }
+    },
+    "Time format" : {
+      "localizations" : {
+        "bn" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "সময়ের ফরম্যাট"
+          }
+        }
+      }
+    },
+    "Times when voluntary prayer should be avoided. Set how long each one lasts." : {
+      "localizations" : {
+        "bn" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "যে সময়ে নফল নামাজ এড়িয়ে চলা উচিত। প্রতিটি কতক্ষণ থাকবে তা ঠিক করুন।"
+          }
+        }
+      }
+    },
+    "min" : {
+      "localizations" : {
+        "bn" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "মিনিট"
+          }
+        }
+      }
+    },
+    "s" : {
+      "localizations" : {
+        "bn" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "সেকেন্ড"
+          }
+        }
+      }
+    },
+    "⚠ outside the calculated window" : {
+      "localizations" : {
+        "bn" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "⚠ হিসাব করা সময়সীমার বাইরে"
+          }
+        }
+      }
+    }
+  },
+  "version" : "1.0"
+}

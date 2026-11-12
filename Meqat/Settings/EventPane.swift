@@ -21,53 +21,85 @@ struct EventPane: View {
     var body: some View {
         let settings = event.wrappedValue
         Form {
-            Section("Time") {
+            Section {
                 Picker(selection: timeSource) {
-                    Text("Calculated").tag(TimeSource.calculated)
-                    Text("Static").tag(TimeSource.fixed)
+                    Text("Calculated", tableName: "Settings").tag(TimeSource.calculated)
+                    Text("Static", tableName: "Settings").tag(TimeSource.fixed)
                 } label: {
-                    Text("Source")
+                    Text("Source", tableName: "Settings")
                     Text(sourceHelp)
                 }
                 .pickerStyle(.radioGroup)
                 if settings.timeSource == .fixed {
-                    DatePicker("Static time", selection: staticDate, displayedComponents: .hourAndMinute)
+                    DatePicker(selection: staticDate, displayedComponents: .hourAndMinute) {
+                        Text("Static time", tableName: "Settings")
+                    }
                     if isOutsideWindow(settings) {
-                        Label("⚠ outside the calculated window", systemImage: "exclamationmark.triangle")
-                            .foregroundStyle(.orange)
+                        Label {
+                            Text("⚠ outside the calculated window", tableName: "Settings")
+                        } icon: {
+                            Image(systemName: "exclamationmark.triangle")
+                        }
+                        .foregroundStyle(.orange)
                     }
                 }
-            }
-            Section("Start alert") {
-                StylePicker(style: event.startAlert.style, help: "Alert when the event starts.")
-                NumberRow(
-                    title: "Offset", help: "Minutes to shift the start alert: negative is earlier, positive is later.",
-                    unit: "min", value: event.startAlert.offsetMinutes,
-                    range: Bounds.offsetMinutes, signed: true)
-            }
-            Section("End alert") {
-                StylePicker(style: event.endAlert.style, help: "Alert before the event ends.")
-                NumberRow(
-                    title: "Lead", help: "How many minutes before the end.", unit: "min",
-                    value: event.endAlert.leadMinutes, range: Bounds.leadMinutes)
-            }
-            Section("Pre-warning") {
-                StylePicker(style: event.preWarning.style, help: "Alert before the event starts.")
-                NumberRow(
-                    title: "Lead", help: "How many minutes before the start.", unit: "min",
-                    value: event.preWarning.leadMinutes, range: Bounds.leadMinutes)
+            } header: {
+                Text("Time", tableName: "Settings")
             }
             Section {
-                Button("Reset to defaults") { store.resetEvent(eventID) }
+                StylePicker(
+                    style: event.startAlert.style, help: String(localized: "Alert when the event starts.", table: "Settings"))
+                NumberRow(
+                    title: String(localized: "Offset", table: "Settings"),
+                    help: String(
+                        localized: "Minutes to shift the start alert: negative is earlier, positive is later.",
+                        table: "Settings"),
+                    unit: Self.minutesUnit, value: event.startAlert.offsetMinutes,
+                    range: Bounds.offsetMinutes, signed: true)
+            } header: {
+                Text("Start alert", tableName: "Settings")
+            }
+            Section {
+                StylePicker(
+                    style: event.endAlert.style, help: String(localized: "Alert before the event ends.", table: "Settings"))
+                NumberRow(
+                    title: Self.leadTitle, help: String(localized: "How many minutes before the end.", table: "Settings"),
+                    unit: Self.minutesUnit, value: event.endAlert.leadMinutes, range: Bounds.leadMinutes)
+            } header: {
+                Text("End alert", tableName: "Settings")
+            }
+            Section {
+                StylePicker(
+                    style: event.preWarning.style, help: String(localized: "Alert before the event starts.", table: "Settings"))
+                NumberRow(
+                    title: Self.leadTitle, help: String(localized: "How many minutes before the start.", table: "Settings"),
+                    unit: Self.minutesUnit, value: event.preWarning.leadMinutes, range: Bounds.leadMinutes)
+            } header: {
+                Text("Pre-warning", tableName: "Settings")
+            }
+            Section {
+                Button {
+                    store.resetEvent(eventID)
+                } label: {
+                    Text("Reset to defaults", tableName: "Settings")
+                }
             }
         }
         .formStyle(.grouped)
     }
 
+    private static let minutesUnit = String(localized: "min", table: "Settings")
+    private static let leadTitle = String(localized: "Lead", table: "Settings")
+
     private var sourceHelp: String {
         eventID == .duha
-            ? "Duha always runs from the end of the sunrise forbidden window to the start of the noon one, so a static time does not move it."
-            : "Calculated follows today's prayer times. Static uses the same clock time every day."
+            ? String(
+                localized:
+                    "Duha always runs from the end of the sunrise forbidden window to the start of the noon one, so a static time does not move it.",
+                table: "Settings")
+            : String(
+                localized: "Calculated follows today's prayer times. Static uses the same clock time every day.",
+                table: "Settings")
     }
 
     private var timeSource: Binding<TimeSource> {
@@ -112,11 +144,11 @@ private struct StylePicker: View {
 
     var body: some View {
         Picker(selection: $style) {
-            Text("Full-Screen Focus").tag(AlertStyle.fullScreen)
-            Text("Banner").tag(AlertStyle.banner)
-            Text("Off").tag(AlertStyle.disabled)
+            Text("Full-Screen Focus", tableName: "Settings").tag(AlertStyle.fullScreen)
+            Text("Banner", tableName: "Settings").tag(AlertStyle.banner)
+            Text("Off", tableName: "Settings").tag(AlertStyle.disabled)
         } label: {
-            Text("Style")
+            Text("Style", tableName: "Settings")
             Text(help)
         }
     }
@@ -129,6 +161,7 @@ private struct NumberRow: View {
     @Binding var value: Int
     let range: ClosedRange<Int>
     var signed = false
+    @Environment(\.locale) private var locale
 
     var body: some View {
         let clamped = Binding(
@@ -136,8 +169,12 @@ private struct NumberRow: View {
             set: { value = Bounds.clamped($0, to: range) })
         LabeledContent {
             HStack {
-                TextField(title, value: clamped, format: signed ? .number.sign(strategy: .always(includingZero: false)) : .number)
-                    .labelsHidden().multilineTextAlignment(.trailing).frame(width: 50)
+                TextField(
+                    title, value: clamped,
+                    format: signed
+                        ? .number.sign(strategy: .always(includingZero: false)).locale(locale) : .number.locale(locale)
+                )
+                .labelsHidden().multilineTextAlignment(.trailing).frame(width: 50)
                 Stepper(title, value: clamped, in: range).labelsHidden()
                 Text(unit)
             }

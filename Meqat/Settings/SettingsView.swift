@@ -16,13 +16,13 @@ struct SettingsView: View {
         NavigationSplitView {
             List(selection: $navigation.selection) {
                 Section {
-                    Text("General").tag(SettingsPane.general)
-                    Text("Location").tag(SettingsPane.location)
-                    Text("About").tag(SettingsPane.about)
+                    Text("General", tableName: "Settings").tag(SettingsPane.general)
+                    Text("Location", tableName: "Settings").tag(SettingsPane.location)
+                    Text("About", tableName: "Settings").tag(SettingsPane.about)
                 }
                 Section {
                     ForEach(EventID.allCases, id: \.self) { id in
-                        Text(id.displayName + (id.kind == .prohibited ? " ⛔" : "")).tag(SettingsPane.event(id))
+                        Text(id.displayName(in: context.language) + (id.kind == .prohibited ? " ⛔" : "")).tag(SettingsPane.event(id))
                     }
                 }
             }
