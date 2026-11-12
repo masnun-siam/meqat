@@ -36,7 +36,7 @@ A `.fixed` source with no `staticTime` behaves as calculated.
 | `SettingsView` | `NavigationSplitView`: General, Location, then one row per event (prohibited events get a ⛔). `SettingsNavigation.selection` is a `SettingsPane` |
 | `SettingsContext` | runtime data panes show, not settings: `calculatedWindows`, `lookupStatus`, `place`, `coordinatesText`, `lastSyncText`, `lastCheckedText`, `updateStatus`, `installState`, `language` (the launch language), plus the `checkNow`, `install` and `cancelInstall` closures |
 | `AboutPane` | Version, update status and "Check now" (disabled while checking or installing), the update toggle, project links. When an update is `available` with `canInstall`, the lines follow `installState`: `idle` adds "Download and install"; `downloading` shows "Downloading… n%" and "Cancel"; `verifying`/`installing`/`relaunching` show "Installing…"; `failed` shows "Update failed", the button again and "View release". Without `canInstall` (DEBUG builds, a read-only or translocated location) only "View release" and the Homebrew hint show |
-| `GeneralPane` | Launch at login; Calculation method (`CalculationMethod.all`); Asr school; Time format; three prohibited-window durations; Full-Screen overlay timeout; Test alerts ("Show test overlay", "Send test banner", with a note when notifications are off); Reset ("Reset all settings…", with confirmation) |
+| `GeneralPane` | Language (System, English, বাংলা; see below); Launch at login; Calculation method (`CalculationMethod.all`); Asr school; Time format; three prohibited-window durations; Full-Screen overlay timeout; Test alerts ("Show test overlay", "Send test banner", with a note when notifications are off); Reset ("Reset all settings…", with confirmation) |
 | `LocationPane` | Automatic/Manual radio; manual City/Country/State fields normalized by `ManualCityInput`; "Look up" calls `setManualLocation`; shows `lookupStatus` and last sync |
 | `EventPane` | Time source (Calculated/Static + time picker), Start alert, End alert and Pre-warning (each a Style picker: Full-Screen Focus, Banner, Off, plus its offset or lead), Overlay minimum hold, Reset to defaults |
 
@@ -74,6 +74,7 @@ flowchart TD
 
 - Menu and alerts read `store.settings` at call time; nothing caches a copy.
 - `resetAll()` keeps the location on purpose.
+- Language picker (Bangla PRD FR-1, FR-2): stored as Meqat's own `AppleLanguages` override, outside the `settings.*` envelope, so neither reset touches it. System removes the key, English writes `["en"]`, বাংলা `["bn"]`. The picker reads the stored override (`persistentDomain(forName:)`, not `stringArray(forKey:)`, which falls through to the Mac's list), so after Later it already shows the next launch's choice. A choice that resolves to a language other than `context.language` asks Relaunch Now / Later; Relaunch Now opens a new instance (`createsNewApplicationInstance`) and terminates only after that launch succeeds. Its strings live in `Meqat/Settings/Language.xcstrings`; "English" and "বাংলা" are verbatim.
 - Adding a setting: give it a default in its `init(from:)`, bound it with `Bounds` if numeric, and decide what `settingsChanged` must do.
 
 ## Tests
