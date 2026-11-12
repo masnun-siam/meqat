@@ -24,8 +24,9 @@
             let context = SettingsContext()
             context.language = Language.resolve(override: nil, preferred: Locale.preferredLanguages)
             context.place = "Dhaka"
-            context.coordinatesText = "23.81, 90.41"
-            context.lastSyncText = "Synced 13:50"
+            context.coordinatesText = String(format: "%.2f, %.2f", locale: context.language.locale, 23.81, 90.41)
+            let format = AppEnvironment.lastSyncFormat(.current, .twentyFour, context.language)
+            context.lastSyncText = format.string(from: mockDate(day: 30, hour: 13, minute: 50))
             if args.bool(forKey: "MeqatDebugWindows") { context.calculatedWindows = mockupWindows() }
             switch args.string(forKey: "MeqatDebugLookup") {
             case "lookingUp": context.lookupStatus = .lookingUp
@@ -34,7 +35,7 @@
             case "unreachable": context.lookupStatus = .unreachable
             default: context.lookupStatus = .idle
             }
-            context.lastCheckedText = "30 Oct 09:05"
+            context.lastCheckedText = format.string(from: mockDate(day: 30, hour: 9, minute: 5))
             let installState = args.string(forKey: "MeqatDebugInstall")
             func available(canInstall: Bool) -> UpdateStatus {
                 .available(
@@ -59,6 +60,10 @@
             context.install = { context.installState = .downloading(percent: 42) }
             context.cancelInstall = { context.installState = .idle }
             return context
+        }
+
+        private static func mockDate(day: Int, hour: Int, minute: Int) -> Date {
+            Calendar.current.date(from: DateComponents(year: 2026, month: 10, day: day, hour: hour, minute: minute))!
         }
 
         private static func pane(_ name: String?) -> SettingsPane {
