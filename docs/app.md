@@ -29,6 +29,7 @@ All under `Meqat/`. Everything is `@MainActor` unless noted.
 | `Settings/GeneralPane.swift` | `GeneralPane` | Launch at login, method, school, durations, reset all. |
 | `Settings/LocationPane.swift` | `LocationPane` | Automatic/manual location, uses `ManualCityInput`. |
 | `Settings/EventPane.swift` | `EventPane` | Per-event settings, uses `StaticTimeHint`. |
+| `Settings/Settings.xcstrings` | (resource) | `bn` text of the window title, sidebar, General and Event panes; keys are the English text. |
 | `Debug/DebugHarness.swift` | `DebugHarness`, `DebugHarnessLauncher` | `#if DEBUG` only: launch with `-MeqatDebugHarness <Name>` to run `MeqatDebug<Name>Harness`. |
 | `Debug/{LoginItem,Menu,Overlay,Settings}DebugHarness.swift` | `LoginItemDebugHarness`, `MenuDebugHarness`, `OverlayDebugHarness`, `SettingsDebugHarness` | One harness per UI area (names `LoginItem`, `Menu`, `Overlay`, `Settings`). |
 

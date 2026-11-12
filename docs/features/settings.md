@@ -75,6 +75,7 @@ flowchart TD
 - Menu and alerts read `store.settings` at call time; nothing caches a copy.
 - `resetAll()` keeps the location on purpose.
 - Language picker (Bangla PRD FR-1, FR-2): stored as Meqat's own `AppleLanguages` override, outside the `settings.*` envelope, so neither reset touches it. System removes the key, English writes `["en"]`, বাংলা `["bn"]`. The picker reads the stored override (`persistentDomain(forName:)`, not `stringArray(forKey:)`, which falls through to the Mac's list), so after Later it already shows the next launch's choice. A choice that resolves to a language other than `context.language` asks Relaunch Now / Later; Relaunch Now opens a new instance (`createsNewApplicationInstance`) and terminates only after that launch succeeds. Its strings live in `Meqat/Settings/Language.xcstrings`; "English" and "বাংলা" are verbatim.
+- Window, sidebar, General and Event text (Bangla PRD FR-4 to FR-6) lives in `Meqat/Settings/Settings.xcstrings`. `DurationRow` and `NumberRow` take `String`s, which `Text` shows verbatim, so call sites pass `String(localized:table: "Settings")` or `EventID.displayName(in:)`. Their `TextField` formats add `.locale(locale)` from the environment, because `TextField(value:format:)` does not apply it on its own; Bangla and Latin digits both parse. Calculation-method names are verbatim.
 - Adding a setting: give it a default in its `init(from:)`, bound it with `Bounds` if numeric, and decide what `settingsChanged` must do.
 
 ## Tests
