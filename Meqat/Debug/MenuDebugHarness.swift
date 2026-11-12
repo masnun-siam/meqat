@@ -38,6 +38,7 @@
                 let offset = (start.count == 2 ? at(start[0], start[1]) : at(13, 52)).timeIntervalSinceNow
                 let timeFormat: TimeFormat = defaults.string(forKey: "MeqatDebugTimeFormat") == "12" ? .twelve : .twentyFour
                 let synced = at(13, 50)
+                let language = Language.resolve(override: nil, preferred: Locale.preferredLanguages)
                 func log(_ name: String) -> @MainActor () -> Void { { print("action:", name) } }
                 let actions = MenuActions(
                     refreshNow: log("refreshNow"), openSettings: log("openSettings"),
@@ -50,7 +51,8 @@
                                 now: Date().addingTimeInterval(offset), timeZone: tz, events: events, styles: [.duha: .disabled],
                                 place: "Dhaka",
                                 hasScheduleForToday: !empty, sync: MenuSyncInfo(lastSuccess: synced, lastFailure: empty ? .other : nil),
-                                notificationsAuthorized: false, timeFormat: timeFormat, updateNotice: update))
+                                notificationsAuthorized: false, timeFormat: timeFormat, updateNotice: update,
+                                language: language))
                     }, actions: actions)
             }
         }

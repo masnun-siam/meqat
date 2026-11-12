@@ -28,8 +28,10 @@ final class SettingsWindowController {
             backing: .buffered, defer: false)
         window.title = "Meqat Settings"
         window.isReleasedWhenClosed = false
+        // Bangla views format numbers with Bengali digits; English keeps SwiftUI's default locale, unchanged.
+        let locale = context.language == .bangla ? context.language.locale : .autoupdatingCurrent
         window.contentViewController = NSHostingController(
-            rootView: SettingsView(navigation: navigation, store: store, context: context))
+            rootView: SettingsView(navigation: navigation, store: store, context: context).environment(\.locale, locale))
         window.center()
         return window
     }
